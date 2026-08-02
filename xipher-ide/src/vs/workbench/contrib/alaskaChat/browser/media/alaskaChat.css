@@ -1,0 +1,5453 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+@import url('https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+.alaska-pane,
+.alaska-settings-root {
+	--bg:        #06080c;
+	--bg-2:      #0a0d13;
+	--panel:     #0e131b;
+	--panel-2:   #131a24;
+	--line:      #1b2330;
+	--line-2:    #28323f;
+	--ink:       #ece5d3;
+	--ink-2:     #a8a193;
+	--mute:      #6f6a5e;
+	--ice:       oklch(0.83 0.10 220);
+	--ice-2:     oklch(0.62 0.13 235);
+	--aurora:    oklch(0.78 0.16 155);
+	--aurora-2:  oklch(0.72 0.14 195);
+	--magenta:   oklch(0.72 0.18 330);
+	--warn:      oklch(0.78 0.13 80);
+	--red:       oklch(0.70 0.18 25);
+	--font-ui:   'Onest', system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono', var(--vscode-editor-font-family), ui-monospace, monospace;
+}
+
+.alaska-pane,
+.alaska-pane *,
+.alaska-pane *::before,
+.alaska-pane *::after,
+.alaska-settings-root,
+.alaska-settings-root *,
+.alaska-settings-root *::before,
+.alaska-settings-root *::after {
+	box-sizing: border-box;
+}
+
+.alaska-pane {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-width: 0;
+	overflow: hidden;
+	color: var(--ink);
+	font-family: var(--font-ui);
+	font-size: 13px;
+	letter-spacing: -0.005em;
+	background: var(--bg);
+}
+
+.alaska-pane ::selection {
+	background: oklch(0.83 0.10 220 / .25);
+	color: #fff;
+}
+
+.alaska-signed-out {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 28px 22px;
+	text-align: center;
+	background:
+		radial-gradient(circle at 50% 30%, oklch(0.83 0.10 220 / .14), transparent 60%),
+		var(--bg);
+}
+
+.alaska-signed-out h2 {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: 17px;
+	font-weight: 600;
+	letter-spacing: -0.015em;
+	color: var(--ink);
+}
+
+.alaska-signed-out p {
+	margin: 0;
+	max-width: 24em;
+	line-height: 1.55;
+	color: var(--ink-2);
+}
+
+.alaska-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 9px 18px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--ice);
+	color: #06121d;
+	font-family: var(--font-ui);
+	font-size: 12.5px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	cursor: pointer;
+	box-shadow: 0 0 22px -8px oklch(0.83 0.10 220 / .55);
+	transition: background 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+}
+
+.alaska-button:hover {
+	background: #fff;
+	box-shadow: 0 0 28px -6px oklch(0.83 0.10 220 / .65);
+}
+
+.alaska-button:active {
+	transform: translateY(0.5px);
+}
+
+.alaska-button:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+	box-shadow: none;
+}
+
+.alaska-button-secondary {
+	background: var(--panel-2);
+	color: var(--ink);
+	box-shadow: none;
+}
+
+.alaska-button-secondary:hover {
+	background: var(--panel);
+	color: var(--ink);
+}
+
+.alaska-button-link {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--ice);
+	font-family: var(--font-ui);
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.alaska-button-link:hover {
+	color: #fff;
+	text-decoration: underline;
+}
+
+.alaska-progress {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	width: 100%;
+	max-width: 22em;
+	margin-top: 8px;
+	padding: 14px;
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	background: var(--panel);
+}
+
+.alaska-progress-code {
+	font-family: var(--font-mono);
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: 0.22em;
+	text-align: center;
+	color: var(--ice);
+	user-select: all;
+}
+
+.alaska-progress small {
+	color: var(--ink-2);
+	font-size: 11.5px;
+	line-height: 1.5;
+}
+
+.alaska-chat-shell {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	min-width: 0;
+	overflow: hidden;
+	background: var(--panel);
+	position: relative;
+	/* size queries below adapt the composer to the PANEL width, not the window */
+	container: alaska-chat / inline-size;
+}
+
+/* ---- adaptive composer (narrow chat panel) -------------------------------- */
+/* Below ~360px the send row stacks so the token bar and Send never collide,
+   and the control chips tighten up. */
+@container alaska-chat (max-width: 360px) {
+	.alaska-composer { padding: 8px 8px; }
+	.alaska-composer-send-row {
+		flex-wrap: wrap;
+		row-gap: 8px;
+	}
+	.alaska-composer-send-actions {
+		width: 100%;
+		justify-content: flex-end;
+	}
+	.alaska-cbtn-send { flex: 1; justify-content: center; }
+	.alaska-composer-controls { gap: 3px; }
+	.alaska-cbtn,
+	.alaska-composer-active-toggle,
+	.alaska-composer-permissions,
+	.alaska-autocontinue,
+	.alaska-model-button,
+	.alaska-effort-button {
+		height: 25px;
+		padding: 0 7px;
+		font-size: 10.5px;
+	}
+}
+/* Very narrow (< 260px): hide the ⌘↵ hint and the effort chip label to save room. */
+@container alaska-chat (max-width: 260px) {
+	.alaska-cbtn-send-kbd { display: none; }
+	.alaska-effort-tag { display: none; }
+	.alaska-token-counter { max-width: 100%; }
+}
+
+.alaska-msg-toast {
+	position: absolute;
+	bottom: 84px;
+	left: 50%;
+	transform: translate(-50%, 8px);
+	background: var(--panel-2);
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	padding: 6px 12px;
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity .2s ease, transform .2s ease;
+	z-index: 100;
+	box-shadow: 0 4px 12px oklch(0.15 0 0 / .35);
+}
+
+.alaska-msg-toast.show {
+	opacity: 1;
+	transform: translate(-50%, 0);
+}
+
+.alaska-header,
+.alaska-chat-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	min-height: 44px;
+	padding: 9px 14px;
+	background: var(--bg-2);
+	border-bottom: 1px solid var(--line);
+}
+
+.alaska-chat-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1 1 auto;
+	min-width: 0;
+	font-family: var(--font-ui);
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--ink);
+	letter-spacing: -0.005em;
+}
+
+.alaska-chat-title .alaska-aurora-mark {
+	flex: none;
+	width: 18px;
+	height: 18px;
+}
+
+.alaska-chat-title .alaska-aurora-mark svg {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+.alaska-chat-title .alaska-aurora-mark .w {
+	fill: none;
+	stroke-width: 1.4;
+	stroke-linecap: round;
+}
+
+.alaska-chat-title .alaska-aurora-mark .w1 {
+	stroke: var(--aurora);
+}
+
+.alaska-chat-title .alaska-aurora-mark .w2 {
+	stroke: var(--ice);
+	opacity: 0.8;
+}
+
+.alaska-chat-title-text {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--ink);
+}
+
+.alaska-chat-actions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex: none;
+}
+
+.alaska-chat-actions-btn {
+	width: 26px;
+	height: 26px;
+	display: grid;
+	place-items: center;
+	padding: 0;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: var(--mute);
+	cursor: pointer;
+	transition: color 150ms ease, background 150ms ease;
+}
+
+.alaska-chat-actions-btn:hover {
+	color: var(--ink);
+	background: var(--panel-2);
+}
+
+.alaska-chat-actions-btn:focus-visible {
+	outline: 1px solid var(--ice);
+	outline-offset: 1px;
+}
+
+.alaska-chat-actions-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+.alaska-chat-actions .alaska-session-picker {
+	position: relative;
+}
+
+.alaska-chat-more-menu {
+	min-width: 220px;
+}
+
+.alaska-brand {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.alaska-brand-logo,
+.alaska-aurora-mark {
+	flex: none;
+	width: 22px;
+	height: 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--aurora);
+}
+
+.alaska-aurora-mark svg {
+	width: 26px;
+	height: 16px;
+	overflow: visible;
+}
+
+.alaska-aurora-mark .w {
+	fill: none;
+	stroke-width: 1.5;
+	stroke-linecap: round;
+}
+
+.alaska-aurora-mark .w1 {
+	stroke: var(--aurora);
+}
+
+.alaska-aurora-mark .w2 {
+	stroke: var(--ice);
+	opacity: 0.85;
+}
+
+.alaska-status-dot {
+	flex: none;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--mute);
+	box-shadow: 0 0 0 0 transparent;
+	transition: background 160ms ease, box-shadow 160ms ease;
+}
+
+.alaska-status-dot-ready {
+	background: var(--aurora);
+	box-shadow: 0 0 6px var(--aurora);
+}
+
+.alaska-status-dot-busy {
+	background: var(--ice);
+	box-shadow: 0 0 6px var(--ice);
+	animation: alaska-dot-pulse 1.2s ease-in-out infinite;
+}
+
+.alaska-status-dot-error {
+	background: var(--red);
+	box-shadow: 0 0 6px var(--red);
+}
+
+.alaska-brand-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	gap: 1px;
+}
+
+.alaska-brand-text strong {
+	display: block;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-ui);
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--ink);
+	letter-spacing: -0.005em;
+}
+
+.alaska-brand-text span {
+	display: block;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--mute);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.alaska-brand-text .alaska-user-name {
+	color: var(--ink-2);
+	text-transform: none;
+	letter-spacing: 0;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+}
+
+.alaska-header-controls {
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	flex: none;
+}
+
+.alaska-icon-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: var(--mute);
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease;
+}
+
+.alaska-icon-button:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+}
+
+.alaska-icon-button:focus-visible {
+	outline: 1px solid var(--ice);
+	outline-offset: 1px;
+}
+
+.alaska-icon-button .codicon {
+	font-size: 14px;
+	width: 14px;
+	height: 14px;
+}
+
+.alaska-chat-toolbar {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	flex: none;
+}
+
+.alaska-chat-toolbar-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: var(--mute);
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease;
+}
+
+.alaska-chat-toolbar-btn:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+}
+
+.alaska-chat-toolbar-btn:focus-visible {
+	outline: 1px solid var(--ice);
+	outline-offset: 1px;
+}
+
+.alaska-chat-toolbar-btn:disabled,
+.alaska-chat-toolbar-btn[aria-disabled='true'] {
+	opacity: 0.4;
+	cursor: default;
+	background: transparent;
+}
+
+.alaska-chat-toolbar-btn .codicon {
+	font-size: 14px;
+	width: 14px;
+	height: 14px;
+}
+
+.alaska-session-picker {
+	position: relative;
+}
+
+.alaska-sessions-menu {
+	position: absolute;
+	top: 32px;
+	right: 0;
+	z-index: 30;
+	width: min(260px, calc(100vw - 28px));
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 4px;
+	background: var(--panel);
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	box-shadow: 0 18px 40px -12px rgba(0, 0, 0, .7);
+}
+
+.alaska-sessions-header {
+	padding: 7px 10px 6px;
+	font-family: var(--font-mono);
+	font-size: 9.5px;
+	font-weight: 600;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--mute);
+}
+
+.alaska-session-item {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	width: 100%;
+	padding: 8px 10px;
+	border: 0;
+	border-left: 2px solid transparent;
+	border-radius: 5px;
+	background: transparent;
+	color: var(--ink-2);
+	text-align: left;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.alaska-session-item:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+}
+
+.alaska-session-item-active {
+	background: var(--panel-2);
+	color: var(--ink);
+	border-left-color: var(--ice);
+}
+
+.alaska-session-item strong {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12.5px;
+	font-weight: 500;
+	color: var(--ink);
+}
+
+.alaska-session-item span,
+.alaska-session-empty {
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--mute);
+}
+
+.alaska-session-empty {
+	padding: 12px 10px;
+	text-align: center;
+}
+
+.alaska-messages {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 16px 14px;
+	display: flex;
+	flex-direction: column;
+	/* NB: no `justify-content: flex-end` — with a flex column that overflows it
+	   pushes the top of the content past the top edge, making it unreachable by
+	   scrolling. The top `.alaska-messages-spacer` (flex:1) already pins messages
+	   to the bottom when the thread is short, and collapses to 0 when it overflows. */
+	gap: 16px;
+	background: var(--panel);
+}
+
+.alaska-messages-spacer {
+	flex: 1 0 0;
+	min-height: 0;
+	pointer-events: none;
+}
+
+.alaska-messages:has(> .alaska-empty) {
+	justify-content: center;
+}
+
+.alaska-messages:has(> .alaska-empty) .alaska-messages-spacer {
+	display: none;
+}
+
+.alaska-msg {
+	display: grid;
+	grid-template-columns: 28px 1fr;
+	gap: 12px;
+	padding: 3px 6px;
+	margin: 0 -6px;
+	border-radius: 12px;
+	animation: alaska-msg-in 0.35s cubic-bezier(.2, .7, .2, 1);
+	transition: background 140ms ease;
+}
+
+.alaska-msg:hover {
+	background: oklch(1 0 0 / .018);
+}
+
+.alaska-msg-avatar {
+	width: 28px;
+	height: 28px;
+	display: grid;
+	place-items: center;
+	border-radius: 8px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	font-weight: 600;
+	border: 1px solid var(--line-2);
+	color: var(--ink-2);
+	background: var(--panel-2);
+	overflow: hidden;
+	box-shadow: 0 1px 2px oklch(0 0 0 / .25);
+}
+
+.alaska-msg-user .alaska-msg-avatar {
+	background: linear-gradient(150deg, var(--panel-2), var(--bg-2));
+	color: var(--ice);
+	border-color: var(--line-2);
+}
+
+.alaska-msg-assistant .alaska-msg-avatar {
+	background:
+		radial-gradient(circle at 32% 24%, oklch(0.78 0.16 155 / .30), transparent 72%),
+		var(--bg-2);
+	border-color: oklch(0.78 0.16 155 / .38);
+	padding: 5px;
+	box-shadow: 0 0 16px -4px oklch(0.78 0.16 155 / .55);
+}
+
+.alaska-msg-assistant .alaska-msg-avatar .alaska-aurora-mark {
+	width: 100%;
+	height: 100%;
+}
+
+.alaska-msg-error .alaska-msg-avatar {
+	border-color: oklch(0.70 0.18 25 / .5);
+	color: var(--red);
+	background: oklch(0.70 0.18 25 / .12);
+}
+
+.alaska-msg-body {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	gap: 6px;
+	padding-top: 3px;
+}
+
+.alaska-msg-role {
+	font-family: var(--font-mono);
+	font-size: 10px;
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--mute);
+}
+
+.alaska-msg-role b {
+	font-weight: 600;
+	color: var(--ink-2);
+}
+
+.alaska-msg-user .alaska-msg-role b {
+	color: var(--ink);
+}
+
+.alaska-msg-assistant .alaska-msg-role b {
+	color: var(--aurora);
+}
+
+.alaska-msg-error .alaska-msg-role b {
+	color: var(--red);
+}
+
+.alaska-msg-content {
+	min-width: 0;
+	font-family: var(--font-ui);
+	font-size: 14px;
+	line-height: 1.55;
+	color: var(--ink);
+	word-wrap: break-word;
+}
+
+.alaska-msg-user .alaska-msg-content {
+	white-space: pre-wrap;
+	color: var(--ink);
+	align-self: flex-start;
+	max-width: 100%;
+	padding: 9px 13px;
+	background: linear-gradient(180deg, var(--panel-2), var(--panel));
+	border: 1px solid var(--line-2);
+	border-radius: 13px;
+	border-top-left-radius: 4px;
+	box-shadow: 0 1px 3px oklch(0 0 0 / .22);
+}
+
+.alaska-msg-error .alaska-msg-content {
+	color: var(--red);
+}
+
+/* ---- per-message footer: model · credits · tokens ------------------------ */
+.alaska-msg-footer {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 2px;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--mute);
+	letter-spacing: 0.01em;
+}
+
+.alaska-msg-footer-model {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	color: var(--ink-2);
+	font-weight: 500;
+}
+
+.alaska-msg-footer-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--aurora);
+	box-shadow: 0 0 6px -1px var(--aurora);
+}
+
+.alaska-msg-footer-credits {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 7px;
+	border-radius: 6px;
+	background: oklch(0.78 0.13 80 / .12);
+	border: 1px solid oklch(0.78 0.13 80 / .30);
+	color: var(--warn);
+	font-variant-numeric: tabular-nums;
+}
+
+.alaska-msg-footer-tokens {
+	color: var(--mute);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ---- group consecutive same-author messages (no repeated avatar/header) --- */
+.alaska-msg-assistant + .alaska-msg-assistant,
+.alaska-msg-user + .alaska-msg-user {
+	margin-top: -6px;
+}
+
+.alaska-msg-assistant + .alaska-msg-assistant .alaska-msg-avatar,
+.alaska-msg-user + .alaska-msg-user .alaska-msg-avatar {
+	visibility: hidden;
+}
+
+.alaska-msg-assistant + .alaska-msg-assistant .alaska-msg-role,
+.alaska-msg-user + .alaska-msg-user .alaska-msg-role {
+	display: none;
+}
+
+.alaska-msg-thinking {
+	color: var(--mute);
+	font-style: italic;
+}
+
+.alaska-msg-edited-tag {
+	margin-left: 6px;
+	color: var(--mute);
+	font-size: 0.85em;
+	font-style: italic;
+}
+
+.alaska-msg-meta-sep {
+	color: var(--mute);
+	opacity: 0.7;
+}
+
+.alaska-msg-time {
+	color: var(--mute);
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: 'tnum' 1;
+	letter-spacing: 0;
+}
+
+.alaska-chat-title-input {
+	font: inherit;
+	color: var(--ink);
+	background: var(--panel-2);
+	border: 1px solid var(--line-2);
+	border-radius: 4px;
+	padding: 2px 6px;
+	outline: none;
+	min-width: 120px;
+}
+
+.alaska-chat-title-input:focus {
+	border-color: var(--ice);
+}
+
+.alaska-msg-content p {
+	margin: 0 0 0.65em;
+}
+
+.alaska-msg-content p:last-child {
+	margin-bottom: 0;
+}
+
+.alaska-msg-content ul,
+.alaska-msg-content ol {
+	margin: 0.35em 0 0.65em 1.35em;
+	padding: 0;
+}
+
+.alaska-msg-content li {
+	margin: 0.2em 0;
+}
+
+.alaska-msg-content pre {
+	margin: 0.7em 0;
+	padding: 10px 12px;
+	overflow: auto;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--bg-2);
+	font-family: var(--font-mono);
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: var(--ink);
+}
+
+.alaska-msg-content code {
+	font-family: var(--font-mono);
+	font-size: 12px;
+}
+
+.alaska-msg-content :not(pre) > code {
+	padding: 1px 6px;
+	border: 1px solid var(--line);
+	border-radius: 3px;
+	background: var(--panel-2);
+	color: var(--ice);
+}
+
+.alaska-msg-content blockquote {
+	margin: 0.65em 0;
+	padding: 4px 0 4px 10px;
+	border-left: 2px solid var(--line-2);
+	color: var(--ink-2);
+}
+
+.alaska-msg-content a {
+	color: var(--ice);
+	text-decoration: none;
+	border-bottom: 1px dashed oklch(0.83 0.10 220 / .35);
+}
+
+.alaska-msg-content a:hover {
+	color: #fff;
+	border-bottom-color: var(--ice);
+}
+
+.alaska-msg-content .alaska-cite {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 4px;
+	padding: 0 6px;
+	border: 1px solid var(--line-2);
+	border-radius: 3px;
+	background: var(--panel-2);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--ice);
+	cursor: pointer;
+}
+
+.alaska-msg-content .alaska-cite:hover {
+	background: var(--panel);
+	color: #fff;
+}
+
+.alaska-msg-reasoning {
+	margin: 4px 0 2px;
+	padding: 4px 10px 6px;
+	border: 1px dashed var(--line-2);
+	border-radius: 6px;
+	background: var(--bg-2);
+}
+
+.alaska-msg-reasoning > summary {
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--mute);
+}
+
+.alaska-msg-reasoning > summary::-webkit-details-marker {
+	display: none;
+}
+
+.alaska-msg-reasoning > summary::before {
+	/* allow-any-unicode-next-line */
+	content: '› ';
+	color: var(--mute);
+}
+
+.alaska-msg-reasoning[open] > summary::before {
+	/* allow-any-unicode-next-line */
+	content: '⌄ ';
+	color: var(--ice);
+}
+
+.alaska-msg-reasoning-text {
+	margin: 8px 0 2px;
+	max-height: 240px;
+	overflow-y: auto;
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	line-height: 1.5;
+	color: var(--ink-2);
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.alaska-msg-reasoning-live {
+	border-style: solid;
+	border-color: var(--ice-2);
+	animation: alaska-reasoning-pulse 1.8s ease-in-out infinite;
+}
+
+.alaska-msg-activities {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 6px 0;
+	padding: 4px 0 4px 12px;
+	border-left: 1px solid var(--line);
+}
+
+.alaska-activity {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	padding: 4px 6px;
+	border: 0;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	line-height: 1.5;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease;
+}
+
+.alaska-activity:hover,
+.alaska-activity:focus-visible {
+	background: var(--panel-2);
+	color: var(--ink);
+	outline: none;
+}
+
+.alaska-activity-icon {
+	flex: none;
+	width: 12px;
+	text-align: center;
+	color: var(--mute);
+	font-size: 12px;
+}
+
+.alaska-activity-verb {
+	flex: none;
+	font-weight: 600;
+	color: var(--ink-2);
+	letter-spacing: 0.02em;
+}
+
+.alaska-activity-sep {
+	flex: none;
+	color: var(--mute);
+}
+
+.alaska-activity-path {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	direction: rtl;
+	text-align: left;
+	color: var(--mute);
+}
+
+.alaska-activity-meta {
+	flex: none;
+	max-width: 50%;
+	margin-left: auto;
+	padding-left: 8px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--mute);
+}
+
+.alaska-activity-pulse {
+	flex: none;
+	width: 6px;
+	height: 6px;
+	margin-left: auto;
+	border-radius: 50%;
+	background: var(--ice);
+	box-shadow: 0 0 4px var(--ice);
+	animation: alaska-dot-pulse 1.2s ease-in-out infinite;
+}
+
+.alaska-activity-progress {
+	flex: none;
+	margin-left: auto;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: oklch(0.83 0.10 220 / .12);
+	color: var(--ice);
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: 'tnum' 1;
+	letter-spacing: 0.01em;
+	white-space: nowrap;
+}
+
+.alaska-activity-running {
+	color: var(--ink);
+}
+
+.alaska-activity-running .alaska-activity-icon {
+	color: var(--ice);
+	animation: alaska-glyph-spin 1s linear infinite;
+}
+
+.alaska-activity-ok {
+	color: var(--ink-2);
+}
+
+.alaska-activity-ok .alaska-activity-icon {
+	color: var(--aurora);
+}
+
+.alaska-activity-err {
+	flex-wrap: wrap;
+	align-items: flex-start;
+	color: var(--ink-2);
+}
+
+.alaska-activity-err .alaska-activity-icon {
+	color: var(--red);
+}
+
+.alaska-activity-err .alaska-activity-meta {
+	flex: 1 1 100%;
+	max-width: 100%;
+	margin: 4px 0 0;
+	padding: 0;
+	overflow: visible;
+	text-overflow: clip;
+	white-space: pre-wrap;
+	word-break: break-word;
+	color: var(--red);
+	line-height: 1.45;
+}
+
+.alaska-activity-skipped {
+	color: var(--mute);
+}
+
+.alaska-activity-skipped .alaska-activity-icon {
+	color: var(--mute);
+	opacity: 0.7;
+}
+
+.alaska-activity-skipped .alaska-activity-verb,
+.alaska-activity-skipped .alaska-activity-path {
+	color: var(--mute);
+	text-decoration: line-through;
+	text-decoration-thickness: 1px;
+	text-decoration-color: rgba(255, 255, 255, 0.18);
+}
+
+.alaska-activity-skipped .alaska-activity-meta {
+	color: var(--mute);
+	font-style: italic;
+	max-width: 60%;
+}
+
+.alaska-msg-tool-card {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-rows: auto auto;
+	gap: 0;
+	margin: 4px 0;
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	background: var(--panel-2);
+	overflow: hidden;
+}
+
+.alaska-msg-tool-card > .alaska-activity {
+	grid-column: 1 / 2;
+	grid-row: 1;
+	margin: 0;
+	padding: 6px 10px;
+	border-radius: 0;
+	background: transparent;
+}
+
+.alaska-msg-tool-card > .alaska-activity:hover,
+.alaska-msg-tool-card > .alaska-activity:focus-visible {
+	background: var(--panel);
+}
+
+.alaska-msg-tool-collapse {
+	grid-column: 2 / 3;
+	grid-row: 1;
+	flex: none;
+	width: 24px;
+	height: 100%;
+	display: grid;
+	place-items: center;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--mute);
+	cursor: pointer;
+	font-size: 12px;
+	line-height: 1;
+	transition: background 120ms ease, color 120ms ease;
+}
+
+.alaska-msg-tool-meta {
+	flex: none;
+	margin-left: auto;
+	margin-right: 8px;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: oklch(0.83 0.10 220 / .08);
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: 'tnum' 1;
+	letter-spacing: 0.01em;
+	white-space: nowrap;
+}
+
+.alaska-msg-tool-card[data-state="done"] .alaska-msg-tool-meta {
+	color: var(--aurora);
+	background: oklch(0.78 0.14 165 / .12);
+}
+
+.alaska-msg-tool-collapse:hover {
+	background: var(--panel);
+	color: var(--ink);
+}
+
+.alaska-msg-tool-preview {
+	grid-column: 1 / -1;
+	grid-row: 2;
+	max-height: 280px;
+	overflow-y: auto;
+	overflow-x: auto;
+	background: var(--bg-2);
+	padding: 8px 10px;
+	border-top: 1px solid var(--line-2);
+	scrollbar-width: thin;
+	border-left: 2px solid transparent;
+}
+
+.alaska-msg-tool-card.collapsed > .alaska-msg-tool-preview {
+	display: none;
+}
+
+.alaska-msg-tool-card[data-state="running"] > .alaska-msg-tool-preview {
+	border-left-color: var(--ice);
+}
+
+.alaska-msg-tool-card[data-state="done"] > .alaska-msg-tool-preview {
+	border-left-color: var(--aurora);
+}
+
+.alaska-msg-tool-card[data-state="error"] > .alaska-msg-tool-preview {
+	border-left-color: var(--red);
+}
+
+.alaska-msg-tool-card[data-state="skipped"] > .alaska-msg-tool-preview {
+	border-left-color: var(--mute);
+	opacity: 0.7;
+}
+
+.alaska-msg-tool-preview-pre {
+	margin: 0;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	line-height: 1.5;
+	color: var(--ink-2);
+	white-space: pre;
+}
+
+.alaska-msg-tool-preview-pre code {
+	font-family: inherit;
+	color: inherit;
+	background: transparent;
+	padding: 0;
+	border: 0;
+	display: block;
+	min-width: max-content;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.alaska-msg-tool-preview {
+		scroll-behavior: auto;
+	}
+}
+
+.alaska-pending-edits-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 10px 14px;
+	border-top: 1px solid var(--line-2);
+	background: linear-gradient(180deg, rgba(125, 211, 252, 0.05), transparent);
+}
+
+.alaska-pending-edits-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.alaska-pending-edits-title {
+	flex: 1;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--ink-2);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+.alaska-pending-edits-actions {
+	display: flex;
+	gap: 6px;
+}
+
+.alaska-pending-btn {
+	padding: 4px 10px;
+	border-radius: 4px;
+	border: 1px solid var(--line-2);
+	background: transparent;
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.alaska-pending-btn:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+}
+
+.alaska-pending-btn-primary {
+	background: var(--ice);
+	color: #0a0d13;
+	border-color: var(--ice);
+}
+
+.alaska-pending-btn-primary:hover {
+	background: var(--aurora);
+	border-color: var(--aurora);
+	color: #0a0d13;
+}
+
+.alaska-pending-btn-secondary {
+	color: var(--mute);
+}
+
+.alaska-pending-btn-tiny {
+	padding: 2px 8px;
+	font-size: 10.5px;
+}
+
+.alaska-pending-edits-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.alaska-pending-edits-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 6px;
+	border-radius: 4px;
+}
+
+.alaska-pending-edits-row:hover {
+	background: var(--panel-2);
+}
+
+.alaska-pending-edits-icon {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	display: grid;
+	place-items: center;
+	border-radius: 3px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.alaska-pending-edits-icon[data-action="create"] {
+	background: rgba(74, 222, 128, 0.15);
+	color: #4ade80;
+}
+
+.alaska-pending-edits-icon[data-action="patch"],
+.alaska-pending-edits-icon[data-action="replace"] {
+	background: rgba(125, 211, 252, 0.15);
+	color: var(--ice);
+}
+
+.alaska-pending-edits-icon[data-action="delete"] {
+	background: rgba(248, 113, 113, 0.15);
+	color: #f87171;
+}
+
+.alaska-pending-edits-name {
+	flex: 1 1 auto;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	background: transparent;
+	border: 0;
+	padding: 0;
+	margin: 0;
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	color: var(--ink);
+	cursor: pointer;
+	text-align: left;
+}
+
+.alaska-pending-edits-name:hover {
+	color: var(--ice);
+	text-decoration: underline;
+}
+
+.alaska-pending-edits-stats {
+	flex: none;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--mute);
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+
+.alaska-msg-stage {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 4px 0;
+	padding: 5px 10px;
+	border: 1px dashed var(--line-2);
+	border-radius: 6px;
+	background: var(--bg-2);
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 11px;
+}
+
+.alaska-stage-pulse {
+	flex: none;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--ice);
+	box-shadow: 0 0 4px var(--ice);
+	animation: alaska-dot-pulse 1.2s ease-in-out infinite;
+}
+
+.alaska-stage-label {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.alaska-msg-user,
+.alaska-msg-assistant {
+	position: relative;
+}
+
+.alaska-msg-toolbar {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	display: flex;
+	gap: 2px;
+	opacity: 0;
+	transform: translateY(-2px);
+	transition: opacity .15s ease, transform .15s ease;
+	background: var(--panel-2);
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	padding: 2px;
+	backdrop-filter: blur(4px);
+	z-index: 2;
+}
+
+.alaska-msg-user:hover .alaska-msg-toolbar,
+.alaska-msg-user:focus-within .alaska-msg-toolbar,
+.alaska-msg-assistant:hover .alaska-msg-toolbar,
+.alaska-msg-assistant:focus-within .alaska-msg-toolbar {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.alaska-msg-btn {
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--mute);
+	cursor: pointer;
+	border-radius: 4px;
+	font-size: 13px;
+	line-height: 1;
+	display: grid;
+	place-items: center;
+	transition: background .12s ease, color .12s ease;
+}
+
+.alaska-msg-btn:hover {
+	background: var(--panel);
+	color: var(--ink);
+}
+
+.alaska-msg-btn-edit:hover {
+	background: oklch(0.83 0.10 220 / .15);
+	color: var(--ice);
+}
+
+.alaska-msg-btn-retry:hover {
+	background: oklch(0.83 0.10 220 / .15);
+	color: var(--ice);
+}
+
+.alaska-msg-btn-delete:hover {
+	background: oklch(0.70 0.18 25 / .15);
+	color: var(--red);
+}
+
+.alaska-msg-edit-area {
+	width: 100%;
+	min-height: 64px;
+	padding: 8px 10px;
+	border: 1px solid var(--ice);
+	border-radius: 6px;
+	background: var(--panel);
+	color: var(--ink);
+	font-family: var(--font-ui);
+	font-size: 13.5px;
+	line-height: 1.5;
+	outline: none;
+	resize: vertical;
+}
+
+.alaska-msg-edit-warning {
+	margin-top: 6px;
+	padding: 6px 10px;
+	background: oklch(0.80 0.15 80 / .10);
+	border: 1px solid oklch(0.80 0.15 80 / .30);
+	border-radius: 4px;
+	color: oklch(0.85 0.15 85);
+	font-family: var(--font-mono);
+	font-size: 11px;
+}
+
+.alaska-msg-edit-actions {
+	display: flex;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.alaska-empty {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 40px 24px;
+	text-align: center;
+	color: var(--ink-2);
+	/* soft single glow — no grid */
+	background-image: radial-gradient(ellipse 68% 44% at 50% 24%, oklch(0.83 0.10 220 / .08), transparent 64%);
+}
+
+.alaska-empty-logo {
+	width: 58px;
+	height: 58px;
+	color: var(--ice);
+	filter: drop-shadow(0 12px 36px oklch(0.83 0.10 220 / .55));
+}
+
+.alaska-empty-title {
+	margin-top: 10px;
+	font-family: var(--font-ui);
+	font-size: 22px;
+	font-weight: 600;
+	letter-spacing: -0.025em;
+	background: linear-gradient(180deg, var(--ink), var(--ice));
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.alaska-empty-subtitle {
+	max-width: 26em;
+	font-family: var(--font-ui);
+	font-size: 12.5px;
+	line-height: 1.55;
+	color: var(--ink-2);
+}
+
+.alaska-empty-badge {
+	margin-top: 10px;
+	padding: 4px 12px;
+	border: 1px solid var(--line-2);
+	border-radius: 999px;
+	background: var(--bg-2);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ink-2);
+}
+
+.alaska-empty-badge-remote {
+	border-color: oklch(0.62 0.13 235 / .5);
+	background: oklch(0.62 0.13 235 / .15);
+	color: var(--ice);
+}
+
+.alaska-empty-cards {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	width: 100%;
+	max-width: 520px;
+	margin-top: 16px;
+}
+
+@media (max-width: 540px) {
+	.alaska-empty-cards { grid-template-columns: 1fr; }
+}
+
+.alaska-empty-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 11px 13px;
+	background: var(--panel-2);
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	color: var(--ink);
+	text-align: left;
+	cursor: pointer;
+	font-family: var(--font-ui);
+	transition: background .12s ease, border-color .12s ease, transform .12s ease;
+}
+
+.alaska-empty-card:hover {
+	background: var(--panel);
+	border-color: oklch(0.83 0.10 220 / .45);
+	transform: translateY(-1px);
+}
+
+.alaska-empty-card:focus-visible {
+	outline: 2px solid var(--ice);
+	outline-offset: 1px;
+}
+
+.alaska-empty-card-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	flex-shrink: 0;
+	color: var(--ice);
+}
+
+.alaska-empty-card-icon .codicon {
+	font-size: 16px;
+}
+
+.alaska-empty-card-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	gap: 2px;
+}
+
+.alaska-empty-card-title {
+	font-size: 12.5px;
+	font-weight: 600;
+	color: var(--ink);
+	line-height: 1.3;
+}
+
+.alaska-empty-card-desc {
+	font-size: 11px;
+	color: var(--mute);
+	line-height: 1.4;
+}
+
+.alaska-slash-menu {
+	position: relative;
+	display: block;
+	background: var(--panel);
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	box-shadow: 0 18px 36px -8px rgba(0, 0, 0, 0.55);
+	padding: 4px;
+	max-height: 320px;
+	overflow-y: auto;
+	margin-top: 6px;
+	z-index: 50;
+}
+
+.alaska-slash-item {
+	display: block;
+	width: 100%;
+	padding: 7px 10px;
+	border-radius: 6px;
+	background: transparent;
+	border: 0;
+	color: var(--ink);
+	cursor: pointer;
+	text-align: left;
+	font-family: var(--font-ui);
+}
+
+.alaska-slash-item:hover,
+.alaska-slash-item-active {
+	background: var(--panel-2);
+}
+
+.alaska-slash-item-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+}
+
+.alaska-slash-trigger {
+	font-family: var(--font-mono);
+	font-size: 11px;
+	background: var(--bg-2);
+	padding: 2px 6px;
+	border-radius: 4px;
+	color: var(--ice);
+	border: 1px solid var(--line-2);
+}
+
+.alaska-slash-name {
+	font-weight: 500;
+	color: var(--ink);
+}
+
+.alaska-slash-item-desc {
+	display: block;
+	margin-top: 2px;
+	margin-left: 2px;
+	color: var(--mute);
+	font-size: 10.5px;
+	line-height: 1.4;
+}
+
+.alaska-token-counter {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 2px 6px;
+	font-family: var(--font-mono);
+	font-size: 10px;
+	color: var(--mute);
+	min-width: 110px;
+	max-width: 150px;
+}
+
+.alaska-token-bar {
+	height: 3px;
+	background: rgba(255, 255, 255, 0.06);
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+.alaska-token-bar i {
+	display: block;
+	height: 100%;
+	width: 0%;
+	background: var(--ice);
+	transition: width .15s ease, background .15s ease;
+}
+
+.alaska-token-bar i.alaska-token-bar-warn { background: oklch(0.78 0.13 80); }
+.alaska-token-bar i.alaska-token-bar-over { background: oklch(0.70 0.18 25); }
+
+.alaska-token-label {
+	font-variant-numeric: tabular-nums;
+	color: var(--ink-2);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.alaska-token-cost {
+	font-variant-numeric: tabular-nums;
+	color: var(--mute);
+	white-space: nowrap;
+}
+
+.alaska-byo-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 6px;
+	margin-left: 4px;
+	background: oklch(0.83 0.10 220 / .18);
+	border: 1px solid oklch(0.83 0.10 220 / .45);
+	border-radius: 4px;
+	font-family: var(--font-mono);
+	font-size: 9.5px;
+	letter-spacing: 0.08em;
+	color: var(--ice);
+	cursor: default;
+}
+
+.alaska-settings-input {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 7px 10px;
+	background: var(--bg-2);
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 12px;
+}
+
+.alaska-settings-input:focus {
+	outline: 2px solid var(--ice);
+	outline-offset: 1px;
+}
+
+.alaska-settings-byo-key-controls {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+	flex-wrap: wrap;
+	width: 100%;
+}
+
+.alaska-settings-byo-key-controls .alaska-settings-input {
+	flex: 1;
+	min-width: 220px;
+}
+
+.alaska-settings-byo-lock {
+	padding: 10px 12px;
+	border: 1px dashed var(--line-2);
+	border-radius: 6px;
+	color: var(--mute);
+	font-size: 12px;
+	background: var(--bg-2);
+}
+
+.alaska-branch-switcher {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	margin-right: 6px;
+	padding: 2px 6px;
+	background: var(--panel-2);
+	border-radius: 10px;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--mute);
+}
+
+.alaska-branch-arrow {
+	width: 16px;
+	height: 16px;
+	padding: 0;
+	margin: 0;
+	background: transparent;
+	border: 0;
+	color: var(--mute);
+	cursor: pointer;
+	border-radius: 3px;
+	font-size: 11px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.alaska-branch-arrow:hover:not(:disabled) {
+	color: var(--ice);
+	background: var(--bg-2);
+}
+
+.alaska-branch-arrow:disabled {
+	opacity: 0.3;
+	cursor: not-allowed;
+}
+
+.alaska-branch-label {
+	font-variant-numeric: tabular-nums;
+	color: var(--ink-2);
+	min-width: 32px;
+	text-align: center;
+}
+
+.alaska-livediff-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1px;
+	background: var(--line-2);
+	max-height: 360px;
+	overflow: hidden;
+	border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+	.alaska-livediff-grid { grid-template-columns: 1fr; }
+}
+
+.alaska-livediff-col {
+	background: var(--bg-2);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.alaska-livediff-head {
+	flex: none;
+	padding: 4px 10px;
+	background: var(--panel-2);
+	font-family: var(--font-mono);
+	font-size: 10px;
+	color: var(--mute);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	border-bottom: 1px solid var(--line-2);
+}
+
+.alaska-livediff-body {
+	flex: 1;
+	overflow: auto;
+	padding: 4px 0;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	line-height: 1.45;
+}
+
+.alaska-livediff-line {
+	display: flex;
+	align-items: baseline;
+	padding: 0 8px;
+	white-space: pre;
+}
+
+.alaska-livediff-line-add { background: rgba(74, 222, 128, 0.10); }
+.alaska-livediff-line-del { background: rgba(248, 113, 113, 0.10); }
+.alaska-livediff-line-pad { opacity: 0.3; }
+
+.alaska-livediff-num {
+	flex-shrink: 0;
+	width: 32px;
+	text-align: right;
+	color: var(--mute);
+	user-select: none;
+	margin-right: 8px;
+	font-variant-numeric: tabular-nums;
+}
+
+.alaska-livediff-text {
+	flex: 1;
+	min-width: 0;
+	color: var(--ink);
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.alaska-livediff-note {
+	padding: 8px 12px;
+	font-size: 11px;
+	color: var(--mute);
+	border-bottom: 1px solid var(--line-2);
+}
+
+.alaska-livediff-fallback-pre {
+	margin: 0;
+	padding: 6px 10px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	line-height: 1.45;
+	color: var(--ink);
+	white-space: pre;
+}
+
+.alaska-composer {
+	flex: none;
+	padding: 10px 12px;
+	border-top: 1px solid var(--line);
+	background: var(--bg-2);
+	font-family: var(--font-ui);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.alaska-composer-context {
+	display: none;
+}
+
+.alaska-context-ribbon {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 7px 10px;
+	border: 1px solid var(--warn);
+	border-radius: 6px;
+	background: oklch(0.78 0.13 80 / .12);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 11px;
+}
+
+.alaska-context-ribbon-critical {
+	border-color: var(--red);
+	background: oklch(0.70 0.18 25 / .15);
+	color: var(--red);
+}
+
+.alaska-context-ribbon-continue {
+	border-color: var(--ice);
+	background: oklch(0.83 0.10 220 / .12);
+	color: var(--ice);
+}
+
+.alaska-context-ribbon-hidden {
+	display: none;
+}
+
+.alaska-context-ribbon-text {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.alaska-context-ribbon-action {
+	flex: none;
+	padding: 3px 10px;
+	border: 0;
+	border-radius: 4px;
+	background: var(--ice);
+	color: #06121d;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	cursor: pointer;
+}
+
+.alaska-context-ribbon-action:hover {
+	background: #fff;
+}
+
+.alaska-attach-chips,
+.alaska-mention-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 0;
+	min-height: 0;
+}
+
+.alaska-attach-chips:empty,
+.alaska-mention-chips:empty {
+	display: none;
+}
+
+.alaska-attach-chips .alaska-chip,
+.alaska-mention-chips .alaska-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 8px;
+	background: var(--panel-2);
+	border: 1px solid var(--line-2);
+	border-radius: 4px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--ink-2);
+}
+
+.alaska-chip .alaska-chip-ice {
+	color: var(--ice);
+}
+
+.alaska-chip .alaska-chip-aur {
+	color: var(--aurora);
+}
+
+.alaska-chip .alaska-chip-x {
+	color: var(--mute);
+	cursor: pointer;
+	padding: 0 2px;
+}
+
+.alaska-chip .alaska-chip-x:hover {
+	color: var(--ink);
+}
+
+.alaska-mention-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	max-width: 100%;
+	padding: 4px 8px;
+	border: 1px solid var(--line-2);
+	border-radius: 4px;
+	background: var(--panel-2);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--ink-2);
+}
+
+.alaska-mention-chip-file {
+	border-color: oklch(0.83 0.10 220 / .35);
+}
+
+.alaska-mention-chip-file .alaska-mention-chip-icon {
+	color: var(--ice);
+}
+
+.alaska-mention-chip-folder {
+	border-color: oklch(0.72 0.18 330 / .4);
+}
+
+.alaska-mention-chip-folder .alaska-mention-chip-icon {
+	color: var(--magenta);
+}
+
+.alaska-mention-chip-url {
+	border-color: oklch(0.78 0.16 155 / .4);
+}
+
+.alaska-mention-chip-url .alaska-mention-chip-icon {
+	color: var(--aurora);
+}
+
+.alaska-mention-chip-diag {
+	border-color: oklch(0.78 0.13 80 / .45);
+}
+
+.alaska-mention-chip-diag .alaska-mention-chip-icon {
+	color: var(--warn);
+}
+
+.alaska-mention-chip-selection {
+	border-color: oklch(0.78 0.16 155 / .4);
+}
+
+.alaska-mention-chip-selection .alaska-mention-chip-icon {
+	color: var(--aurora);
+}
+
+.alaska-mention-chip-icon {
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--ice);
+}
+
+.alaska-mention-chip-text {
+	min-width: 0;
+	max-width: 240px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.alaska-mention-chip-remove {
+	width: 14px;
+	height: 14px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--mute);
+	font-size: 13px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.alaska-mention-chip-remove:hover {
+	background: var(--bg-2);
+	color: var(--ink);
+}
+
+.alaska-attach-image-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 4px;
+}
+
+.alaska-attach-image-chips:empty {
+	display: none;
+}
+
+.alaska-attach-image-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 10px 4px 4px;
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	background: var(--panel-2);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--ink-2);
+	max-width: 260px;
+	animation: alaska-msg-in 0.28s cubic-bezier(.2, .7, .2, 1);
+}
+
+.alaska-attach-image-chip-thumb {
+	width: 36px;
+	height: 36px;
+	flex: 0 0 auto;
+	border-radius: 6px;
+	background-color: var(--bg-2);
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.alaska-attach-image-chip-label {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.alaska-attach-image-chip-remove {
+	width: 16px;
+	height: 16px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--mute);
+	font-size: 14px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.alaska-attach-image-chip-remove:hover {
+	background: var(--bg-2);
+	color: var(--ink);
+}
+
+.alaska-msg-images {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 8px;
+}
+
+.alaska-msg-image-fig {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	max-width: 320px;
+	animation: alaska-msg-in 0.35s cubic-bezier(.2, .7, .2, 1);
+}
+
+.alaska-msg-image {
+	max-width: 100%;
+	max-height: 320px;
+	width: auto;
+	height: auto;
+	border-radius: 8px;
+	box-shadow: inset 0 0 0 1px var(--line), 0 2px 8px rgb(0 0 0 / .25);
+	display: block;
+}
+
+.alaska-msg-image-cap {
+	font-family: var(--font-mono);
+	font-size: 10px;
+	color: var(--mute);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.alaska-model-cap-badge {
+	font-family: var(--font-mono);
+	font-size: 9px;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: var(--bg-2);
+	color: var(--ink-2);
+	border: 1px solid var(--line-2);
+}
+
+.alaska-model-cap-vision {
+	color: var(--aurora);
+	border-color: oklch(0.78 0.16 155 / .4);
+}
+
+.alaska-settings-model-cap-vision {
+	color: var(--aurora);
+}
+
+.alaska-msg-retry-banner {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 8px;
+	padding: 8px 12px;
+	border-radius: 8px;
+	border: 1px solid oklch(0.78 0.13 80 / .45);
+	background: oklch(0.20 0.04 60 / 0.4);
+	color: var(--ink-2);
+	font-size: 12px;
+}
+
+.alaska-msg-retry-label {
+	flex: 1;
+	min-width: 0;
+}
+
+.alaska-msg-retry-btn {
+	flex: 0 0 auto;
+	padding: 4px 12px;
+	border-radius: 6px;
+	border: 1px solid var(--line);
+	background: var(--panel);
+	color: var(--ink);
+	font-family: inherit;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.alaska-msg-retry-btn:hover {
+	background: var(--bg-2);
+}
+
+.alaska-empty-remote-cta {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	margin-top: 16px;
+	padding: 12px 16px;
+	border-top: 1px dashed var(--line-2);
+	max-width: 340px;
+}
+
+.alaska-empty-remote-cta-heading {
+	font-size: 11px;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--mute);
+}
+
+.alaska-empty-remote-cta-row {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px;
+}
+
+.alaska-empty-remote-cta-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--line);
+	background: var(--panel);
+	color: var(--ink);
+	font-size: 12px;
+	cursor: pointer;
+	font-family: inherit;
+}
+
+.alaska-empty-remote-cta-btn:hover {
+	background: var(--bg-2);
+	border-color: var(--ice);
+}
+
+.alaska-empty-remote-cta-glyph {
+	font-size: 14px;
+	color: var(--ice);
+}
+
+.alaska-empty-remote-cta-hint {
+	font-size: 10px;
+	color: var(--mute);
+	text-align: center;
+	max-width: 280px;
+}
+
+/* The unified composer card: input + control bar stacked flush (no gap). */
+.alaska-composer-field {
+	display: flex;
+	flex-direction: column;
+}
+
+/* Input is the top half of one unified composer card; the control bar is the
+   bottom half. They share a border that lights up together on focus (:has below). */
+.alaska-composer-input {
+	display: block;
+	width: 100%;
+	min-height: 56px;
+	max-height: 200px;
+	padding: 12px 13px 10px;
+	background: var(--panel);
+	border: 1px solid var(--line-2);
+	border-bottom: none;
+	border-radius: 12px 12px 0 0;
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 12.5px;
+	line-height: 1.55;
+	outline: none;
+	resize: none;
+	letter-spacing: 0;
+	transition: border-color 150ms ease, background 150ms ease;
+}
+
+.alaska-composer-input:focus {
+	background: var(--panel);
+}
+
+.alaska-composer-input::placeholder {
+	color: var(--mute);
+}
+
+.alaska-composer-bar {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 0;
+	padding: 8px 10px 9px;
+	background: var(--panel);
+	border: 1px solid var(--line-2);
+	border-top: none;
+	border-radius: 0 0 12px 12px;
+}
+
+/* Whole card (input + bar) lights up together when the input is focused. */
+.alaska-composer:has(.alaska-composer-input:focus) .alaska-composer-input,
+.alaska-composer:has(.alaska-composer-input:focus) .alaska-composer-bar {
+	border-color: oklch(0.83 0.10 220 / .5);
+}
+
+/* Row 1: controls wrap as one tidy group. */
+.alaska-composer-controls {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+	flex-wrap: wrap;
+}
+
+/* Row 2: cost on the left, Send anchored right, separated by a hairline. */
+.alaska-composer-send-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding-top: 8px;
+	border-top: 1px solid var(--line);
+}
+
+.alaska-composer-send-actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex: none;
+}
+
+/* legacy left/right groups (kept for any stragglers) */
+.alaska-composer-bar-left,
+.alaska-composer-bar-right {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+	flex-wrap: wrap;
+}
+
+.alaska-cbtn,
+.alaska-composer-active-toggle,
+.alaska-composer-permissions,
+.alaska-autocontinue,
+.alaska-model-button,
+.alaska-effort-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	height: 27px;
+	padding: 0 9px;
+	border: 1px solid transparent;
+	border-radius: 7px;
+	background: transparent;
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.alaska-cbtn:hover,
+.alaska-composer-active-toggle:hover,
+.alaska-composer-permissions:hover,
+.alaska-autocontinue:hover,
+.alaska-model-button:hover,
+.alaska-effort-button:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+	border-color: var(--line-2);
+}
+
+.alaska-cbtn:focus-visible,
+.alaska-composer-active-toggle:focus-visible,
+.alaska-composer-permissions:focus-visible,
+.alaska-autocontinue:focus-visible,
+.alaska-model-button:focus-visible,
+.alaska-effort-button:focus-visible {
+	outline: 1px solid var(--ice);
+	outline-offset: 1px;
+}
+
+.alaska-cbtn .codicon,
+.alaska-composer-active-toggle .codicon,
+.alaska-composer-permissions .codicon,
+.alaska-autocontinue .codicon,
+.alaska-model-button .codicon,
+.alaska-effort-button .codicon {
+	font-size: 13px;
+}
+
+.alaska-cbtn svg,
+.alaska-composer-active-toggle svg,
+.alaska-composer-permissions svg {
+	width: 13px;
+	height: 13px;
+	opacity: 0.85;
+}
+
+.alaska-cbtn small,
+.alaska-composer-permissions small {
+	font-size: 10px;
+	color: var(--mute);
+	margin-left: 1px;
+}
+
+.alaska-cbtn-icon-only {
+	width: 26px;
+	padding: 0;
+	justify-content: center;
+}
+
+/* Active toggles = solid accent fill (Kiro-style filled pill), not a faint tint. */
+.alaska-cbtn-on,
+.alaska-cbtn-toggle-on,
+.alaska-composer-active-on {
+	background: var(--ice);
+	color: #06121d;
+	border-color: transparent;
+	font-weight: 600;
+	box-shadow: 0 0 12px -5px oklch(0.83 0.10 220 / .7);
+}
+
+.alaska-cbtn-on:hover,
+.alaska-cbtn-toggle-on:hover,
+.alaska-composer-active-on:hover {
+	background: #eaf6ff;
+	color: #06121d;
+	border-color: transparent;
+}
+
+.alaska-cbtn-on .codicon,
+.alaska-cbtn-toggle-on .codicon,
+.alaska-composer-active-on .codicon,
+.alaska-cbtn-toggle-on svg,
+.alaska-composer-active-on svg {
+	color: #06121d;
+	opacity: 1;
+}
+
+.alaska-cbtn-ctx-meta {
+	font-size: 10px;
+	color: var(--mute);
+	max-width: 140px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.alaska-composer-active-toggle {
+	min-width: 0;
+}
+
+.alaska-composer-permissions {
+	min-width: 0;
+}
+
+.alaska-permission-trigger-icon {
+	font-size: 13px;
+}
+
+.alaska-autocontinue {
+	min-width: 0;
+}
+
+.alaska-autocontinue-on {
+	background: var(--aurora);
+	color: #06120c;
+	border-color: transparent;
+	font-weight: 600;
+	box-shadow: 0 0 12px -5px oklch(0.78 0.16 155 / .7);
+}
+
+.alaska-autocontinue-on:hover {
+	background: #d8ffe9;
+	color: #06120c;
+	border-color: transparent;
+}
+
+.alaska-autocontinue-on .codicon,
+.alaska-autocontinue-on svg {
+	color: #06120c;
+	opacity: 1;
+}
+
+.alaska-stream-status {
+	min-width: 0;
+	max-width: 160px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+}
+
+/* a11y-only: kept in the DOM for screen readers, hidden visually */
+.alaska-visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Send button in its Stop state (while streaming) — clearly a stop affordance. */
+.alaska-cbtn-send.alaska-cbtn-send-stopping {
+	background: oklch(0.70 0.18 25);
+	color: #fff;
+	box-shadow: 0 0 14px -4px oklch(0.70 0.18 25 / .6);
+}
+.alaska-cbtn-send.alaska-cbtn-send-stopping:hover {
+	background: oklch(0.74 0.19 25);
+	color: #fff;
+}
+.alaska-cbtn-send.alaska-cbtn-send-stopping .alaska-cbtn-send-kbd {
+	color: rgba(255, 255, 255, 0.85);
+}
+
+.alaska-cbtn-send {
+	background: var(--ice);
+	color: #06121d;
+	font-weight: 600;
+	border-color: transparent;
+	box-shadow: 0 0 14px -4px oklch(0.83 0.10 220 / .55);
+}
+
+.alaska-cbtn-send:hover {
+	background: #fff;
+	color: #06121d;
+	border-color: transparent;
+	box-shadow: 0 0 18px -2px oklch(0.83 0.10 220 / .7);
+}
+
+.alaska-cbtn-send:active {
+	transform: translateY(0.5px);
+}
+
+.alaska-cbtn-send:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	box-shadow: none;
+}
+
+.alaska-cbtn-send-kbd {
+	margin-right: 4px;
+	color: rgba(6, 18, 29, 0.6);
+	font-family: inherit;
+	font-size: 10px;
+	font-weight: 600;
+}
+
+.alaska-cbtn-send-label {
+	font-family: inherit;
+}
+
+.alaska-cbtn-stop {
+	background: var(--panel-2);
+	color: var(--ink);
+	border: 1px solid var(--line-2);
+	font-weight: 500;
+}
+
+.alaska-cbtn-stop:hover {
+	background: var(--panel);
+	color: var(--ink);
+	border-color: var(--ice);
+}
+
+.alaska-round-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 26px;
+	padding: 0;
+	border: 0;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.alaska-model-picker,
+.alaska-effort-picker {
+	position: relative;
+	min-width: 0;
+}
+
+.alaska-model-button {
+	max-width: 180px;
+	white-space: nowrap;
+}
+
+.alaska-model-button strong {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 500;
+}
+
+.alaska-model-dot {
+	flex: none;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--aurora);
+	box-shadow: 0 0 5px var(--aurora);
+}
+
+.alaska-effort-picker-hidden {
+	display: none;
+}
+
+.alaska-effort-tag {
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 10px;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.alaska-effort-value {
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 11px;
+}
+
+.alaska-floating-menu,
+.alaska-model-menu,
+.alaska-effort-menu,
+.alaska-permission-menu,
+.alaska-attach-menu,
+.alaska-plan-menu {
+	position: absolute;
+	left: 0;
+	bottom: calc(100% + 6px);
+	z-index: 40;
+	min-width: 200px;
+	max-width: min(320px, calc(100vw - 28px));
+	max-height: 320px;
+	overflow-y: auto;
+	padding: 4px;
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	background: var(--panel);
+	box-shadow: 0 18px 40px -10px rgba(0, 0, 0, .7);
+}
+
+.alaska-floating-menu-right,
+.alaska-model-menu-right,
+.alaska-effort-menu-right,
+.alaska-permission-menu-right,
+.alaska-attach-menu-right,
+.alaska-plan-menu-right {
+	left: auto;
+	right: 0;
+}
+
+.alaska-menu-group-title {
+	padding: 6px 10px 4px;
+	font-family: var(--font-mono);
+	font-size: 9.5px;
+	font-weight: 500;
+	color: var(--mute);
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	border-top: 1px solid var(--line);
+	margin-top: 4px;
+}
+
+.alaska-menu-group-title:first-child {
+	border-top: 0;
+	margin-top: 0;
+}
+
+.alaska-menu-item,
+.alaska-model-item,
+.alaska-effort-item {
+	display: grid;
+	grid-template-columns: 14px 1fr auto;
+	gap: 8px;
+	align-items: center;
+	width: 100%;
+	padding: 7px 10px;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	text-align: left;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease;
+}
+
+.alaska-menu-item:hover,
+.alaska-model-item:hover,
+.alaska-effort-item:hover,
+.alaska-menu-item-active,
+.alaska-model-item-active,
+.alaska-effort-item-active {
+	background: var(--panel-2);
+	color: var(--ink);
+}
+
+.alaska-menu-item-on,
+.alaska-menu-item-active,
+.alaska-model-item-active,
+.alaska-effort-item-active {
+	background: var(--panel-2);
+	color: var(--ink);
+	box-shadow: inset 2px 0 0 var(--ice);
+}
+
+.alaska-menu-item-meta-on {
+	color: var(--ice);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.alaska-menu-item-glyph {
+	color: var(--ice);
+	font-family: var(--font-mono);
+	font-size: 12px;
+	text-align: center;
+}
+
+.alaska-menu-item-body {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	gap: 2px;
+}
+
+.alaska-menu-item-body small {
+	display: block;
+	color: var(--mute);
+	font-size: 10px;
+	letter-spacing: 0;
+}
+
+.alaska-menu-item-meta {
+	color: var(--mute);
+	font-size: 10px;
+}
+
+.alaska-menu-item-disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.alaska-model-menu {
+	min-width: 320px;
+	max-width: min(420px, calc(100vw - 32px));
+}
+
+.alaska-model-item {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 4px;
+	padding: 8px 10px;
+}
+
+.alaska-model-item-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	min-width: 0;
+	width: 100%;
+}
+
+.alaska-model-item-row strong {
+	min-width: 0;
+	flex: 1 1 auto;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--ink);
+}
+
+.alaska-model-item-row span {
+	color: var(--mute);
+	font-size: 9.5px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.alaska-model-item small {
+	display: block;
+	margin-top: 0;
+	color: var(--mute);
+	font-size: 10.5px;
+	line-height: 1.4;
+	overflow-wrap: anywhere;
+}
+
+.alaska-effort-item {
+	display: block;
+	grid-template-columns: none;
+	padding: 7px 10px;
+}
+
+.alaska-agent-mode {
+	height: 26px;
+	padding: 0 11px;
+	border: 1px solid var(--line-2);
+	border-radius: 999px;
+	background: var(--panel-2);
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.04em;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.alaska-agent-mode:hover {
+	background: var(--panel);
+	color: var(--ink);
+}
+
+.alaska-agent-mode-full {
+	background: oklch(0.78 0.16 155 / .12);
+	color: var(--aurora);
+	border-color: oklch(0.78 0.16 155 / .4);
+}
+
+.alaska-usage {
+	display: inline-flex;
+	align-items: center;
+	position: relative;
+	min-width: 0;
+}
+
+.alaska-plan-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 22px;
+	padding: 0 10px;
+	border: 1px solid var(--line);
+	border-radius: 999px;
+	background: var(--bg-2);
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: border-color 120ms ease, color 120ms ease;
+}
+
+.alaska-plan-button:hover {
+	border-color: var(--ice);
+	color: var(--ink);
+}
+
+.alaska-plan-button b {
+	color: var(--ice);
+	font-weight: 600;
+	letter-spacing: 0;
+}
+
+.alaska-plan-menu {
+	left: 0;
+	right: auto;
+	min-width: 240px;
+	padding: 8px;
+}
+
+.alaska-plan-row {
+	display: grid;
+	grid-template-columns: minmax(54px, max-content) minmax(0, 1fr);
+	gap: 12px;
+	padding: 5px 4px;
+	border-bottom: 1px solid var(--line);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+}
+
+.alaska-plan-row:last-child {
+	border-bottom: 0;
+}
+
+.alaska-plan-row span {
+	color: var(--mute);
+}
+
+.alaska-plan-row strong {
+	color: var(--ink);
+	font-weight: 600;
+	text-align: right;
+	overflow-wrap: anywhere;
+}
+
+.alaska-plan-dock {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 0 12px;
+	max-height: 0;
+	overflow: hidden;
+	opacity: 0;
+	transform: translateY(4px);
+	transition: max-height 150ms ease, opacity 150ms ease, transform 150ms ease, padding 150ms ease, border-top-color 150ms ease;
+	border-top: 1px solid transparent;
+	background: var(--bg-2);
+}
+
+.alaska-plan-dock-visible {
+	max-height: 200px;
+	padding: 8px 12px;
+	opacity: 1;
+	transform: translateY(0);
+	border-top-color: var(--line);
+}
+
+.alaska-plan-dock-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.alaska-plan-dock-buttons {
+	display: flex;
+	gap: 6px;
+	flex: 1 1 auto;
+}
+
+.alaska-plan-dock-auto {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--ink-2);
+	cursor: pointer;
+	user-select: none;
+}
+
+.alaska-plan-dock-auto input[type='checkbox'] {
+	accent-color: var(--ice);
+}
+
+.alaska-plan-dock-auto input[type='checkbox']:disabled {
+	cursor: not-allowed;
+	opacity: 0.65;
+}
+
+.alaska-plan-card {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 10px 12px;
+	margin: 6px 0;
+	border: 1px solid var(--line-2);
+	border-left: 3px solid var(--line);
+	border-radius: 6px;
+	background: var(--panel-2);
+	color: var(--ink);
+}
+
+.alaska-plan-card-pending {
+	border-left-color: var(--ice);
+}
+
+.alaska-plan-card-approved {
+	border-left-color: var(--aurora);
+	background: oklch(0.78 0.16 155 / .06);
+}
+
+.alaska-plan-card-approved-edited {
+	border-left-color: var(--magenta);
+	background: oklch(0.72 0.18 330 / .06);
+}
+
+.alaska-plan-card-declined {
+	border-left-color: var(--red);
+	background: oklch(0.70 0.18 25 / .07);
+}
+
+.alaska-plan-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-family: var(--font-ui);
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--ink);
+}
+
+.alaska-plan-rationale {
+	color: var(--ink-2);
+	font-size: 12.5px;
+	line-height: 1.5;
+}
+
+.alaska-plan-list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.alaska-plan-row {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	padding: 5px 8px;
+	border: 0;
+	border-radius: 4px;
+	background: var(--bg-2);
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+}
+
+.alaska-plan-row-action {
+	flex: none;
+	padding: 1px 7px;
+	border-radius: 999px;
+	font-size: 9.5px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.alaska-plan-row-create .alaska-plan-row-action {
+	background: oklch(0.78 0.16 155 / .18);
+	color: var(--aurora);
+}
+
+.alaska-plan-row-edit .alaska-plan-row-action {
+	background: oklch(0.83 0.10 220 / .18);
+	color: var(--ice);
+}
+
+.alaska-plan-row-delete .alaska-plan-row-action {
+	background: oklch(0.70 0.18 25 / .2);
+	color: var(--red);
+}
+
+.alaska-plan-row-path {
+	flex: none;
+	max-width: 50%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--ink);
+}
+
+.alaska-plan-row-summary {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--mute);
+}
+
+.alaska-plan-editor {
+	width: 100%;
+	min-height: 180px;
+	padding: 10px;
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	background: var(--panel);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 12px;
+	resize: vertical;
+}
+
+.alaska-plan-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.alaska-plan-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 12px;
+	border: 1px solid var(--line-2);
+	border-radius: 5px;
+	background: var(--panel);
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.alaska-plan-btn:hover:not(:disabled) {
+	background: var(--panel-2);
+	color: var(--ink);
+	border-color: var(--ice);
+}
+
+.alaska-plan-btn:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.alaska-plan-btn-approve {
+	background: var(--ice);
+	color: #06121d;
+	border-color: transparent;
+	font-weight: 600;
+}
+
+.alaska-plan-btn-approve:hover:not(:disabled) {
+	background: #fff;
+}
+
+.alaska-plan-btn-decline {
+	color: var(--red);
+	border-color: oklch(0.70 0.18 25 / .35);
+}
+
+.alaska-plan-undo-strip {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	margin: 6px 0 0;
+	border: 1px solid var(--warn);
+	border-radius: 6px;
+	background: oklch(0.78 0.13 80 / .12);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+}
+
+.alaska-plan-undo-strip .codicon {
+	color: var(--warn);
+	font-size: 12px;
+}
+
+.alaska-plan-undo-label {
+	flex: 0 0 auto;
+}
+
+.alaska-plan-undo-spacer {
+	flex: 1 1 auto;
+}
+
+.alaska-plan-undo-btn {
+	padding: 3px 12px;
+	border: 1px solid var(--line-2);
+	border-radius: 4px;
+	background: var(--panel-2);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	cursor: pointer;
+}
+
+.alaska-plan-undo-btn:hover {
+	background: var(--panel);
+	border-color: var(--warn);
+}
+
+.alaska-edit-batch {
+	margin-top: 10px;
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	background: var(--bg-2);
+	overflow: hidden;
+}
+
+.alaska-edit-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--line);
+	background: var(--panel-2);
+}
+
+.alaska-edit-header strong {
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	color: var(--ink);
+}
+
+.alaska-edit-header span {
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+}
+
+.alaska-edit-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.alaska-edit-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--line);
+}
+
+.alaska-edit-row:last-child {
+	border-bottom: 0;
+}
+
+.alaska-edit-row-applied {
+	background: oklch(0.78 0.16 155 / .08);
+}
+
+.alaska-edit-row-failed {
+	background: oklch(0.70 0.18 25 / .08);
+}
+
+.alaska-edit-row-main {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	gap: 2px;
+}
+
+.alaska-edit-row-main strong {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	color: var(--ink);
+}
+
+.alaska-edit-row-main span {
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+}
+
+.alaska-edit-row-actions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex: none;
+}
+
+.alaska-mini-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 22px;
+	padding: 0 9px;
+	border: 1px solid var(--line-2);
+	border-radius: 4px;
+	background: var(--panel);
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.alaska-mini-button:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+	border-color: var(--ice);
+}
+
+.alaska-mini-button-accept {
+	color: var(--aurora);
+	border-color: oklch(0.78 0.16 155 / .35);
+}
+
+.alaska-edit-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.alaska-edit-status {
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+}
+
+.alaska-inline-edit-widget {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 360px;
+	max-width: 540px;
+	padding: 5px 10px;
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	background: var(--panel);
+	color: var(--ink);
+	font-family: var(--font-ui);
+	font-size: 12px;
+	box-shadow: 0 8px 24px -8px rgba(0, 0, 0, .6);
+}
+
+.alaska-inline-edit-widget-ready {
+	border-color: var(--aurora);
+}
+
+.alaska-inline-edit-input {
+	flex: 1;
+	min-width: 0;
+	padding: 2px 0;
+	border: 0;
+	background: transparent;
+	color: var(--ink);
+	font-family: inherit;
+	font-size: 12px;
+	outline: none;
+}
+
+.alaska-inline-edit-input::placeholder {
+	color: var(--mute);
+}
+
+.alaska-inline-edit-input:disabled {
+	color: var(--mute);
+	opacity: 0.85;
+}
+
+.alaska-inline-edit-hint {
+	flex: none;
+	padding-left: 8px;
+	border-left: 1px solid var(--line);
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 10px;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.alaska-inline-edit-preview {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 6px 12px;
+	background: oklch(0.78 0.16 155 / .08);
+	border-left: 3px solid var(--aurora);
+	font-family: var(--font-mono);
+	font-size: 12.5px;
+	line-height: 1.4;
+}
+
+.alaska-inline-edit-preview-hint {
+	color: var(--mute);
+	font-family: var(--font-ui);
+	font-size: 11px;
+}
+
+.alaska-inline-edit-preview-code {
+	margin: 0;
+	padding: 0;
+	color: var(--ink);
+	background: transparent;
+	white-space: pre;
+	overflow: auto;
+}
+
+.alaska-inline-edit-preview-footer {
+	color: var(--mute);
+	font-family: var(--font-ui);
+	font-size: 10px;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.alaska-inline-edit-selection {
+	background: oklch(0.70 0.18 25 / .14);
+}
+
+.alaska-inline-edit-selection-margin {
+	background: var(--red);
+	width: 3px !important;
+}
+
+.alaska-diff-removed {
+	background: oklch(0.70 0.18 25 / .14);
+	text-decoration: line-through;
+	text-decoration-color: var(--red);
+}
+
+.alaska-diff-removed-gutter::before {
+	/* allow-any-unicode-next-line */
+	content: '−';
+	display: inline-block;
+	width: 14px;
+	color: var(--red);
+	font-weight: 600;
+	text-align: center;
+}
+
+.alaska-diff-removed-shatter {
+	animation: alaska-line-shatter 0.6s ease forwards;
+	overflow: hidden;
+}
+
+.alaska-diff-removed-zone {
+	display: flex;
+	flex-direction: column;
+	background: oklch(0.70 0.18 25 / .08);
+	border-left: 2px solid oklch(0.70 0.18 25 / .55);
+	font-family: var(--vscode-editor-font-family, 'JetBrains Mono', monospace);
+	font-size: var(--vscode-editor-font-size, 13px);
+	line-height: var(--vscode-editor-line-height, 1.6);
+}
+
+.alaska-diff-removed-zone-line {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 12px 0 4px;
+	white-space: pre;
+	color: oklch(0.78 0.10 25);
+}
+
+.alaska-diff-removed-text {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow-x: auto;
+}
+
+.alaska-diff-added {
+	background: oklch(0.78 0.16 155 / .14);
+	animation: alaska-line-add 0.4s ease forwards;
+}
+
+.alaska-diff-added-gutter::before {
+	content: '+';
+	display: inline-block;
+	color: var(--aurora);
+	font-weight: 600;
+}
+
+.alaska-diff-ghost {
+	background: oklch(0.78 0.16 155 / .07);
+	color: oklch(0.85 0.05 155);
+	opacity: 0;
+	transform: translateY(-3px);
+	animation: alaska-line-ghost-in 0.35s ease forwards;
+}
+
+.alaska-diff-ghost-committing {
+	animation: alaska-line-freeze 0.7s ease forwards;
+}
+
+.alaska-diff-toolbar {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 8px;
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	background: var(--panel);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--ink-2);
+	box-shadow: 0 8px 24px -8px rgba(0, 0, 0, .6);
+}
+
+.alaska-diff-toolbar-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 22px;
+	padding: 0 10px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--ink-2);
+	font-family: inherit;
+	font-size: 11px;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.alaska-diff-toolbar-btn:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+	border-color: var(--line-2);
+}
+
+.alaska-diff-toolbar-btn-accept {
+	background: oklch(0.83 0.10 220 / .15);
+	color: var(--ice);
+	border-color: oklch(0.83 0.10 220 / .4);
+}
+
+.alaska-diff-toolbar-btn-accept:hover {
+	background: var(--ice);
+	color: #06121d;
+	border-color: transparent;
+}
+
+.alaska-diff-toolbar-btn-discard {
+	color: var(--mute);
+}
+
+.alaska-diff-toolbar-btn-discard:hover {
+	color: var(--red);
+	border-color: oklch(0.70 0.18 25 / .35);
+}
+
+.alaska-diff-toolbar-kbd {
+	display: inline-block;
+	padding: 0 5px;
+	border: 1px solid var(--line);
+	border-radius: 3px;
+	background: var(--bg-2);
+	color: var(--mute);
+	font-size: 9.5px;
+	font-family: var(--font-mono);
+}
+
+.alaska-run-card {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 8px 10px;
+	border: 1px solid var(--line-2);
+	border-left: 2px solid var(--ice);
+	border-radius: 5px;
+	background: var(--bg-2);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	overflow: hidden;
+}
+
+.alaska-run-card-hidden {
+	display: none;
+}
+
+.alaska-run-card-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.alaska-run-card-icon {
+	flex: none;
+	color: var(--mute);
+	font-size: 13px;
+}
+
+.alaska-run-card-title {
+	flex: none;
+	color: var(--ink);
+	font-weight: 600;
+	font-size: 11px;
+	letter-spacing: 0.02em;
+}
+
+.alaska-run-card-shell {
+	flex: none;
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 7px;
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	background: var(--panel-2);
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	white-space: nowrap;
+}
+
+.alaska-run-card-shell-empty {
+	display: none;
+}
+
+.alaska-run-card-spacer {
+	flex: 1 1 auto;
+}
+
+.alaska-run-card-timer-icon {
+	flex: none;
+	color: var(--mute);
+	font-size: 11px;
+}
+
+.alaska-run-card-timer {
+	flex: none;
+	min-width: 36px;
+	color: var(--mute);
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: 'tnum' 1;
+	text-align: right;
+}
+
+.alaska-run-card-close {
+	flex: none;
+	width: 18px;
+	height: 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--mute);
+	cursor: pointer;
+}
+
+.alaska-run-card-close:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+}
+
+.alaska-run-card-command {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+	min-width: 0;
+	padding: 4px 8px;
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	background: var(--panel);
+}
+
+.alaska-run-card-command-icon {
+	flex: none;
+	margin-top: 1px;
+	color: var(--ice);
+	font-size: 11px;
+}
+
+.alaska-run-card-command-text {
+	flex: 1 1 auto;
+	min-width: 0;
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.alaska-run-card-output {
+	margin: 0;
+	padding: 6px 10px;
+	max-height: 220px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	background: var(--bg);
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	line-height: 1.45;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.alaska-run-card-output:empty {
+	display: none;
+}
+
+.alaska-run-card-footer {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.alaska-run-card-footer-icon {
+	flex: none;
+	color: var(--mute);
+	font-size: 12px;
+}
+
+.alaska-run-card-footer-status {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--mute);
+	font-size: 10.5px;
+}
+
+.alaska-run-card-link {
+	flex: none;
+	padding: 2px 8px;
+	border: 0;
+	border-radius: 3px;
+	background: transparent;
+	color: var(--ice);
+	font-size: 10.5px;
+	cursor: pointer;
+}
+
+.alaska-run-card-link:hover {
+	background: var(--panel-2);
+	color: #fff;
+}
+
+.alaska-run-card-button {
+	flex: none;
+	padding: 2px 10px;
+	border: 1px solid var(--line-2);
+	border-radius: 4px;
+	background: var(--panel-2);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	cursor: pointer;
+}
+
+.alaska-run-card-button:hover {
+	background: var(--panel);
+	border-color: var(--ice);
+}
+
+.alaska-history-view {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	background: var(--bg-2);
+}
+
+.alaska-history-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 14px;
+	border-bottom: 1px solid var(--line);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--mute);
+}
+
+.alaska-history-plus {
+	width: 20px;
+	height: 20px;
+	display: grid;
+	place-items: center;
+	padding: 0;
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	background: transparent;
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	cursor: pointer;
+}
+
+.alaska-history-plus:hover {
+	border-color: var(--ice);
+	color: var(--ice);
+}
+
+.alaska-history-list {
+	flex: 1;
+	overflow-y: auto;
+	padding: 4px 0 12px;
+}
+
+.alaska-history-empty {
+	padding: 22px 14px;
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	line-height: 1.6;
+	text-align: center;
+}
+
+.alaska-history-section {
+	padding: 10px 14px 4px;
+	font-family: var(--font-mono);
+	font-size: 9.5px;
+	font-weight: 500;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--mute);
+}
+
+.alaska-history-item {
+	position: relative;
+	padding: 9px 14px 9px 16px;
+	border-left: 2px solid transparent;
+	cursor: pointer;
+	transition: background 120ms ease;
+}
+
+.alaska-history-item:hover {
+	background: var(--panel-2);
+}
+
+.alaska-history-item-active {
+	background: var(--panel-2);
+	border-left-color: var(--ice);
+}
+
+.alaska-history-date {
+	margin-bottom: 4px;
+	font-family: var(--font-mono);
+	font-size: 9.5px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--mute);
+}
+
+.alaska-history-title-row {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-ui);
+	font-size: 12.5px;
+	color: var(--ink);
+}
+
+.alaska-history-preview {
+	margin-top: 4px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--mute);
+	line-height: 1.4;
+}
+
+.alaska-history-badge {
+	display: inline-block;
+	margin-top: 5px;
+	padding: 1px 7px;
+	border-radius: 999px;
+	background: oklch(0.78 0.16 155 / .12);
+	color: var(--aurora);
+	font-family: var(--font-mono);
+	font-size: 9.5px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.alaska-settings-overlay,
+.alaska-settings-root {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	font-family: var(--font-ui);
+	color: var(--ink);
+	background:
+		radial-gradient(ellipse 60% 40% at 50% 0%, oklch(0.83 0.10 220 / .14), transparent 60%),
+		linear-gradient(180deg, var(--panel-2), var(--bg) 320px),
+		var(--bg);
+	animation: alaska-settings-fade-in 200ms ease-out;
+}
+
+.alaska-settings-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 200;
+	padding: 28px 24px 36px;
+}
+
+.alaska-settings-overlay-hidden {
+	display: none;
+}
+
+.alaska-settings-page {
+	min-height: 100%;
+	padding: 48px 28px 64px;
+}
+
+.alaska-settings-inner {
+	max-width: 920px;
+	margin: 0 auto;
+}
+
+.alaska-settings-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 24px;
+}
+
+.alaska-settings-inner .alaska-settings-head {
+	margin-bottom: 30px;
+}
+
+.alaska-settings-title {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--ice);
+}
+
+.alaska-settings-inner h1.alaska-settings-title {
+	margin: 0 0 6px;
+	font-size: 30px;
+	background: linear-gradient(180deg, var(--ink), var(--ice));
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.alaska-settings-subtitle {
+	margin: 0;
+	color: var(--ink-2);
+	font-size: 13px;
+}
+
+.alaska-settings-close {
+	flex: none;
+	width: 28px;
+	height: 28px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	background: var(--panel-2);
+	color: var(--mute);
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.alaska-settings-close:hover {
+	background: var(--panel);
+	color: var(--ice);
+	border-color: var(--ice);
+}
+
+.alaska-settings-body {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.alaska-settings-root .alaska-settings-body {
+	gap: 16px;
+}
+
+.alaska-settings-card {
+	padding: 18px 18px 16px;
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	background: linear-gradient(180deg, oklch(0.83 0.10 220 / .04), transparent 60%), var(--panel-2);
+	box-shadow: 0 12px 28px rgba(0, 0, 0, .55);
+}
+
+.alaska-settings-root .alaska-settings-card {
+	padding: 22px 24px 20px;
+	border-radius: 10px;
+}
+
+.alaska-settings-card-heading {
+	margin: 0 0 12px;
+	font-family: var(--font-mono);
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--ice);
+}
+
+.alaska-settings-root .alaska-settings-card-heading {
+	margin-bottom: 16px;
+	font-size: 10.5px;
+}
+
+.alaska-settings-hint {
+	margin: 0 0 12px;
+	color: var(--ink-2);
+	font-size: 11.5px;
+	line-height: 1.55;
+}
+
+.alaska-settings-account-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.alaska-settings-account-left {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.alaska-settings-account-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-ui);
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--ink);
+}
+
+.alaska-settings-root .alaska-settings-account-name {
+	font-size: 16px;
+}
+
+.alaska-settings-account-email {
+	margin-top: 2px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--mute);
+}
+
+.alaska-settings-root .alaska-settings-account-email {
+	font-size: 12px;
+}
+
+.alaska-settings-plan-tag,
+.alaska-settings-model-plan {
+	display: inline-flex;
+	align-items: center;
+	padding: 3px 10px;
+	border: 1px solid var(--line-2);
+	border-radius: 999px;
+	background: var(--bg-2);
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.alaska-settings-plan-tag {
+	padding: 4px 14px;
+	font-size: 11px;
+}
+
+.alaska-settings-plan-free {
+	color: var(--mute);
+}
+
+.alaska-settings-plan-pro {
+	color: var(--ice);
+	border-color: oklch(0.83 0.10 220 / .35);
+	background: oklch(0.83 0.10 220 / .1);
+}
+
+.alaska-settings-plan-max,
+.alaska-settings-plan-team {
+	color: var(--aurora);
+	border-color: oklch(0.78 0.16 155 / .35);
+	background: oklch(0.78 0.16 155 / .1);
+}
+
+.alaska-settings-plan-ultra {
+	color: #06121d;
+	background: linear-gradient(180deg, var(--ice), var(--ice-2));
+	border-color: transparent;
+	box-shadow: 0 0 18px -6px oklch(0.83 0.10 220 / .65);
+}
+
+.alaska-settings-link-row {
+	display: flex;
+	gap: 18px;
+	margin-top: 14px;
+	padding-top: 14px;
+	border-top: 1px solid var(--line);
+}
+
+.alaska-settings-root .alaska-settings-link-row {
+	gap: 22px;
+	margin-top: 18px;
+	padding-top: 18px;
+}
+
+.alaska-settings-link {
+	font-family: var(--font-ui);
+	font-size: 12px;
+	color: var(--ice);
+	text-decoration: none;
+	transition: color 120ms ease;
+}
+
+.alaska-settings-root .alaska-settings-link {
+	font-size: 13px;
+}
+
+.alaska-settings-link:hover {
+	color: #fff;
+}
+
+.alaska-settings-model-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.alaska-settings-model-empty {
+	padding: 14px;
+	border: 1px dashed var(--line-2);
+	border-radius: 6px;
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	text-align: center;
+}
+
+.alaska-settings-model-item {
+	padding: 12px 14px;
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	background: var(--panel);
+	cursor: pointer;
+	transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.alaska-settings-model-item:hover {
+	background: var(--panel-2);
+	border-color: var(--ice);
+}
+
+.alaska-settings-model-selected {
+	background: linear-gradient(180deg, oklch(0.83 0.10 220 / .12), transparent 80%), var(--panel-2);
+	border-color: var(--ice);
+	box-shadow: 0 0 18px -6px oklch(0.83 0.10 220 / .55);
+}
+
+.alaska-settings-model-locked {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.alaska-settings-model-locked:hover {
+	background: var(--panel);
+	border-color: var(--line-2);
+}
+
+.alaska-settings-model-head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.alaska-settings-model-indicator {
+	flex: none;
+	display: inline-flex;
+	color: var(--ice);
+}
+
+.alaska-settings-model-locked .alaska-settings-model-indicator {
+	color: var(--mute);
+}
+
+.alaska-settings-model-label {
+	font-family: var(--font-ui);
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--ink);
+}
+
+.alaska-settings-model-cap {
+	padding: 2px 7px;
+	border: 1px solid var(--line-2);
+	border-radius: 4px;
+	color: var(--ice);
+	font-family: var(--font-mono);
+	font-size: 9.5px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.alaska-settings-model-desc {
+	margin: 6px 0 0;
+	color: var(--ink-2);
+	font-size: 11.5px;
+	line-height: 1.45;
+}
+
+.alaska-settings-model-meta {
+	margin-top: 6px;
+	display: flex;
+	gap: 10px;
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 10px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.alaska-settings-pref-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 10px 0;
+	border-top: 1px solid var(--line);
+}
+
+.alaska-settings-pref-row:first-of-type {
+	padding-top: 0;
+	border-top: 0;
+}
+
+.alaska-settings-pref-label {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-width: 0;
+	gap: 3px;
+}
+
+.alaska-settings-pref-label strong {
+	font-family: var(--font-ui);
+	font-size: 12.5px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--ink);
+}
+
+.alaska-settings-pref-label span {
+	color: var(--ink-2);
+	font-size: 11px;
+	line-height: 1.4;
+}
+
+.alaska-settings-segmented {
+	display: inline-flex;
+	flex: none;
+	border: 1px solid var(--line-2);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.alaska-settings-segment {
+	padding: 5px 11px;
+	border: 0;
+	border-right: 1px solid var(--line);
+	background: transparent;
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	cursor: pointer;
+	transition: background 120ms ease, color 120ms ease;
+}
+
+.alaska-settings-segment:last-child {
+	border-right: 0;
+}
+
+.alaska-settings-segment:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+}
+
+.alaska-settings-segment-active {
+	background: linear-gradient(180deg, var(--ice), var(--ice-2));
+	color: #06121d;
+	font-weight: 600;
+}
+
+.alaska-settings-segment-active:hover {
+	background: linear-gradient(180deg, #fff, var(--ice));
+	color: #06121d;
+}
+
+.alaska-settings-toggle {
+	position: relative;
+	flex: none;
+	width: 40px;
+	height: 22px;
+	border: 1px solid var(--line-2);
+	border-radius: 999px;
+	background: var(--panel-2);
+	cursor: pointer;
+	transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.alaska-settings-toggle span {
+	position: absolute;
+	top: 50%;
+	left: 3px;
+	width: 14px;
+	height: 14px;
+	border-radius: 999px;
+	background: var(--ink-2);
+	transform: translateY(-50%);
+	transition: left 160ms ease, background 160ms ease;
+}
+
+.alaska-settings-toggle-on {
+	background: linear-gradient(90deg, var(--ice-2), var(--ice));
+	border-color: var(--ice);
+	box-shadow: 0 0 14px -4px oklch(0.83 0.10 220 / .55);
+}
+
+.alaska-settings-toggle-on span {
+	left: 21px;
+	background: #06121d;
+}
+
+@keyframes alaska-msg-in {
+	from { opacity: 0; transform: translateY(6px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes alaska-dot-pulse {
+	0%, 100% { opacity: 0.4; transform: scale(0.85); }
+	50%      { opacity: 1;   transform: scale(1.15); }
+}
+
+@keyframes alaska-glyph-spin {
+	to { transform: rotate(360deg); }
+}
+
+@keyframes alaska-reasoning-pulse {
+	0%, 100% { opacity: 1; }
+	50%      { opacity: 0.7; }
+}
+
+@keyframes alaska-soft-pulse {
+	0%, 100% { opacity: 0.55; }
+	50%      { opacity: 1; }
+}
+
+@keyframes alaska-settings-fade-in {
+	from { opacity: 0; transform: translateY(4px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes alaska-line-shatter {
+	0%   { opacity: 1; transform: translateX(0); filter: blur(0); }
+	60%  { opacity: 0.35; transform: translateX(-4px); filter: blur(0.4px); }
+	100% { opacity: 0; transform: translateX(-14px); height: 0; padding: 0; line-height: 0; margin: 0; }
+}
+
+@keyframes alaska-line-add {
+	from { opacity: 0; transform: translateY(-3px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes alaska-line-ghost-in {
+	from { opacity: 0; transform: translateY(-3px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes alaska-line-freeze {
+	0%   { background: oklch(0.78 0.16 155 / .25); }
+	60%  { background: oklch(0.85 0.05 155 / .35); }
+	100% { background: transparent; color: var(--ink); }
+}
+
+.alaska-soft-pulse {
+	animation: alaska-soft-pulse 1.6s ease-in-out infinite;
+}
+
+.alaska-pane *::-webkit-scrollbar,
+.alaska-settings-root *::-webkit-scrollbar {
+	width: 4px;
+	height: 4px;
+	background: transparent;
+}
+
+.alaska-pane *:hover::-webkit-scrollbar,
+.alaska-settings-root *:hover::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.alaska-pane *::-webkit-scrollbar-thumb,
+.alaska-settings-root *::-webkit-scrollbar-thumb {
+	background-color: var(--line-2);
+	border-radius: 4px;
+}
+
+.alaska-pane *::-webkit-scrollbar-thumb:hover,
+.alaska-settings-root *::-webkit-scrollbar-thumb:hover {
+	background-color: var(--mute);
+}
+
+.alaska-pane *::-webkit-scrollbar-track,
+.alaska-settings-root *::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.alaska-pane *::-webkit-scrollbar-corner,
+.alaska-settings-root *::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
+.alaska-pane *::-webkit-scrollbar-button,
+.alaska-settings-root *::-webkit-scrollbar-button {
+	display: none;
+}
+
+.alaska-msg-pending {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 2px;
+	padding: 6px 10px;
+	border: 1px dashed var(--line-2);
+	border-radius: 6px;
+	background: var(--bg-2);
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	letter-spacing: 0.02em;
+}
+
+/* live elapsed-time badge in the "working" placeholder */
+.alaska-pending-elapsed {
+	margin-left: 2px;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: oklch(0.83 0.10 220 / .14);
+	color: var(--ice);
+	font-variant-numeric: tabular-nums;
+	font-size: 10.5px;
+}
+
+.alaska-msg-pending-dots {
+	display: inline-flex;
+	gap: 4px;
+}
+
+.alaska-msg-pending-dots span {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: var(--ice);
+	box-shadow: 0 0 4px var(--ice);
+	opacity: 0.4;
+	animation: alaska-pending-dot 1.2s ease-in-out infinite;
+}
+
+.alaska-msg-pending-dots span:nth-child(2) {
+	animation-delay: 0.15s;
+}
+
+.alaska-msg-pending-dots span:nth-child(3) {
+	animation-delay: 0.3s;
+}
+
+@keyframes alaska-pending-dot {
+	0%, 100% { opacity: 0.25; transform: scale(0.85); }
+	50%      { opacity: 1; transform: scale(1.15); }
+}
+
+.alaska-caret {
+	display: inline-block;
+	width: 7px;
+	height: 14px;
+	margin-left: 2px;
+	background: var(--ice);
+	vertical-align: -2px;
+	animation: alaska-caret-blink 1s steps(1) infinite;
+}
+
+@keyframes alaska-caret-blink {
+	50% { opacity: 0; }
+}
+
+@keyframes alaska-tree-pulse {
+	0%, 100% { background: oklch(0.78 0.16 155 / .10); }
+	50%      { background: oklch(0.78 0.16 155 / .22); }
+}
+
+body.alaska-shell .part.sidebar .monaco-list-row.alaska-reading,
+body.alaska-shell .part.sidebar .monaco-list-row[aria-label*="Xipher IDE is reading"],
+body.alaska-shell .part.sidebar .monaco-list-row[title*="Xipher IDE is reading"] {
+	animation: alaska-tree-pulse 1.2s ease-in-out infinite;
+}
+
+body.alaska-shell .part.sidebar .monaco-list-row.alaska-reading .label-name,
+body.alaska-shell .part.sidebar .monaco-list-row[aria-label*="Xipher IDE is reading"] .label-name {
+	color: var(--vscode-alaska-tree-readingForeground, var(--aurora));
+}
+
+@media (max-width: 1380px) {
+	.alaska-history-view {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	body.alaska-shell .alaska-msg,
+	body.alaska-shell .alaska-msg-reasoning-live,
+	body.alaska-shell .alaska-msg-pending-dots span,
+	body.alaska-shell .alaska-caret,
+	body.alaska-shell .alaska-activity-running .alaska-activity-icon,
+	body.alaska-shell .alaska-activity-pulse,
+	body.alaska-shell .alaska-stage-pulse,
+	body.alaska-shell .alaska-soft-pulse,
+	body.alaska-shell .part.sidebar .monaco-list-row.alaska-reading,
+	body.alaska-shell .part.sidebar .monaco-list-row[aria-label*="Xipher IDE is reading"] {
+		animation: none !important;
+		transition: none !important;
+	}
+}
+
+body.alaska-shell .alaska-mode-picker {
+	position: relative;
+	display: inline-flex;
+}
+
+body.alaska-shell .alaska-mode-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	background: var(--panel-2);
+	border: 1px solid var(--line-2);
+	border-radius: 4px;
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	cursor: pointer;
+	transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+body.alaska-shell .alaska-mode-button:hover {
+	background: var(--panel);
+	color: var(--ink);
+	border-color: var(--line);
+}
+
+body.alaska-shell .alaska-mode-button[data-mode="plan"] {
+	background: oklch(0.83 0.13 80 / .18);
+	border-color: oklch(0.83 0.13 80 / .55);
+	color: var(--ink);
+}
+
+body.alaska-shell .alaska-mode-button[data-mode="act"] {
+	background: oklch(0.83 0.10 220 / .18);
+	border-color: oklch(0.83 0.10 220 / .55);
+	color: var(--ink);
+}
+
+body.alaska-shell .alaska-mode-tag {
+	color: var(--mute);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+body.alaska-shell .alaska-mode-value {
+	color: var(--ink);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+body.alaska-shell .alaska-mode-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+	display: inline-block;
+}
+
+body.alaska-shell .alaska-mode-dot-chat {
+	background: var(--mute);
+}
+
+body.alaska-shell .alaska-mode-dot-plan {
+	background: #fbbf24;
+}
+
+body.alaska-shell .alaska-mode-dot-act {
+	background: var(--aurora);
+}
+
+body.alaska-shell .alaska-mode-menu {
+	position: absolute;
+	bottom: calc(100% + 6px);
+	left: 0;
+	width: 280px;
+	max-width: min(320px, 80vw);
+	background: var(--panel);
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.7);
+	padding: 4px;
+	z-index: 3500;
+}
+
+body.alaska-shell .alaska-mode-item {
+	gap: 10px;
+	align-items: flex-start;
+}
+
+body.alaska-shell .alaska-mode-item .alaska-menu-item-glyph.alaska-mode-dot {
+	width: 10px;
+	height: 10px;
+	margin-top: 6px;
+	border-radius: 50%;
+}
+
+body.alaska-shell .alaska-mode-banner {
+	padding: 10px 14px;
+	border-bottom: 1px solid var(--line);
+	background: linear-gradient(180deg, rgba(251, 191, 36, 0.07), transparent 95%);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+body.alaska-shell .alaska-mode-banner[data-mode="act"] {
+	background: linear-gradient(180deg, rgba(125, 211, 252, 0.06), transparent 95%);
+}
+
+body.alaska-shell .alaska-mode-banner-hidden {
+	display: none;
+}
+
+body.alaska-shell .alaska-mode-banner-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+body.alaska-shell .alaska-mode-banner-title-wrap {
+	flex: 1;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+body.alaska-shell .alaska-mode-banner-title {
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--ink-2);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+body.alaska-shell .alaska-mode-banner-exit {
+	padding: 3px 10px;
+	background: transparent;
+	border: 1px solid var(--line-2);
+	border-radius: 4px;
+	color: var(--ink-2);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	cursor: pointer;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+body.alaska-shell .alaska-mode-banner-exit:hover {
+	background: var(--panel-2);
+	color: var(--ink);
+}
+
+body.alaska-shell .alaska-mode-banner-hint {
+	margin: 0;
+	color: var(--mute);
+	font-size: 11.5px;
+	line-height: 1.5;
+}
+
+body.alaska-shell .alaska-plan-card {
+	border: 1px solid rgba(251, 191, 36, 0.3);
+	border-radius: 6px;
+	overflow: hidden;
+	background: rgba(251, 191, 36, 0.04);
+}
+
+body.alaska-shell .alaska-plan-card-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 8px 12px;
+	background: rgba(251, 191, 36, 0.08);
+	border-bottom: 1px solid rgba(251, 191, 36, 0.15);
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: #fbbf24;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+body.alaska-shell .alaska-plan-card-count {
+	color: var(--ink-2);
+	font-size: 10px;
+}
+
+body.alaska-shell .alaska-plan-card-preview {
+	padding: 8px 14px;
+	max-height: 280px;
+	overflow-y: auto;
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+body.alaska-shell .alaska-plan-card-preview ol,
+body.alaska-shell .alaska-plan-card-preview ul {
+	margin: 0;
+	padding-left: 22px;
+}
+
+body.alaska-shell .alaska-plan-card-preview li {
+	margin: 2px 0;
+}
+
+body.alaska-shell .alaska-plan-card-preview p {
+	margin: 6px 0;
+}
+
+body.alaska-shell .alaska-plan-card-actions {
+	display: flex;
+	gap: 6px;
+	padding: 8px 12px;
+	border-top: 1px solid rgba(251, 191, 36, 0.15);
+	flex-wrap: wrap;
+}
+
+body.alaska-shell .alaska-plan-card-approve:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+body.alaska-shell .alaska-act-card {
+	padding: 10px 12px;
+	border: 1px solid rgba(125, 211, 252, 0.3);
+	border-radius: 6px;
+	background: rgba(125, 211, 252, 0.04);
+}
+
+body.alaska-shell .alaska-act-card-heading {
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--ice);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 8px;
+}
+
+body.alaska-shell .alaska-act-progress-bar {
+	height: 4px;
+	background: rgba(255, 255, 255, 0.06);
+	border-radius: 2px;
+	overflow: hidden;
+	margin-bottom: 10px;
+}
+
+body.alaska-shell .alaska-act-progress-bar i {
+	display: block;
+	height: 100%;
+	background: linear-gradient(90deg, var(--ice), var(--aurora));
+	transition: width 0.3s ease;
+	font-style: normal;
+}
+
+body.alaska-shell .alaska-act-tasklist {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+body.alaska-shell .alaska-act-task {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	padding: 3px 0;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+body.alaska-shell .alaska-act-task-check {
+	flex-shrink: 0;
+	min-width: 18px;
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 11px;
+}
+
+body.alaska-shell .alaska-act-task[data-completed="true"] .alaska-act-task-check {
+	color: var(--aurora);
+}
+
+body.alaska-shell .alaska-act-task-desc {
+	flex: 1;
+	color: var(--ink);
+}
+
+body.alaska-shell .alaska-act-task[data-completed="true"] .alaska-act-task-desc {
+	color: var(--mute);
+	text-decoration: line-through;
+	text-decoration-thickness: 1px;
+}
+
+/* --- Alaska history per-session ⋯ menu (#17) --- */
+
+.alaska-history-item {
+	position: relative;
+}
+
+.alaska-history-more {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--mute);
+	cursor: pointer;
+	border-radius: 4px;
+	opacity: 0;
+	transition: opacity .12s ease, background .12s ease, color .12s ease;
+	font-size: 14px;
+	line-height: 1;
+	font-family: var(--font-mono);
+}
+
+.alaska-history-item:hover .alaska-history-more,
+.alaska-history-item.alaska-history-item-active .alaska-history-more,
+.alaska-history-more:focus-visible {
+	opacity: 1;
+}
+
+.alaska-history-more:hover,
+.alaska-history-more:focus-visible {
+	background: var(--panel-2);
+	color: var(--ink);
+	outline: none;
+}
+
+.alaska-history-menu {
+	z-index: 200;
+	min-width: 200px;
+	background: var(--panel);
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+	padding: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.alaska-history-menu-item {
+	background: transparent;
+	border: 0;
+	color: var(--ink);
+	font-family: var(--font-ui);
+	font-size: 12px;
+	text-align: left;
+	padding: 7px 10px;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.alaska-history-menu-item:hover,
+.alaska-history-menu-item:focus-visible {
+	background: var(--panel-2);
+	outline: none;
+}
+
+.alaska-history-menu-danger {
+	color: #f87171;
+}
+
+.alaska-history-menu-danger:hover {
+	background: rgba(248, 113, 113, 0.12);
+	color: #fca5a5;
+}
+
+.alaska-history-menu-sep {
+	height: 1px;
+	background: var(--line);
+	margin: 4px 4px;
+}
+
+/* --- Composer drag/drop overlay (#16) --- */
+
+.alaska-composer {
+	position: relative;
+}
+
+.alaska-composer.alaska-composer-dropping {
+	background: rgba(125, 211, 252, 0.06);
+	box-shadow: inset 0 0 0 2px var(--ice);
+	border-radius: 8px;
+}
+
+.alaska-composer.alaska-composer-dropping::after {
+	content: attr(data-drop-hint);
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	color: var(--ice);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* --- Inline mention dropdown (#19) --- */
+
+.alaska-mention-dropdown {
+	position: absolute;
+	bottom: calc(100% + 4px);
+	left: 8px;
+	right: 8px;
+	max-height: 280px;
+	overflow-y: auto;
+	background: #0e131b;
+	border: 1px solid var(--line-2);
+	border-radius: 8px;
+	box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+	padding: 4px;
+	z-index: 120;
+	display: none;
+}
+
+.alaska-mention-dropdown[data-open="true"] {
+	display: block;
+}
+
+.alaska-mention-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	border-radius: 4px;
+	cursor: pointer;
+	min-height: 24px;
+}
+
+.alaska-mention-item:hover,
+.alaska-mention-item-active {
+	background: var(--panel-2);
+}
+
+.alaska-mention-icon {
+	flex-shrink: 0;
+	color: var(--ice);
+	font-size: 14px;
+}
+
+.alaska-mention-label {
+	font-family: var(--font-mono);
+	font-size: 12px;
+	color: var(--ink);
+	flex-shrink: 0;
+}
+
+.alaska-mention-detail {
+	flex: 1;
+	margin-left: 8px;
+	color: var(--mute);
+	font-size: 10.5px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.alaska-mention-empty {
+	padding: 10px;
+	color: var(--mute);
+	font-size: 11px;
+	text-align: center;
+}
+
+/* --- Markdown enhancements (#18) --- */
+
+.alaska-msg-body .katex-display {
+	margin: 12px 0;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.alaska-msg-body .katex {
+	font-size: 1.05em;
+}
+
+.alaska-katex-error {
+	color: #f87171;
+	background: rgba(248, 113, 113, 0.08);
+	padding: 1px 4px;
+	border-radius: 3px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+}
+
+.alaska-mermaid {
+	background: var(--bg-2);
+	padding: 8px;
+	margin: 12px 0;
+	border-radius: 6px;
+	overflow-x: auto;
+}
+
+.alaska-mermaid svg {
+	display: block;
+	margin: 0 auto;
+	max-width: 100%;
+}
+
+.alaska-mermaid-pending {
+	color: var(--mute);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	padding: 12px;
+	text-align: center;
+}
+
+.alaska-mermaid-error {
+	color: #f87171;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	padding: 12px;
+}
+
+.alaska-callout {
+	margin: 12px 0;
+	padding: 10px 14px;
+	border-left: 3px solid var(--mute);
+	background: var(--panel-2);
+	border-radius: 4px;
+}
+
+.alaska-callout-note,
+.alaska-callout-info {
+	border-left-color: var(--ice);
+	background: rgba(125, 211, 252, 0.06);
+}
+
+.alaska-callout-tip,
+.alaska-callout-success {
+	border-left-color: var(--aurora);
+	background: rgba(74, 222, 128, 0.06);
+}
+
+.alaska-callout-warning {
+	border-left-color: #fbbf24;
+	background: rgba(251, 191, 36, 0.06);
+}
+
+.alaska-callout-danger {
+	border-left-color: #f87171;
+	background: rgba(248, 113, 113, 0.06);
+}
+
+.alaska-callout-title {
+	font-weight: 600;
+	margin-bottom: 6px;
+	color: var(--ink);
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.alaska-callout-title-icon {
+	font-family: var(--font-mono);
+}
+
+.alaska-callout-body > :last-child {
+	margin-bottom: 0;
+}
+
+/* --- Orphan code block recovery banner --- */
+
+.alaska-orphan-banner {
+	margin: 12px 0 4px;
+	padding: 12px 14px;
+	background: rgba(251, 191, 36, 0.06);
+	border: 1px solid rgba(251, 191, 36, 0.30);
+	border-radius: 6px;
+}
+
+.alaska-orphan-banner-heading {
+	font-weight: 600;
+	color: #fbbf24;
+	margin-bottom: 4px;
+	font-size: 12.5px;
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.alaska-orphan-banner-heading::before {
+	content: "⚠";
+	font-family: var(--font-mono);
+}
+
+.alaska-orphan-banner-subtitle {
+	color: var(--ink-2);
+	font-size: 11.5px;
+	margin-bottom: 10px;
+	line-height: 1.4;
+}
+
+.alaska-orphan-list {
+	list-style: none;
+	margin: 0 0 10px;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.alaska-orphan-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	background: var(--panel-2);
+	border: 1px solid var(--line);
+	border-radius: 4px;
+}
+
+.alaska-orphan-item-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.alaska-orphan-item-path {
+	font-family: var(--font-mono);
+	font-size: 12px;
+	color: var(--ink);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.alaska-orphan-item-meta {
+	color: var(--mute);
+	font-size: 10.5px;
+	font-family: var(--font-mono);
+}
+
+.alaska-orphan-save-btn,
+.alaska-orphan-copy-btn {
+	padding: 4px 10px;
+	border-radius: 4px;
+	border: 1px solid var(--line-2);
+	background: transparent;
+	color: var(--ink-2);
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.alaska-orphan-save-btn {
+	background: var(--ice);
+	color: #0a0d13;
+	border-color: var(--ice);
+	font-weight: 600;
+	max-width: 220px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.alaska-orphan-save-btn:hover:not(:disabled) {
+	background: var(--aurora);
+	border-color: var(--aurora);
+}
+
+.alaska-orphan-save-btn:disabled {
+	opacity: 0.6;
+	cursor: progress;
+}
+
+.alaska-orphan-save-btn.alaska-orphan-saved {
+	background: var(--aurora);
+	border-color: var(--aurora);
+	color: #0a0d13;
+	cursor: default;
+}
+
+.alaska-orphan-copy-btn:hover {
+	background: var(--panel);
+	color: var(--ink);
+	border-color: var(--line-2);
+}
+
+.alaska-orphan-retry-btn {
+	width: 100%;
+	padding: 6px 10px;
+	background: transparent;
+	border: 1px dashed rgba(251, 191, 36, 0.40);
+	color: #fbbf24;
+	cursor: pointer;
+	border-radius: 4px;
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	transition: background 120ms ease;
+}
+
+.alaska-orphan-retry-btn:hover {
+	background: rgba(251, 191, 36, 0.08);
+}
+
+/* ============================================================
+   Composer redesign — unified rounded card (Kiro-style) + model credits
+   ============================================================ */
+.alaska-composer {
+	margin: 8px 10px 10px;
+	padding: 8px 8px 6px;
+	border: 1px solid var(--line-2);
+	border-top: 1px solid var(--line-2);
+	border-radius: 12px;
+	background: var(--panel);
+	transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.alaska-composer:focus-within {
+	border-color: var(--ice);
+	box-shadow: 0 0 0 3px oklch(0.83 0.10 220 / .10);
+}
+.alaska-composer-input {
+	border: none;
+	background: transparent;
+	padding: 4px 6px 2px;
+	min-height: 46px;
+	font-family: var(--font-ui);
+	font-size: 13px;
+	line-height: 1.5;
+}
+.alaska-composer-input:focus { border: none; box-shadow: none; }
+.alaska-composer-bar { padding: 2px 2px 0; gap: 8px; }
+.alaska-composer-send-row { padding-top: 8px; }
+
+/* model dropdown: name ...… credit multiplier / lock, right-aligned */
+.alaska-model-item-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+}
+.alaska-model-item-meta {
+	margin-left: auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex: none;
+}
+.alaska-model-credit {
+	font-size: 11px;
+	color: var(--mute);
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.alaska-model-lock {
+	font-size: 11px;
+	color: var(--warn);
+	white-space: nowrap;
+	text-transform: capitalize;
+}
+.alaska-model-item-locked { opacity: .5; cursor: not-allowed; }
+.alaska-model-item-locked:hover { background: transparent; }

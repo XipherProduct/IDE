@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>О нас — ALaska.ai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+
+<canvas class="snow-canvas" id="snow"></canvas>
+
+<div class="aurora-bg" aria-hidden="true">
+  <svg viewBox="0 0 1600 900" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="aur1" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.78 0.16 155)" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="oklch(0.78 0.16 155)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="aur2" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.72 0.14 195)" stop-opacity=".65"/>
+        <stop offset="100%" stop-color="oklch(0.72 0.14 195)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="aur3" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.72 0.18 330)" stop-opacity=".4"/>
+        <stop offset="100%" stop-color="oklch(0.72 0.18 330)" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="aur-blur"><feGaussianBlur stdDeviation="40"/></filter>
+    </defs>
+    <g filter="url(#aur-blur)">
+      <path fill="url(#aur1)">
+        <animate attributeName="d" dur="14s" repeatCount="indefinite" values="M0,260 C320,160 560,320 880,200 C1200,80 1380,200 1600,140 L1600,0 L0,0 Z;M0,200 C300,300 600,140 920,240 C1240,340 1400,180 1600,260 L1600,0 L0,0 Z;M0,260 C320,160 560,320 880,200 C1200,80 1380,200 1600,140 L1600,0 L0,0 Z"/>
+      </path>
+      <path fill="url(#aur2)" opacity="0.85">
+        <animate attributeName="d" dur="18s" repeatCount="indefinite" values="M0,340 C260,260 540,420 880,300 C1200,180 1400,300 1600,260 L1600,0 L0,0 Z;M0,300 C280,400 560,240 900,360 C1240,480 1400,300 1600,380 L1600,0 L0,0 Z;M0,340 C260,260 540,420 880,300 C1200,180 1400,300 1600,260 L1600,0 L0,0 Z"/>
+      </path>
+      <path fill="url(#aur3)" opacity="0.5">
+        <animate attributeName="d" dur="22s" repeatCount="indefinite" values="M0,440 C300,360 600,500 940,400 C1280,300 1440,420 1600,360 L1600,0 L0,0 Z;M0,400 C320,500 600,320 920,440 C1240,560 1400,400 1600,460 L1600,0 L0,0 Z;M0,440 C300,360 600,500 940,400 C1280,300 1440,420 1600,360 L1600,0 L0,0 Z"/>
+      </path>
+    </g>
+  </svg>
+</div>
+<div class="grain"></div>
+
+<div class="wrap" data-screen-label="04 About">
+
+  <nav class="top">
+    <a class="logo" href="Landing.html">
+      <span class="mark">
+        <svg viewBox="0 0 26 26" fill="none">
+          <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="currentColor" stroke-width="1.2" stroke-opacity=".35"></path>
+          <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".15"></path>
+          <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+        </svg>
+      </span>
+      <span><b>ALaska</b><span class="dot">.ai</span></span>
+    </a>
+    <ul>
+      <li><a href="Landing.html">Главная</a></li>
+      <li><a href="about.html" style="color:var(--ink)">О нас</a></li>
+      <li><a href="pricing.html">Цены</a></li>
+      <li><a href="download.html">Скачать</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="btn ghost" href="login.html">Войти</a>
+      <a class="btn primary" href="download.html">Скачать <span class="kbd">⇣</span></a>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="kicker">О нас</div>
+    <h1>IDE, которую <em>хочется иметь</em>.</h1>
+    <p class="lede">
+      Когда маркетинговый текст перестаёт что-то значить — мы пишем код. Этот раздел про то, кто и откуда.
+    </p>
+  </header>
+
+  <section class="about-block">
+    <p class="about-statement">
+      Alaska AI — это IDE, которую хочется иметь, когда маркетинговый текст перестаёт что-то значить. Мы сделали её потому что существующие ассистенты либо <em>забивают курсор предложениями</em>, либо весят <em>300 МБ как Electron-монстры</em>, либо живут на <em>продаже твоего кода модели</em>. Ни одного из этих вариантов мы не хотели.
+    </p>
+
+    <div class="about-cols">
+      <div>
+        <div class="kicker">Откуда</div>
+        <h2>Штаб-квартиры нет. <em>Работаем оттуда, где холодно.</em></h2>
+        <p>Команда распределена по Санкт-Петербургу, Минску и Рейкьявику. Лично встречаемся два раза в год. Всё остальное время — пишем код.</p>
+        <p style="color:var(--mute); font-size:14px; margin-top:18px">Если вам кажется, что распределённая команда из трёх городов не может сделать нормальную IDE — посмотрите, кто пишет ядро Linux.</p>
+      </div>
+
+      <div class="about-stats">
+        <div>
+          <div class="k">инженеров</div>
+          <div class="v">2</div>
+        </div>
+        <div>
+          <div class="k">регион</div>
+          <div class="v">EU + RU</div>
+        </div>
+        <div>
+          <div class="k">финансирование</div>
+          <div class="v">Клиенты <small>без VC</small></div>
+        </div>
+        <div>
+          <div class="k">открытых вакансий</div>
+          <div class="v">— <small>на сейчас</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-row">
+      <div class="map-card">
+        <div class="city">59°57′N · 30°19′E</div>
+        <h3 class="name">Санкт-Петербург</h3>
+        <p style="color:var(--ink-2); font-size:14px; line-height:1.55; margin:0 0 14px">Архитектура IDE, ядро редактора, индекс проекта. Ответственный за то, что бинарник весит 160 МБ, а не 720.</p>
+        <div class="meta">
+          <span>core / editor</span>
+          <span style="color:var(--ice)">— 11°C</span>
+        </div>
+      </div>
+      <div class="map-card">
+        <div class="city">53°54′N · 27°34′E</div>
+        <h3 class="name">Минск</h3>
+        <p style="color:var(--ink-2); font-size:14px; line-height:1.55; margin:0 0 14px">Чат, агенты, контекст. Тот человек, который объясняет ИИ, как читать ваш warehouse.ts без хождения по верхам.</p>
+        <div class="meta">
+          <span>chat / agents</span>
+          <span style="color:var(--ice)">— 4°C</span>
+        </div>
+      </div>
+      <div class="map-card">
+        <div class="city">64°08′N · 21°56′W</div>
+        <h3 class="name">Рейкьявик</h3>
+        <p style="color:var(--ink-2); font-size:14px; line-height:1.55; margin:0 0 14px">Инфраструктура и шлюз к OpenAI. Делает так, чтобы вам не приходилось трогать VPN ни одной клавишей.</p>
+        <div class="meta">
+          <span>infra / routing</span>
+          <span style="color:var(--ice)">— 2°C</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="border-top:1px solid var(--line); padding: 80px 0">
+    <div class="section-head">
+      <div>
+        <div class="section-tag">принципы</div>
+        <h2>На чём построено.</h2>
+      </div>
+      <p>Четыре правила, которые мы держим сами и которые видно в продукте. Не очень короткие, но честные.</p>
+    </div>
+
+    <div class="feature-wall">
+      <div class="cell span-6">
+        <div>
+          <div class="label"><span class="num">01</span>код — ваш</div>
+          <h3>Мы не обучаем модели на вашем коде.</h3>
+          <p>В модель уходят только те фрагменты, которые вы явно прикрепили к запросу. Локальный индекс остаётся на машине. Это аудируется — телеметрия видна изнутри редактора.</p>
+        </div>
+      </div>
+      <div class="cell span-6">
+        <div>
+          <div class="label"><span class="num">02</span>один файл</div>
+          <h3>Бинарник, а не «дистрибутив».</h3>
+          <p>160 МБ — это весь редактор. Без отдельных установщиков, серверов обновлений и фоновых демонов. Удалить = удалить файл.</p>
+        </div>
+      </div>
+      <div class="cell span-6">
+        <div>
+          <div class="label"><span class="num">03</span>совместимость</div>
+          <h3>Не ломаем то, что уже работает.</h3>
+          <p>Расширения VS Code, темы, devcontainers, Settings Sync, SSH. Открываете рабочий проект — вам не нужно ничего перенастраивать заново.</p>
+        </div>
+      </div>
+      <div class="cell span-6">
+        <div>
+          <div class="label"><span class="num">04</span>деньги</div>
+          <h3>Платите за то, что использовали.</h3>
+          <p>Без подписок-абонементов, привязанных к «активным сидам». Free, $12, $30, $60. Перенос неиспользованных кредитов на следующий месяц.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="border-top:1px solid var(--line); padding: 80px 0 40px; text-align: center">
+    <div class="kicker" style="justify-content:center; display:inline-flex">контакты</div>
+    <h2 style="font-size: clamp(28px, 3vw, 38px); font-weight:500; letter-spacing:-0.02em; margin: 14px 0 18px">
+      Напишите нам напрямую.
+    </h2>
+    <p style="color:var(--ink-2); margin:0 auto 30px; max-width: 50ch">
+      Без саппорт-форм и тикетов. Пишет два человека, отвечают тоже они.
+    </p>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+      <a class="btn primary" href="mailto:hello@alaska.ai">hello@alaska.ai</a>
+      <a class="btn" href="#">Telegram</a>
+      <a class="btn ghost" href="#">GitHub</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="cols">
+      <div>
+        <a class="logo" href="Landing.html" style="margin-bottom:14px">
+          <span class="mark">
+            <svg viewBox="0 0 26 26" fill="none">
+              <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="currentColor" stroke-width="1.2" stroke-opacity=".35"></path>
+              <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".15"></path>
+              <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+            </svg>
+          </span>
+          <span><b>ALaska</b><span style="color: var(--ice)">.ai</span></span>
+        </a>
+        <p style="color: var(--mute); font-size:13.5px; max-width: 32ch; margin:12px 0 0">IDE с встроенным ИИ. Холодный север, тёплый код.</p>
+      </div>
+      <div>
+        <h6>Продукт</h6>
+        <ul>
+          <li><a href="Landing.html">Лендинг</a></li>
+          <li><a href="pricing.html">Цены</a></li>
+          <li><a href="download.html">Скачать</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Аккаунт</h6>
+        <ul>
+          <li><a href="login.html">Войти</a></li>
+          <li><a href="register.html">Регистрация</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Контакты</h6>
+        <ul>
+          <li><a href="mailto:hello@alaska.ai">hello@alaska.ai</a></li>
+          <li><a href="#">Telegram</a></li>
+          <li><a href="#">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 ALaska Labs · все права защищены</span>
+      <span class="now">
+        <span class="dot-aur"></span>
+        Анкоридж · <span data-anch-time>—</span> · <span data-temp>−14°C</span>
+      </span>
+    </div>
+  </footer>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

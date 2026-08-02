@@ -1,0 +1,46 @@
+---
+title: Настройка
+description: Как настроить API-ключи и параметры Xipher IDE.
+order: 20
+---
+
+## Добавление API-ключей
+
+Запустите интерактивный мастер настройки:
+
+```bash
+xipher configure
+```
+
+Вам будет предложено ввести API-ключи для провайдеров, которые хотите использовать. Ключи хранятся безопасно в системном keyring (macOS Keychain, GNOME Keyring или Windows Credential Manager).
+
+## Поддерживаемые провайдеры
+
+| Провайдер | Переменная окружения | Получить ключ |
+|-----------|---------------------|---------------|
+| OpenAI | `OPENAI_API_KEY` | [platform.openai.com](https://platform.openai.com) |
+| Anthropic | `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) |
+| Google | `GOOGLE_API_KEY` | [aistudio.google.com](https://aistudio.google.com) |
+| DeepSeek | `DEEPSEEK_API_KEY` | [platform.deepseek.com](https://platform.deepseek.com) |
+| xAI | `XAI_API_KEY` | [console.x.ai](https://console.x.ai) |
+| Zhipu AI | `ZHIPU_API_KEY` | [open.bigmodel.cn](https://open.bigmodel.cn) |
+| Moonshot | `MOONSHOT_API_KEY` | [platform.moonshot.cn](https://platform.moonshot.cn) |
+
+## Переменные окружения
+
+Ключи также можно задать через переменные окружения:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+Ключи из keyring имеют приоритет над переменными окружения.
+
+## Модель по умолчанию
+
+Установите модель по умолчанию, чтобы пропустить выбор:
+
+```bash
+xipher configure --default-model claude-4-sonnet
+```

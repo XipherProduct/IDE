@@ -1,0 +1,82 @@
+---
+title: "Hello, Xipher IDE! Introducing Xipher IDE v0.4.0"
+description: "We're excited to announce Xipher IDE — a free, open-source tool that brings 75+ AI models to your terminal."
+date: "2026-04-19"
+author: "Xipher Team"
+tags: ["announcement", "release", "v0.4.0"]
+---
+
+## Welcome to Xipher IDE
+
+Today we're publicly launching **Xipher IDE v0.4.0** — the first public alpha of a tool we've been building to solve a frustration many developers share: the fragmentation of AI access.
+
+## The Problem
+
+If you work with AI models regularly, you probably:
+
+- Have browser tabs open for ChatGPT, Claude, and maybe Gemini
+- Pay for multiple subscriptions
+- Copy-paste between windows
+- Lost track of which conversation had that useful code snippet
+
+## Our Solution
+
+Xipher IDE gives you a **single terminal interface** for all major AI providers:
+
+```bash
+$ xipher
+Xipher IDE v0.4.0
+Select a model:
+  1. gpt-4o
+  2. claude-4-sonnet
+  3. gemini-2.5-pro
+  4. deepseek-r1
+  ...
+```
+
+No browser needed. Your API keys, stored securely in your system keyring. Real-time streaming responses you can cancel with `Ctrl+C`.
+
+## What's in v0.4.0?
+
+- **75+ models** from 7 providers (OpenAI, Anthropic, Google, DeepSeek, xAI, Zhipu, Moonshot)
+- **Secure key storage** using your OS keyring
+- **Live streaming** with cancel support
+- **Slash commands** — `/model`, `/system`, `/history`, `/clear`
+- **Cross-platform** — macOS, Linux, Windows
+
+## Get Started
+
+Install in one line:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xipher-pro/xipher-ide/main/install.sh | sh
+```
+
+Then configure your first provider:
+
+```bash
+xipher configure
+```
+
+And start chatting:
+
+```bash
+xipher
+```
+
+## What's Next
+
+We have an ambitious roadmap:
+
+- **Tool calling** — let models call functions
+- **/attach** — send files as context
+- **Multimodality** — images and other formats
+- **SQLite sessions** — persistent full-context sessions
+
+## It's Open Source
+
+Xipher IDE is MIT-licensed and free forever. We believe AI access should be open and developer-friendly.
+
+Check us out on [GitHub](https://github.com/xipher-pro/xipher-ide). Star the repo, open issues, and contribute!
+
+Happy chatting.

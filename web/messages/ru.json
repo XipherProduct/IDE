@@ -1,0 +1,301 @@
+{
+  "meta": {
+    "title": "Xipher IDE — 75+ AI моделей в одном терминале",
+    "description": "Единый CLI для ChatGPT, Claude, Gemini, DeepSeek, Grok, GLM и Kimi. Бесплатный, open-source."
+  },
+  "nav": {
+    "docs": "Документация",
+    "pricing": "Тарифы",
+    "blog": "Блог",
+    "download": "Скачать",
+    "account": "Кабинет",
+    "github": "GitHub"
+  },
+  "hero": {
+    "eyebrow": "Альфа · v0.4.0",
+    "title": "75+ AI моделей.\n7 провайдеров.\nОдин терминал.",
+    "subtitle": "Xipher IDE — бесплатный open-source инструмент для общения с ведущими AI-моделями прямо из терминала. Без браузера, без подписок на каждый сервис.",
+    "ctaPrimary": "Скачать для {os}",
+    "ctaSecondary": "GitHub",
+    "installTab": {
+      "macos": "macOS / Linux",
+      "windows": "Windows",
+      "go": "Go Install"
+    }
+  },
+  "terminal": {
+    "title": "Увидеть в действии",
+    "subtitle": "Xipher IDE в реальном времени"
+  },
+  "features": {
+    "title": "Всё, что нужно",
+    "subtitle": "Мощные возможности для продуктивной работы с AI",
+    "multiProvider": {
+      "title": "75+ моделей, 7 провайдеров",
+      "desc": "OpenAI, Anthropic, Google, DeepSeek, xAI, Zhipu, Moonshot — все доступны через единый интерфейс."
+    },
+    "secureKeys": {
+      "title": "Безопасное хранение ключей",
+      "desc": "API-ключи хранятся в системном keyring (macOS Keychain, GNOME Keyring, Windows Credential Manager)."
+    },
+    "streaming": {
+      "title": "Стриминг и отмена",
+      "desc": "Ответы стримятся в реальном времени. Ctrl+C для отмены без потери контекста."
+    },
+    "modelSwitcher": {
+      "title": "Переключение моделей на лету",
+      "desc": "Команда /model позволяет сменить модель прямо во время диалога."
+    },
+    "systemPrompt": {
+      "title": "Системные промпты",
+      "desc": "Задайте системный промпт через /system для настройки поведения модели."
+    },
+    "history": {
+      "title": "Постоянная история",
+      "desc": "Вся история диалогов сохраняется локально и доступна через /history."
+    }
+  },
+  "providers": {
+    "title": "Провайдеры",
+    "subtitle": "Один CLI — доступ ко всем ведущим AI-платформам",
+    "models": "Модели"
+  },
+  "quickstart": {
+    "title": "Быстрый старт",
+    "subtitle": "Установите Xipher IDE за 30 секунд",
+    "step1": "Установите CLI",
+    "step2": "Добавьте API-ключ",
+    "step3": "Начните диалог",
+    "addKeyCmd": "xipher configure",
+    "startCmd": "xipher"
+  },
+  "download": {
+    "title": "Скачать Xipher IDE",
+    "subtitle": "Выберите сборку для вашей платформы",
+    "goInstall": "Или через Go",
+    "checksums": "Контрольные суммы (SHA256)",
+    "size": "Размер",
+    "pageTitle": "Загрузки",
+    "pageSubtitle": "Все сборки Xipher IDE v{version}",
+    "verification": "Верификация",
+    "verificationDesc": "Проверьте целостность загрузки с помощью SHA256 контрольных сумм.",
+    "prerequisites": "Предварительные требования",
+    "linuxNote": "Linux: требуется libsecret для системного keyring."
+  },
+  "why": {
+    "title": "Почему Xipher IDE?",
+    "subtitle": "Сравнение подходов к работе с AI",
+    "webUi": {
+      "title": "Web UI",
+      "items": ["Отдельный браузер", "Платные подписки", "Копирование между окнами"]
+    },
+    "perProvider": {
+      "title": "CLI каждого провайдера",
+      "items": ["Разные CLI", "Разные API", "Нет единой истории"]
+    },
+    "xipher": {
+      "title": "Xipher IDE",
+      "items": ["Один терминал", "Свои ключи", "Единая история", "75+ моделей"]
+    }
+  },
+  "roadmap": {
+    "title": "Дорожная карта",
+    "subtitle": "Что мы планируем",
+    "items": [
+      { "title": "Tool Calling", "desc": "Вызов функций из моделей", "status": "planned" },
+      { "title": "/attach — прикрепление файлов", "desc": "Отправка файлов в контекст", "status": "planned" },
+      { "title": "Мультимодальность", "desc": "Изображения и другие форматы", "status": "planned" },
+      { "title": "SQLite сессии", "desc": "Персистентные сессии с полным контекстом", "status": "planned" }
+    ]
+  },
+  "cta": {
+    "title": "Готовы попробовать?",
+    "subtitle": "Скачайте Xipher IDE и начните работать с AI из терминала уже сегодня.",
+    "primary": "Скачать",
+    "secondary": "GitHub"
+  },
+  "pricing": {
+    "title": "Тарифы",
+    "subtitle": "Xipher IDE бесплатен и открыт. Hosted-тарифы в планах.",
+    "disclaimer": "Xipher IDE — бесплатный open-source проект. Hosted-тарифы появятся позже.",
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "навсегда",
+      "desc": "Open-source CLI, свои API-ключи",
+      "features": ["75+ моделей", "Все 7 провайдеров", "Безопасное хранение ключей", "Стриминг ответов", "История диалогов", "Обновления"]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "TBD",
+      "period": "",
+      "desc": "Управляемые ключи команды, приоритетная поддержка",
+      "features": ["Всё из Free", "Managed API-ключи", "Командный доступ", "Приоритетная поддержка", "Аналитика"]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Связаться",
+      "period": "",
+      "desc": "SSO, аудит-логи, SLA",
+      "features": ["Всё из Pro", "SSO/SAML", "Аудит-логи", "SLA", "Выделенный менеджер"]
+    }
+  },
+  "blog": {
+    "title": "Блог",
+    "subtitle": "Новости и статьи о Xipher IDE",
+    "readMore": "Читать далее",
+    "backToBlog": "Назад в блог",
+    "share": "Поделиться",
+    "readingTime": "{min} мин чтения",
+    "tags": "Теги"
+  },
+  "docs": {
+    "title": "Документация",
+    "subtitle": "Руководство по использованию Xipher IDE",
+    "onThisPage": "На этой странице",
+    "sidebar": {
+      "gettingStarted": "Начало работы",
+      "installation": "Установка",
+      "configuration": "Настройка",
+      "commands": "Команды",
+      "providers": "Провайдеры",
+      "troubleshooting": "Решение проблем"
+    }
+  },
+  "account": {
+    "meta": {
+      "title": "Личный кабинет",
+      "description": "MVP control center Xipher IDE с локальными настройками, провайдерами и mock-сессиями."
+    },
+    "eyebrow": "Frontend MVP",
+    "title": "Кабинет Xipher IDE",
+    "subtitle": "Минималистичный центр управления провайдерами, сессиями и локальными настройками для CLI-first workflows.",
+    "storageNotice": "MVP работает локально в браузере: без backend, auth и хранения raw API keys.",
+    "headerCard": {
+      "plan": "Текущий контур",
+      "connected": "Подключено провайдеров",
+      "sessions": "Сессии",
+      "lastSeen": "Последнее локальное обновление"
+    },
+    "tabs": {
+      "overview": "Обзор",
+      "providers": "Провайдеры",
+      "sessions": "Сессии",
+      "preferences": "Настройки"
+    },
+    "actions": {
+      "openProviders": "Провайдеры и ключи",
+      "openSessions": "Сессии",
+      "openPreferences": "Локальные настройки",
+      "createSession": "Новая mock-сессия",
+      "viewDetails": "Открыть детали",
+      "connect": "Подключить",
+      "disconnect": "Отключить",
+      "save": "Сохранить",
+      "reset": "Сбросить demo-данные",
+      "pin": "Закрепить",
+      "unpin": "Снять закрепление"
+    },
+    "overview": {
+      "welcome": "Привет, {name}",
+      "welcomeSubtitle": "Ваш локальный пульт Xipher IDE для CLI-first workflows, провайдеров и быстрых операционных действий без backend-слоя.",
+      "localOnly": "Browser-local only",
+      "planTitle": "Текущий план",
+      "planNote": "Hosted billing и managed controls ещё впереди. Пока это честный BYOK-поток поверх open-source CLI.",
+      "planFields": {
+        "workspace": "Контур",
+        "seats": "Seats",
+        "mode": "Режим"
+      },
+      "cards": {
+        "models": "Доступно моделей",
+        "requests": "Запросов за 30 дней",
+        "tokens": "Токенов за 30 дней",
+        "spend": "Оценка spend"
+      },
+      "providersTitle": "Статус провайдеров",
+      "providersDescription": "Активные подключения видны сразу, но raw key после ввода не сохраняется.",
+      "activityTitle": "Последняя активность",
+      "activityDescription": "Закрепления, статусы и краткий след последних AI-сессий.",
+      "emptyProviders": "Пока нет подключённых провайдеров. Добавьте безопасную маску ключа на вкладке Providers.",
+      "emptySessions": "Сессий пока нет. Создайте локальный draft и проверьте flow."
+    },
+    "providers": {
+      "title": "Providers / Keys",
+      "subtitle": "Подключайте BYOK-провайдеров через UI. В localStorage пишется только безопасная маска и last4, но не raw secret.",
+      "connected": "Подключён",
+      "disconnected": "Не подключён",
+      "models": "Модели",
+      "updated": "Обновлено",
+      "maskedKey": "Маска ключа",
+      "keyLabel": "Добавить или обновить ключ",
+      "keyPlaceholder": "Вставьте API key. Сохранится только безопасная маска.",
+      "safeStorage": "Raw key не сохраняется. После подтверждения остаётся только маска и безопасный fingerprint.",
+      "openWebsite": "Сайт провайдера",
+      "last4": "last4 {value}"
+    },
+    "sessions": {
+      "title": "Recent sessions",
+      "subtitle": "Локальная витрина последних AI-диалогов с пинами, статусами и деталями по каждому проходу.",
+      "filters": {
+        "all": "Все",
+        "pinned": "Закреплённые",
+        "active": "Активные"
+      },
+      "provider": "Провайдер",
+      "updated": "Обновлено",
+      "messages": "Сообщения",
+      "tokens": "Токены",
+      "noResults": "Под выбранный фильтр сессий пока нет.",
+      "dialog": {
+        "pinned": "Закреплена",
+        "metrics": "Метрики"
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "subtitle": "Локальные настройки кабинета, стартовой вкладки и предпочтительного режима работы.",
+      "profileTitle": "Профиль и поведение",
+      "profileSubtitle": "Настройки сохраняются только в localStorage текущего браузера.",
+      "name": "Имя пользователя",
+      "email": "Email-заглушка",
+      "emailHint": "Используется только как локальный placeholder без auth-потока.",
+      "defaultModel": "Модель по умолчанию",
+      "appearance": "Theme preference",
+      "density": "Плотность интерфейса",
+      "homeTab": "Стартовая вкладка",
+      "saveHint": "Сохраняется в localStorage этого браузера и переживает reload.",
+      "saved": "Локальные настройки сохранены.",
+      "appearanceOptions": {
+        "dark": "Polar dark",
+        "light": "Ice light"
+      },
+      "densityOptions": {
+        "cozy": "Cozy",
+        "compact": "Compact"
+      }
+    },
+    "status": {
+      "live": "Live",
+      "idle": "Idle",
+      "review": "Needs review",
+      "alpha": "Alpha"
+    },
+    "common": {
+      "connectedProviders": "{count} из {total} провайдеров подключено",
+      "updated": "Обновлено {date}"
+    }
+  },
+  "footer": {
+    "product": "Продукт",
+    "resources": "Ресурсы",
+    "legal": "Юридическое",
+    "copyright": "© 2026 Xipher IDE. Open Source.",
+    "builtWith": "Построен с ❄️ в CLI"
+  },
+  "notFound": {
+    "title": "404",
+    "desc": "Страница не найдена. Может, она замёрзла?",
+    "backHome": "На главную"
+  }
+}

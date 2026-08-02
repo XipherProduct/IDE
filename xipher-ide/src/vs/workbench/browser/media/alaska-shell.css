@@ -1,0 +1,1346 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
+ *  Alaska AI - shell shape + animated backdrop layers
+ *
+ *  Three fixed-position layers sit behind the workbench grid:
+ *    .bg-topo   slow-panning SVG topographic line drawing
+ *    .bg-aurora soft animated gradient blob (top of viewport)
+ *    .bg-noise  static radial-dot grain overlay
+ *
+ *  The workbench itself gets a 14px viewport margin, 10px rounded corners,
+ *  a deep shadow, and a 1px line-2 border so it floats over the backdrop.
+ *
+ *  DOM is injected by layout.ts during workbench bootstrap.
+ *--------------------------------------------------------------------------------------------*/
+
+@font-face {
+	font-family: 'Onest';
+	font-style: normal;
+	font-weight: 300 700;
+	font-display: swap;
+	src: url('./fonts/onest-latin.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: 'Onest';
+	font-style: normal;
+	font-weight: 300 700;
+	font-display: swap;
+	src: url('./fonts/onest-latin-ext.woff2') format('woff2');
+	unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+	font-family: 'Onest';
+	font-style: normal;
+	font-weight: 300 700;
+	font-display: swap;
+	src: url('./fonts/onest-cyrillic.woff2') format('woff2');
+	unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+	font-family: 'Onest';
+	font-style: normal;
+	font-weight: 300 700;
+	font-display: swap;
+	src: url('./fonts/onest-cyrillic-ext.woff2') format('woff2');
+	unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./fonts/jetbrains-mono-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./fonts/jetbrains-mono-medium.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./fonts/jetbrains-mono-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./fonts/jetbrains-mono-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./fonts/jetbrains-mono-italic.woff2') format('woff2');
+}
+
+body.alaska-shell {
+	--alaska-bg: #06080c;
+	--alaska-bg-2: #0a0d13;
+	--alaska-panel: #0e131b;
+	--alaska-panel-2: #131a24;
+	--alaska-line: #1b2330;
+	--alaska-line-2: #28323f;
+	--alaska-ink: #ece5d3;
+	--alaska-ink-2: #a8a193;
+	--alaska-mute: #6f6a5e;
+	--alaska-ice: #7dd3fc;
+	--alaska-ice-2: #5fb8e0;
+	--alaska-aurora: #5cd6a8;
+	--alaska-aurora-2: #45b88a;
+	--alaska-magenta: #c8a2c8;
+	--alaska-warn: #e8c574;
+	--alaska-red: #e57d68;
+}
+
+.alaska-bg-topo,
+.alaska-bg-aurora,
+.alaska-bg-noise {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	user-select: none;
+}
+
+.alaska-bg-topo  { z-index: 0; }
+.alaska-bg-aurora{ z-index: 0; overflow: hidden; opacity: .42; }
+.alaska-bg-noise { z-index: 1;
+	background-image: radial-gradient(rgba(255,255,255,.028) 1px, transparent 1px);
+	background-size: 3px 3px;
+	opacity: .45;
+	mix-blend-mode: overlay;
+}
+
+.alaska-bg-topo svg {
+	width: 200%;
+	height: 200%;
+	opacity: .22;
+	animation: alaska-topo-drift 240s linear infinite;
+}
+@keyframes alaska-topo-drift {
+	0%   { transform: translate(0, 0) }
+	100% { transform: translate(-50%, -25%) }
+}
+
+.alaska-bg-aurora svg {
+	width: 110%;
+	height: 75%;
+}
+
+/* === SHELL ============================================================
+	Workbench fills the BrowserWindow edge-to-edge. The 14px aurora gap
+	that the mockup shows on the desktop backdrop cannot exist inside an
+	Electron window — the OS WM (KWin/mutter) draws its native decoration
+	in that gap regardless of frame:false. Aurora and topo backdrop paint
+	AS the workbench background, not around it.
+======================================================================= */
+body.alaska-shell .monaco-workbench {
+	position: fixed !important;
+	inset: 0 !important;
+	width: 100vw !important;
+	height: 100vh !important;
+	border: none;
+	border-radius: 0;
+	overflow: hidden;
+	z-index: 2;
+}
+
+body.alaska-shell {
+	background: #06080c;
+}
+
+/* =====================================================================
+	IDE-3 — TITLEBAR
+	Match the mockup: 42px tall row, logo (left) + center menu tabs +
+	user pill (right). The actual menu bar items get spacing / hover
+	tuning so they look like the IDE.html .top-tab buttons.
+===================================================================== */
+body.alaska-shell .part.titlebar {
+	height: 48px !important;
+	min-height: 48px !important;
+	background: linear-gradient(180deg, #0a0d13 0%, #0e131b 100%);
+	border-bottom: 1px solid #1b2330;
+	padding: 0 14px 0 0;
+	font-family: "Onest", system-ui, sans-serif;
+	font-size: 13px;
+}
+body.alaska-shell .part.titlebar .titlebar-container {
+	height: 48px !important;
+	/* Column gap is honored by the Grid layout in titlebarpart.css. */
+	column-gap: 22px;
+}
+
+body.alaska-shell .part.titlebar .alaska-brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	font-size: 13.5px;
+	font-weight: 500;
+	letter-spacing: -0.005em;
+	color: #ece5d3;
+	flex-shrink: 0;
+	height: 100%;
+	width: 44px;
+	box-sizing: border-box;
+	padding: 0;
+	justify-content: center;
+	border-right: 1px solid #1b2330;
+	-webkit-app-region: no-drag;
+}
+body.alaska-shell .part.titlebar .alaska-brand-mark {
+	width: 22px;
+	height: 22px;
+	flex-shrink: 0;
+	display: inline-flex;
+}
+body.alaska-shell .part.titlebar .alaska-brand {
+	width: auto;
+	padding: 0 16px;
+	justify-content: flex-start;
+}
+body.alaska-shell .part.titlebar .alaska-brand-text {
+	display: inline-flex;
+}
+@media (max-width: 600px) {
+	/* titlebarpart.css forces .alaska-brand-text to inline-flex with !important,
+	so the collapse rule must also use !important to win the cascade. */
+	body.alaska-shell .part.titlebar .alaska-brand-text {
+		display: none !important;
+	}
+}
+body.alaska-shell .part.titlebar .alaska-brand-mark svg {
+	width: 100%;
+	height: 100%;
+}
+body.alaska-shell .part.titlebar .alaska-brand-text {
+	align-items: baseline;
+}
+body.alaska-shell .part.titlebar .alaska-brand-text b {
+	font-weight: 600;
+}
+body.alaska-shell .part.titlebar .alaska-brand-dot {
+	color: #7dd3fc;
+}
+
+/* Window title — hidden in alaska shell (menubar takes center) */
+body.alaska-shell .part.titlebar .window-title {
+	display: none;
+}
+
+/* App icon (Windows/Linux) — hidden in alaska shell, brand replaces it */
+body.alaska-shell .part.titlebar .window-appicon {
+	display: none;
+}
+
+/* Window controls (min / max / close) tinted to the theme accent, not dull gray. */
+body.alaska-shell .part.titlebar .window-controls-container > .window-icon {
+	color: #7dd3fc;
+}
+body.alaska-shell .part.titlebar.inactive .window-controls-container > .window-icon {
+	color: rgba(125, 211, 252, 0.5);
+}
+body.alaska-shell .part.titlebar .window-controls-container > .window-icon:hover {
+	color: #bfe9ff;
+	background-color: rgba(125, 211, 252, 0.18);
+}
+/* keep the conventional red close affordance */
+body.alaska-shell .part.titlebar .window-controls-container > .window-icon.window-close:hover {
+	color: #fff;
+	background-color: rgba(232, 17, 35, 0.9);
+}
+
+body.alaska-shell .part.titlebar .menubar {
+	gap: 2px;
+	height: auto;
+	min-width: 0;
+	order: unset;
+	flex-wrap: nowrap;
+}
+body.alaska-shell .part.titlebar .menubar .menubar-menu-button {
+	padding: 4px 12px;
+	border-radius: 5px;
+	font-size: 12px;
+	color: #a8a193;
+	transition: background .12s ease, color .12s ease;
+	height: auto;
+}
+body.alaska-shell .part.titlebar .menubar .menubar-menu-button:hover,
+body.alaska-shell .part.titlebar .menubar .menubar-menu-button.focused {
+	background: #0a0d13;
+	color: #ece5d3;
+}
+body.alaska-shell .part.titlebar .menubar .menubar-menu-button.open {
+	background: #131a24;
+	color: #ece5d3;
+	box-shadow: 0 0 0 1px #28323f inset;
+}
+body.alaska-shell .part.titlebar .menubar .menubar-menu-button[style*="visibility: hidden"] {
+	display: none;
+}
+body.alaska-shell .part.titlebar .window-title {
+	font-weight: 500;
+	letter-spacing: -0.005em;
+	color: #a8a193;
+}
+body.alaska-shell .part.titlebar .command-center {
+	min-height: 26px;
+	border-radius: 6px;
+	background: #0e131b;
+	border: 1px solid #28323f;
+}
+body.alaska-shell .part.titlebar .command-center:hover {
+	background: #131a24;
+	border-color: #28323f;
+}
+
+body.alaska-shell .part.titlebar .titlebar-right .alaska-user-pill-host {
+	position: relative;
+	display: flex;
+	align-items: center;
+	margin-left: 8px;
+}
+body.alaska-shell .alaska-user-pill {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 10px;
+	height: 36px;
+	padding: 4px 6px 4px 8px;
+	border-radius: 999px;
+	background: transparent;
+	border: 1px solid transparent;
+	color: #a8a193;
+	font-family: "Onest", system-ui, sans-serif;
+	cursor: pointer;
+	transition: background .15s ease, border-color .15s ease;
+	min-width: 0;
+	max-width: 100%;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+body.alaska-shell .alaska-user-pill:hover,
+body.alaska-shell .alaska-user-pill.open {
+	background: #0a0d13;
+	border-color: #1b2330;
+}
+body.alaska-shell .alaska-user-pill:active {
+	transform: scale(0.97);
+}
+body.alaska-shell .alaska-user-pill.signed-out {
+	padding: 7px 22px !important;
+	background: linear-gradient(180deg, rgba(125, 211, 252, 0.18), rgba(125, 211, 252, 0.08)) !important;
+	border-color: rgba(125, 211, 252, 0.45) !important;
+	color: #7dd3fc !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	letter-spacing: 0.01em;
+	box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.08) inset, 0 1px 14px rgba(125, 211, 252, 0.14);
+}
+body.alaska-shell .alaska-user-pill.signed-out:hover {
+	background: linear-gradient(180deg, rgba(125, 211, 252, 0.30), rgba(125, 211, 252, 0.16)) !important;
+	border-color: rgba(125, 211, 252, 0.7) !important;
+	box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.12) inset, 0 0 18px rgba(125, 211, 252, 0.28);
+}
+body.alaska-shell .alaska-user-pill-signin {
+	font-weight: 600;
+}
+body.alaska-shell .alaska-user-pill-quota {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 11px;
+	color: #a8a193;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 5px 10px;
+	border: 1px solid #1b2330;
+	border-radius: 999px;
+	background: #0a0d13;
+	flex-shrink: 1;
+	min-width: 0;
+	height: 26px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+body.alaska-shell .alaska-user-pill-quota b {
+	color: #7dd3fc;
+	font-weight: 600;
+	letter-spacing: 0;
+}
+body.alaska-shell .alaska-user-pill-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #5cd6a8;
+	box-shadow: 0 0 8px #5cd6a8;
+	flex-shrink: 0;
+}
+body.alaska-shell .alaska-user-pill-avatar {
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: rgba(125, 211, 252, 0.18);
+	border: 0;
+	color: #7dd3fc;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 11px;
+	font-weight: 600;
+	flex-shrink: 0;
+	line-height: 1;
+}
+body.alaska-shell .alaska-user-pill-caret {
+	color: #6f6a5e;
+	font-size: 10px;
+	margin-left: 2px;
+	margin-right: 2px;
+	flex-shrink: 0;
+	opacity: 0.6;
+	transition: transform .15s ease, opacity .15s ease;
+}
+body.alaska-shell .alaska-user-pill:hover .alaska-user-pill-caret,
+body.alaska-shell .alaska-user-pill.open .alaska-user-pill-caret {
+	opacity: 1;
+}
+@media (max-width: 720px) {
+	body.alaska-shell .alaska-user-pill-quota b {
+		display: none;
+	}
+}
+body.alaska-shell .alaska-user-pill.open .alaska-user-pill-caret {
+	transform: rotate(180deg);
+}
+
+body.alaska-shell .alaska-user-menu {
+	position: fixed;
+	box-sizing: border-box;
+	width: 296px;
+	max-width: calc(100vw - 16px);
+	background: #0e131b;
+	border: 1px solid #28323f;
+	border-radius: 12px;
+	box-shadow: 0 30px 70px -15px rgba(0,0,0,.75), 0 0 0 1px rgba(125,211,252,.05);
+	z-index: 3500;
+	overflow-y: auto;
+	overflow-x: hidden;
+	opacity: 0;
+	transform: translateY(-6px);
+	pointer-events: none;
+	transition: opacity .18s ease, transform .18s ease;
+	font-family: "Onest", system-ui, sans-serif;
+	overscroll-behavior: contain;
+	scrollbar-width: thin;
+	scrollbar-color: #28323f transparent;
+}
+body.alaska-shell .alaska-user-menu::-webkit-scrollbar {
+	width: 8px;
+}
+body.alaska-shell .alaska-user-menu::-webkit-scrollbar-track {
+	background: transparent;
+}
+body.alaska-shell .alaska-user-menu::-webkit-scrollbar-thumb {
+	background: #28323f;
+	border-radius: 4px;
+}
+body.alaska-shell .alaska-user-menu.show {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+body.alaska-shell .alaska-um-header {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	padding: 14px 16px 12px;
+	border-bottom: 1px solid #1b2330;
+}
+body.alaska-shell .alaska-um-avatar {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, rgba(125, 211, 252, 0.25), rgba(92, 214, 168, 0.15));
+	border: 1px solid #28323f;
+	color: #7dd3fc;
+	display: grid;
+	place-items: center;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 15px;
+	font-weight: 600;
+	flex-shrink: 0;
+}
+body.alaska-shell .alaska-um-id {
+	min-width: 0;
+}
+body.alaska-shell .alaska-um-name {
+	font-size: 13.5px;
+	color: #ece5d3;
+	font-weight: 500;
+	letter-spacing: -0.005em;
+}
+body.alaska-shell .alaska-um-email {
+	font-family: "JetBrains Mono", monospace;
+	font-size: 11px;
+	color: #6f6a5e;
+	margin-top: 2px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+body.alaska-shell .alaska-um-plan {
+	padding: 12px 16px 10px;
+	border-bottom: 1px solid #1b2330;
+	background: #0a0d13;
+}
+body.alaska-shell .alaska-um-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 11px;
+	color: #6f6a5e;
+	padding: 3px 0;
+}
+body.alaska-shell .alaska-um-row b {
+	color: #ece5d3;
+	font-weight: 500;
+}
+body.alaska-shell .alaska-um-row .ice {
+	color: #7dd3fc;
+	font-weight: 600;
+}
+body.alaska-shell .alaska-um-row.sub {
+	color: #6f6a5e;
+	opacity: .75;
+}
+body.alaska-shell .alaska-um-bar {
+	height: 4px;
+	background: rgba(255, 255, 255, .04);
+	border-radius: 2px;
+	overflow: hidden;
+	margin: 6px 0 4px;
+}
+body.alaska-shell .alaska-um-bar i {
+	display: block;
+	height: 100%;
+	width: 0;
+	background: linear-gradient(90deg, #7dd3fc, #5cd6a8);
+	border-radius: 2px;
+	transition: width .8s cubic-bezier(.2, .7, .2, 1);
+}
+body.alaska-shell .alaska-um-section {
+	padding: 4px 0;
+	border-bottom: 1px solid #1b2330;
+}
+body.alaska-shell .alaska-um-section:last-of-type {
+	border-bottom: none;
+}
+body.alaska-shell .alaska-um-item {
+	display: grid;
+	grid-template-columns: 20px 1fr auto;
+	gap: 10px;
+	align-items: center;
+	padding: 8px 16px;
+	font-size: 12.5px;
+	color: #a8a193;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background .12s ease, color .12s ease;
+}
+body.alaska-shell .alaska-um-item:hover {
+	background: #131a24;
+	color: #ece5d3;
+}
+body.alaska-shell .alaska-um-item .glyph {
+	color: #6f6a5e;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 13px;
+	text-align: center;
+}
+body.alaska-shell .alaska-um-item .ext {
+	color: #7dd3fc;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 11px;
+}
+body.alaska-shell .alaska-um-item.danger {
+	color: #e57d68;
+}
+body.alaska-shell .alaska-um-item.danger:hover {
+	background: rgba(229, 125, 104, 0.10);
+	color: #e57d68;
+}
+body.alaska-shell .alaska-um-item.danger .glyph {
+	color: #e57d68;
+}
+body.alaska-shell .alaska-um-foot {
+	padding: 8px 16px;
+	background: #0a0d13;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 10px;
+	color: #6f6a5e;
+	text-align: center;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+body.alaska-shell .monaco-workbench.alaska-signout-dim {
+	opacity: .18;
+	filter: blur(3px) saturate(.4);
+	transition: opacity .4s ease, filter .4s ease;
+}
+
+body.alaska-shell ~ .alaska-signout-toast,
+.alaska-signout-toast {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) scale(.96);
+	background: #0e131b;
+	border: 1px solid #7dd3fc;
+	border-radius: 12px;
+	padding: 22px 30px;
+	z-index: 9999;
+	box-shadow: 0 40px 80px -10px rgba(0, 0, 0, .8), 0 0 60px -10px rgba(125, 211, 252, .3);
+	text-align: center;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 12.5px;
+	color: #ece5d3;
+	opacity: 0;
+	transition: opacity .25s ease, transform .25s ease;
+	pointer-events: none;
+}
+.alaska-signout-toast.show {
+	opacity: 1;
+	transform: translate(-50%, -50%) scale(1);
+}
+.alaska-signout-toast .title {
+	color: #5cd6a8;
+	margin-bottom: 6px;
+	font-size: 13px;
+}
+.alaska-signout-toast .sub {
+	color: #6f6a5e;
+	font-size: 11px;
+	letter-spacing: .04em;
+}
+
+/* =====================================================================
+	IDE-4 — ACTIVITY BAR
+	44px column, transparent panel-2 hover, 2px ice line on the left of
+	the active item. Bottom group (Account / Settings) gets a thin
+	divider above it.
+===================================================================== */
+body.alaska-shell .part.activitybar {
+	background: #0a0d13;
+	border-right: 1px solid #1b2330;
+	width: 44px !important;
+	min-width: 44px;
+}
+body.alaska-shell .part.activitybar .composite-bar {
+	padding-top: 8px;
+}
+body.alaska-shell .part.activitybar .monaco-action-bar .action-item {
+	height: 32px;
+	width: 32px;
+	margin: 2px auto;
+	border-radius: 6px;
+	position: relative;
+	display: grid;
+	place-items: center;
+}
+body.alaska-shell .part.activitybar .monaco-action-bar .action-item .action-label {
+	color: #6f6a5e;
+	transition: color .15s ease, background-color .15s ease;
+	border-radius: 6px;
+	width: 32px;
+	height: 32px;
+	display: grid;
+	place-items: center;
+}
+body.alaska-shell .part.activitybar .monaco-action-bar .action-item:hover .action-label {
+	background: #131a24;
+	color: #a8a193;
+}
+body.alaska-shell .part.activitybar .monaco-action-bar .action-item.checked .action-label {
+	color: #ece5d3;
+	background: #131a24;
+}
+body.alaska-shell .part.activitybar .monaco-action-bar .action-item.checked::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 6px;
+	bottom: 6px;
+	width: 2px;
+	background: #7dd3fc;
+	border-radius: 0 2px 2px 0;
+	z-index: 3;
+}
+body.alaska-shell .part.activitybar .monaco-action-bar .badge .badge-content {
+	top: 3px;
+	right: 3px;
+	min-width: 14px;
+	height: 14px;
+	line-height: 14px;
+	padding: 0 4px;
+	border-radius: 7px;
+	background: #5cd6a8;
+	color: #04241a;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 9.5px;
+	font-weight: 700;
+	border: none !important;
+}
+body.alaska-shell .part.activitybar .monaco-action-bar .badge .codicon.badge-content {
+	font-size: 11px;
+}
+
+/* =====================================================================
+	Activity bar SVG icons — replace codicons with IDE.html paths.
+	We blank out the codicon font glyph and use mask-image for crisp 1:1
+	match with the mockup.
+===================================================================== */
+body.alaska-shell .part.activitybar .codicon-explorer-view-icon::before,
+body.alaska-shell .part.activitybar .codicon-search-view-icon::before,
+body.alaska-shell .part.activitybar .codicon-source-control-view-icon::before,
+body.alaska-shell .part.activitybar .codicon-run-view-icon::before,
+body.alaska-shell .part.activitybar .codicon-extensions-view-icon::before,
+body.alaska-shell .part.activitybar .codicon-settings-view-bar-icon::before,
+body.alaska-shell .part.activitybar .codicon-alaska-ai-view-icon::before,
+body.alaska-shell .part.activitybar .codicon-accounts-view-bar-icon::before {
+	content: '' !important;
+	display: inline-block;
+	width: 22px;
+	height: 22px;
+	background-color: currentColor;
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	-webkit-mask-size: 22px 22px;
+	mask-repeat: no-repeat;
+	mask-position: center;
+	mask-size: 22px 22px;
+}
+
+body.alaska-shell .part.activitybar .codicon-explorer-view-icon::before {
+	-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linejoin='round'><path d='M3 5h4l2 2h12v11a2 2 0 0 1-2 2H3z'/></svg>");
+	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linejoin='round'><path d='M3 5h4l2 2h12v11a2 2 0 0 1-2 2H3z'/></svg>");
+}
+
+body.alaska-shell .part.activitybar .codicon-search-view-icon::before {
+	-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><circle cx='11' cy='11' r='6'/><path d='m20 20-4-4'/></svg>");
+	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><circle cx='11' cy='11' r='6'/><path d='m20 20-4-4'/></svg>");
+}
+
+body.alaska-shell .part.activitybar .codicon-source-control-view-icon::before {
+	-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><circle cx='6' cy='6' r='2.5'/><circle cx='6' cy='18' r='2.5'/><circle cx='18' cy='14' r='2.5'/><path d='M6 9v6M8 18a4 4 0 0 0 4-4v-2a4 4 0 0 1 4-4'/></svg>");
+	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><circle cx='6' cy='6' r='2.5'/><circle cx='6' cy='18' r='2.5'/><circle cx='18' cy='14' r='2.5'/><path d='M6 9v6M8 18a4 4 0 0 0 4-4v-2a4 4 0 0 1 4-4'/></svg>");
+}
+
+body.alaska-shell .part.activitybar .codicon-run-view-icon::before {
+	-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><path d='M8 10v8a4 4 0 0 0 8 0v-8M8 10a4 4 0 0 1 8 0M8 10H4M16 10h4M5 14h3M16 14h3M5 18h3M16 18h3'/></svg>");
+	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><path d='M8 10v8a4 4 0 0 0 8 0v-8M8 10a4 4 0 0 1 8 0M8 10H4M16 10h4M5 14h3M16 14h3M5 18h3M16 18h3'/></svg>");
+}
+
+body.alaska-shell .part.activitybar .codicon-extensions-view-icon::before {
+	-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linejoin='round'><path d='M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v4a3 3 0 0 0 3 3h0a3 3 0 0 1-3-3v-4z'/></svg>");
+	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linejoin='round'><path d='M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v4a3 3 0 0 0 3 3h0a3 3 0 0 1-3-3v-4z'/></svg>");
+}
+
+body.alaska-shell .part.activitybar .codicon-alaska-ai-view-icon::before {
+	-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 18' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'><path d='M0,9 Q7.5,3 15,9 T30,9'/><path d='M0,9 Q7.5,5 15,9 T30,9' opacity='.55'/></svg>");
+	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 18' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'><path d='M0,9 Q7.5,3 15,9 T30,9'/><path d='M0,9 Q7.5,5 15,9 T30,9' opacity='.55'/></svg>");
+	-webkit-mask-size: 24px 18px;
+	mask-size: 24px 18px;
+}
+
+body.alaska-shell .part.activitybar .codicon-settings-view-bar-icon::before {
+	-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'/></svg>");
+	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'/></svg>");
+}
+
+body.alaska-shell .part.activitybar .codicon-accounts-view-bar-icon::before {
+	-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><circle cx='12' cy='12' r='9' opacity='.4'/><path d='M12 4 L13.5 12 L12 20 L10.5 12 Z' fill='black' stroke='none'/></svg>");
+	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><circle cx='12' cy='12' r='9' opacity='.4'/><path d='M12 4 L13.5 12 L12 20 L10.5 12 Z' fill='black' stroke='none'/></svg>");
+}
+
+/* =====================================================================
+	IDE-5 — SIDEBAR (Explorer + view shell)
+	Default width 240px (VS Code resizable, user can override). Title
+	header in monospace uppercase, smaller font, --ink-2 colour. Active
+	row gets a left 2px ice line + ice-tinted background.
+===================================================================== */
+body.alaska-shell .part.sidebar {
+	background: #0a0d13;
+	border-right: 1px solid #1b2330;
+}
+body.alaska-shell .part.sidebar .composite.title {
+	background: #0a0d13;
+	border-bottom: 1px solid #1b2330;
+	padding: 0 14px;
+	height: 30px;
+	min-height: 30px;
+}
+body.alaska-shell .part.sidebar .composite.title h2 {
+	font-family: "JetBrains Mono", monospace;
+	font-size: 10.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: #6f6a5e;
+	font-weight: 500;
+}
+body.alaska-shell .part.sidebar .pane-header {
+	background: #0a0d13;
+	border-top: 1px solid #1b2330;
+	border-bottom: 1px solid #1b2330;
+	height: 32px;
+	min-height: 32px;
+	padding: 0 14px;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 10.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: #6f6a5e;
+}
+body.alaska-shell .part.sidebar .pane-header:first-of-type {
+	border-top: none;
+}
+body.alaska-shell .part.sidebar .pane-header .actions {
+	visibility: visible;
+	opacity: 0.6;
+}
+body.alaska-shell .part.sidebar .pane-header:hover .actions {
+	opacity: 1;
+}
+body.alaska-shell .part.sidebar .monaco-list .monaco-list-row {
+	font-size: 12.5px;
+	line-height: 1.5;
+}
+body.alaska-shell .part.sidebar .monaco-list .monaco-list-row.focused.selected {
+	background: rgba(125, 211, 252, 0.12) !important;
+	box-shadow: inset 2px 0 0 #7dd3fc;
+}
+body.alaska-shell .part.sidebar .monaco-list .monaco-list-row:hover:not(.selected) {
+	background: #131a24 !important;
+}
+
+body.alaska-shell .part.sidebar .monaco-icon-label[class*="monaco-decoration-itemBadge-"]::after,
+body.alaska-shell .part.sidebar .monaco-icon-label .monaco-decoration-bubbleBadge::after {
+	font-family: "JetBrains Mono", monospace !important;
+	font-size: 10.5px !important;
+	font-weight: 600 !important;
+	padding: 1px 5px !important;
+	border-radius: 3px !important;
+	margin-right: 6px !important;
+	opacity: 0.95;
+	letter-spacing: 0;
+}
+
+body.alaska-shell .part.sidebar .monaco-list-row[class*="reading"] .monaco-icon-label,
+body.alaska-shell .part.sidebar .monaco-list-row[aria-label] .monaco-icon-label.alaska-reading {
+	animation: alaska-tree-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes alaska-tree-pulse {
+	0%, 100% { background: rgba(92, 214, 168, 0.10); }
+	50%      { background: rgba(92, 214, 168, 0.22); }
+}
+
+/* =====================================================================
+	IDE-6 — EDITOR TABS + BREADCRUMB
+	Tabs row: 32px tall, dark tab.inactive bg, active tab gets a 2px
+	ice top border + lifted background. Breadcrumb row: 30px,
+	monospace small text, muted color.
+===================================================================== */
+body.alaska-shell .part.editor .tabs-container {
+	height: 32px;
+	background: #0a0d13;
+	border-bottom: 1px solid #1b2330;
+}
+body.alaska-shell .part.editor .tab {
+	height: 32px;
+	min-height: 32px;
+	padding: 0 14px;
+	font-size: 12px;
+	color: #6f6a5e;
+	background: transparent;
+	border-right: 1px solid #1b2330;
+	position: relative;
+}
+body.alaska-shell .part.editor .tab.active {
+	background: #0e131b;
+	color: #ece5d3;
+}
+body.alaska-shell .part.editor .tab.active::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 2px;
+	background: #7dd3fc;
+}
+body.alaska-shell .part.editor .tab:hover:not(.active) {
+	background: #131a24;
+	color: #a8a193;
+}
+body.alaska-shell .part.editor .tab.dirty .tab-label {
+	position: relative;
+}
+body.alaska-shell .part.editor .tab.dirty .tab-label::before {
+	content: '●';
+	color: #e8c574;
+	font-size: 11px;
+	margin-right: 4px;
+	line-height: 1;
+	vertical-align: middle;
+}
+body.alaska-shell .part.editor .tab.dirty:not(:hover) .action-label.codicon-close::before {
+	content: "\ea71";
+}
+body.alaska-shell .part.editor .breadcrumbs-below-tabs {
+	background: #0a0d13;
+	border-bottom: 1px solid #1b2330;
+	height: 30px;
+	display: flex !important;
+	align-items: center;
+	position: relative;
+}
+body.alaska-shell .part.editor .breadcrumbs-control {
+	height: 30px !important;
+	background: transparent !important;
+	border-bottom: 0 !important;
+	padding: 0 14px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+body.alaska-shell .part.editor .breadcrumbs-control .monaco-breadcrumbs {
+	height: 30px !important;
+}
+body.alaska-shell .part.editor .breadcrumbs-control .monaco-breadcrumbs .monaco-breadcrumb-item {
+	font-family: "JetBrains Mono", monospace;
+	font-size: 11px;
+	color: #6f6a5e;
+	padding: 0 4px;
+	letter-spacing: 0;
+}
+body.alaska-shell .part.editor .breadcrumbs-control .monaco-breadcrumbs .monaco-breadcrumb-item.focused {
+	color: #ece5d3;
+	background: transparent !important;
+}
+body.alaska-shell .part.editor .breadcrumbs-control .monaco-breadcrumbs .monaco-breadcrumb-item:last-child {
+	color: #ece5d3;
+	font-weight: 500;
+}
+body.alaska-shell .part.editor .breadcrumbs-control .monaco-breadcrumbs .monaco-breadcrumb-item:last-child .label-name {
+	color: #ece5d3;
+}
+body.alaska-shell .part.editor .breadcrumbs-control .monaco-breadcrumbs .monaco-breadcrumb-item .codicon {
+	font-size: 11px;
+	color: #6f6a5e;
+}
+body.alaska-shell .part.editor .breadcrumbs-control .monaco-breadcrumbs .monaco-breadcrumb-item .codicon.codicon-chevron-right {
+	opacity: 0.4;
+	transform: scale(0.85);
+	margin: 0 1px;
+}
+
+/* =====================================================================
+	IDE-6b — AUX BAR (Chat panel + History column)
+	Mirrors the mockup `.chat` / `.history` columns: distinct background,
+	crisp 1px left edge that separates it from the editor, and a tall
+	composite.title row so it visually sits ABOVE the editor tabs row
+	instead of looking like a continuation of it.
+===================================================================== */
+body.alaska-shell .part.auxiliarybar {
+	background: #0e131b;
+	border-left: 1px solid #1b2330;
+}
+body.alaska-shell .part.auxiliarybar .composite.title {
+	background: #0a0d13;
+	border-bottom: 1px solid #1b2330;
+	height: 36px;
+	min-height: 36px;
+	padding: 0 14px;
+}
+body.alaska-shell .part.auxiliarybar .composite.title h2 {
+	font-family: "Onest", system-ui, sans-serif;
+	font-size: 13px;
+	font-weight: 500;
+	color: #ece5d3;
+	letter-spacing: -0.005em;
+	text-transform: none;
+}
+body.alaska-shell .part.auxiliarybar .composite.title .title-actions .action-item {
+	color: #6f6a5e;
+}
+body.alaska-shell .part.auxiliarybar .composite.title .title-actions .action-item:hover {
+	color: #ece5d3;
+	background: #131a24;
+	border-radius: 5px;
+}
+body.alaska-shell .part.auxiliarybar .pane-header {
+	background: transparent;
+	border-top: 1px solid #1b2330;
+	height: 24px;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 10.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: #6f6a5e;
+}
+body.alaska-shell .part.auxiliarybar .pane-header:first-of-type {
+	border-top: none;
+}
+body.alaska-shell .part.auxiliarybar .pane-body {
+	background: #0e131b;
+}
+
+/* =====================================================================
+	IDE-7 — PANEL (Terminal / Problems / Output)
+	Same dark scheme. Section headers in monospace uppercase to match
+	the sidebar look. Title bar height matches breadcrumb row.
+===================================================================== */
+body.alaska-shell .part.panel {
+	background: #06080c;
+	border-top: 1px solid #1b2330;
+}
+body.alaska-shell .part.panel .composite.title {
+	background: #0a0d13;
+	border-bottom: 1px solid #1b2330;
+	height: 30px;
+	min-height: 30px;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 10.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+}
+body.alaska-shell .part.panel .composite.title .title-actions .action-item {
+	color: #a8a193;
+}
+body.alaska-shell .part.panel .composite.title .title-actions .action-item.checked {
+	color: #ece5d3;
+	border-bottom: 2px solid #7dd3fc;
+}
+
+/* =====================================================================
+	IDE-8 — STATUSBAR
+	24px row, JetBrains Mono 10.5px, all items get a leading dot before
+	their label. Item hover gets a subtle panel-2 bg.
+===================================================================== */
+body.alaska-shell .part.statusbar {
+	height: 24px;
+	min-height: 24px;
+	background: #0a0d13;
+	border-top: 1px solid #1b2330;
+	padding: 0 14px;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 10.5px;
+	color: #a8a193;
+}
+body.alaska-shell .part.statusbar .statusbar-item {
+	padding: 0 8px;
+	min-height: 24px;
+	line-height: 24px;
+}
+body.alaska-shell .part.statusbar .statusbar-item:hover {
+	background: #131a24;
+}
+body.alaska-shell .part.statusbar .statusbar-item .codicon {
+	font-size: 11px;
+}
+body.alaska-shell .part.statusbar .statusbar-item[id="status.alaska.clock"] .codicon-circle-filled {
+	color: #5cd6a8;
+	text-shadow: 0 0 6px #5cd6a8;
+	font-size: 6px;
+	vertical-align: middle;
+	margin-right: 4px;
+}
+body.alaska-shell .part.statusbar .statusbar-item[id="status.alaska.clock"] {
+	color: #ece5d3;
+	letter-spacing: 0.04em;
+}
+
+/* =====================================================================
+	IDE — common token-glyph "dot-aurora" used inside many surfaces
+	(the small green pulse before "online" / "connected" labels).
+===================================================================== */
+body.alaska-shell .dot-aurora {
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	background: #5cd6a8;
+	border-radius: 50%;
+	box-shadow: 0 0 6px #5cd6a880;
+	vertical-align: middle;
+	margin-right: 6px;
+}
+
+/* =====================================================================
+	IDE — global tweaks that fall through to many surfaces:
+	- monospace var-overrides for codey UI (settings inputs, etc.)
+	- thinner scrollbars so the dense layout breathes
+===================================================================== */
+body.alaska-shell .monaco-workbench .monaco-scrollable-element > .scrollbar > .slider {
+	background: rgba(168, 161, 147, 0.30);
+}
+body.alaska-shell .monaco-workbench .monaco-scrollable-element > .scrollbar > .slider:hover {
+	background: rgba(168, 161, 147, 0.50);
+}
+
+/* Selection colour is set globally by the workbench style.ts so we
+	leave that alone. */
+
+/* =====================================================================
+	IDE-7-overlay — ALASKA CHAT
+	The full alaskaChat.css owns the chat layout. Here we only nudge
+	typography + spacing + tokens so it reads as part of the new
+	IDE.html mockup palette: cream text, JetBrains Mono for code,
+	ice accent on the send button, aurora pulse on connection dot.
+===================================================================== */
+body.alaska-shell .alaska-chat-shell {
+	background: #0e131b;
+	color: #ece5d3;
+	font-family: "Onest", system-ui, sans-serif;
+}
+body.alaska-shell .alaska-brand {
+	background: #0a0d13;
+	border-bottom: 1px solid #1b2330;
+	padding: 0 14px;
+	min-height: 36px;
+}
+body.alaska-shell .alaska-brand-text {
+	color: #ece5d3;
+	font-weight: 500;
+	font-size: 13px;
+	letter-spacing: -0.005em;
+}
+body.alaska-shell .alaska-chat-toolbar-btn,
+body.alaska-shell .alaska-composer-actions .alaska-button {
+	background: transparent;
+	border: 1px solid transparent;
+	color: #a8a193;
+	border-radius: 6px;
+	padding: 4px 10px;
+	font-size: 12px;
+	transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+body.alaska-shell .alaska-chat-toolbar-btn:hover,
+body.alaska-shell .alaska-composer-actions .alaska-button:hover {
+	background: #131a24;
+	border-color: #28323f;
+	color: #ece5d3;
+}
+body.alaska-shell .alaska-chat-toolbar-btn.active,
+body.alaska-shell .alaska-composer-actions .alaska-button.active {
+	background: rgba(125, 211, 252, 0.10);
+	color: #7dd3fc;
+	border-color: rgba(125, 211, 252, 0.35);
+}
+body.alaska-shell .alaska-composer {
+	background: #0a0d13;
+	border-top: 1px solid #1b2330;
+	padding: 10px 12px;
+}
+body.alaska-shell .alaska-composer textarea,
+body.alaska-shell .alaska-composer [contenteditable] {
+	background: #0e131b;
+	border: 1px solid #28323f;
+	color: #ece5d3;
+	border-radius: 6px;
+	padding: 8px 10px;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 12.5px;
+	min-height: 56px;
+	transition: border-color .12s ease;
+}
+body.alaska-shell .alaska-composer textarea:focus,
+body.alaska-shell .alaska-composer [contenteditable]:focus {
+	outline: none;
+	border-color: #7dd3fc;
+}
+body.alaska-shell .alaska-composer .alaska-button.alaska-button-send,
+body.alaska-shell .alaska-composer .alaska-button.send {
+	background: #7dd3fc;
+	color: #06121d;
+	font-weight: 600;
+	border-color: transparent;
+}
+body.alaska-shell .alaska-composer .alaska-button.alaska-button-send:hover,
+body.alaska-shell .alaska-composer .alaska-button.send:hover {
+	background: #a5e1ff;
+}
+body.alaska-shell .alaska-context-ribbon .alaska-chip,
+body.alaska-shell .alaska-composer-context .alaska-chip {
+	background: #131a24;
+	border: 1px solid #28323f;
+	color: #a8a193;
+	font-size: 11px;
+	border-radius: 999px;
+	padding: 2px 8px;
+}
+body.alaska-shell .alaska-msg {
+	display: grid;
+	grid-template-columns: 24px 1fr;
+	column-gap: 10px;
+	row-gap: 0;
+	animation: alaska-msg-in .35s cubic-bezier(.2, .7, .2, 1);
+}
+body.alaska-shell .alaska-msg::before {
+	grid-column: 1;
+	grid-row: 1 / span 99;
+	width: 24px;
+	height: 24px;
+	border-radius: 5px;
+	display: grid;
+	place-items: center;
+	flex-shrink: 0;
+	align-self: start;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 10.5px;
+	font-weight: 600;
+}
+body.alaska-shell .alaska-msg-user::before {
+	content: 'U';
+	background: #131a24;
+	color: #a8a193;
+	border: 1px solid #28323f;
+}
+body.alaska-shell .alaska-msg-assistant::before,
+body.alaska-shell .alaska-msg-error::before {
+	content: '';
+	background: #0a0d13 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 18'><path d='M0,9 Q7.5,3 15,9 T30,9' fill='none' stroke='%235cd6a8' stroke-width='1.4' stroke-linecap='round'/><path d='M0,9 Q7.5,5 15,9 T30,9' fill='none' stroke='%237dd3fc' stroke-width='1.4' stroke-linecap='round' opacity='0.8'/></svg>") center/16px no-repeat;
+	border: 1px solid #1b2330;
+}
+body.alaska-shell .alaska-msg-error::before {
+	border-color: #e57d68;
+}
+body.alaska-shell .alaska-msg > *:not(::before) {
+	grid-column: 2;
+}
+body.alaska-shell .alaska-msg-role {
+	grid-column: 2;
+}
+@keyframes alaska-msg-in {
+	from { opacity: 0; transform: translateY(6px) }
+	to   { opacity: 1; transform: translateY(0) }
+}
+
+body.alaska-shell .alaska-activity {
+	border-left: 1px solid #1b2330;
+	padding: 4px 0 4px 12px;
+	margin-top: 6px;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 11.5px;
+	color: #6f6a5e;
+	line-height: 1.6;
+}
+body.alaska-shell .alaska-activity-running .alaska-activity-icon {
+	color: #7dd3fc;
+	animation: alaska-glyph-spin 1s linear infinite;
+}
+body.alaska-shell .alaska-activity-ok .alaska-activity-icon {
+	color: #5cd6a8;
+}
+body.alaska-shell .alaska-activity-ok {
+	color: #a8a193;
+}
+body.alaska-shell .alaska-activity-err .alaska-activity-icon {
+	color: #e57d68;
+}
+body.alaska-shell .alaska-activity-err {
+	color: #e57d68;
+}
+
+@keyframes alaska-glyph-spin {
+	from { transform: rotate(0deg) }
+	to   { transform: rotate(360deg) }
+}
+
+body.alaska-shell .alaska-composer .alaska-button.alaska-button-send,
+body.alaska-shell .alaska-composer .alaska-button.send {
+	transition: transform .15s ease, background .12s ease;
+}
+body.alaska-shell .alaska-composer .alaska-button.alaska-button-send:active,
+body.alaska-shell .alaska-composer .alaska-button.send:active {
+	transform: scale(.96);
+}
+
+@media (max-width: 1380px) {
+	body.alaska-shell .alaska-history-panel,
+	body.alaska-shell .alaska-chat-history {
+		display: none !important;
+	}
+}
+
+/* Connection-status pill in chat header — animated aurora dot before label. */
+body.alaska-shell .alaska-chat-shell .connection-status::before,
+body.alaska-shell .alaska-chat-shell .alaska-connection-dot {
+	content: '';
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #5cd6a8;
+	box-shadow: 0 0 6px #5cd6a880;
+	margin-right: 6px;
+	vertical-align: middle;
+	animation: alaska-pulse 2.4s ease-in-out infinite;
+}
+@keyframes alaska-pulse {
+	0%, 100% { opacity: 1 }
+	50%      { opacity: 0.45 }
+}
+
+/* =====================================================================
+	IDE-RESP — Responsive breakpoints.
+	Chat (aux bar) stays user-controlled at every width: layoutService owns
+	visibility via setPartHidden, CSS must NOT use display:none !important
+	or the toggle commands silently break. Brand text and quota numbers
+	collapse via inverted defaults handled in their own sections above.
+	<=780px: sidebar auto-collapses (toggle-able from View menu)
+	<=600px: brand text → diamond only (in titlebar section)
+	<=560px: activity bar auto-collapses (toggle-able from View menu),
+	menubar gap tightens
+	<=720px: quota chip drops credit numbers (in pill section)
+===================================================================== */
+@media (max-width: 780px) {
+	body.alaska-shell .part.sidebar {
+		display: none;
+	}
+	body.alaska-shell .part.editor .breadcrumbs-control {
+		font-size: 10.5px;
+	}
+}
+@media (max-width: 560px) {
+	body.alaska-shell .part.activitybar {
+		display: none;
+	}
+	body.alaska-shell .part.titlebar .menubar {
+		gap: 0;
+	}
+	body.alaska-shell .part.titlebar .menubar .menubar-menu-button {
+		padding: 4px 6px;
+		font-size: 11px;
+	}
+}

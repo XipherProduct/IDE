@@ -1,0 +1,10 @@
+{
+  "name": "xipher-agent",
+  "version": "1.0.0",
+  "description": "Xipher Code daemon — pairs your machine to a Xipher account so the web agent can work in a local project (no IDE install).",
+  "type": "module",
+  "bin": { "xipher-agent": "bin/xipher-agent.mjs" },
+  "engines": { "node": ">=18" },
+  "files": ["bin", "lib"],
+  "license": "MIT"
+}

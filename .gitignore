@@ -1,0 +1,85 @@
+# ---- secrets / credentials ----
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+*credentials*
+*secret*
+data/
+**/data/site.json
+**/data/executors.json
+
+# ---- dependencies ----
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+
+# ---- build output ----
+out/
+out-*/
+dist/
+.build/
+.next/
+build/node_modules/
+coverage/
+*.tsbuildinfo
+*.vsix
+.node22/
+
+# ---- Electron / VS Code runtime profile (cookies, cache, session state) ----
+.dev-profile/
+.profile-oss/
+.vscode-test/
+.chat-simulation-data/
+cli/target/
+cli/openssl/
+
+# ---- local tool / editor state ----
+.claude/
+.codex/
+.cache
+.tmp/
+.DS_Store
+Thumbs.db
+npm-debug.log
+*.log
+
+# ---- test artifacts ----
+test-results/
+test-results.xml
+test-output.json
+test_data/
+*.snap.actual
+vscode.lsif
+vscode.db
+extensions/copilot/test/simulation/cache/
+
+# ---- packaged binaries / installers (too large for git) ----
+*.AppImage
+*.exe
+*.dll
+*.zip
+*.dmg
+*.deb
+*.rpm
+*.tar.gz
+*.pak
+*.bin
+*.dat
+*.node
+
+# ---- prebuilt desktop distributions & upstream copies ----
+VSCode-linux-x64/
+VSCode-win32-x64/
+IDE-src/
+vscode-1.118.1/
+recovered/
+
+# ---- stray ----
+%F
+product.overrides.json
+.git.disabled-for-monorepo/

@@ -1,0 +1,755 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* Part Element */
+.monaco-workbench .part.titlebar {
+	display: flex;
+	flex-direction: row;
+	box-shadow: var(--vscode-shadow-md);
+	min-height: 42px;
+}
+
+/* =====================================================================
+   Alaska AI — titlebar brand logo + 3-column layout overrides.
+   These rules are written here (in the core titlebar CSS, NOT in an
+   overlay) so they apply unconditionally regardless of whether the
+   alaska-shell body class has been wired up.
+===================================================================== */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left > .alaska-brand {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 12px;
+	font-family: "Onest", system-ui, sans-serif;
+	font-size: 16px;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+	color: #ece5d3;
+	flex-shrink: 0;
+	height: 100%;
+	padding: 0 10px;
+	position: relative;
+	z-index: 2500;
+	-webkit-app-region: no-drag;
+	white-space: nowrap;
+}
+.monaco-workbench .part.titlebar .alaska-brand-mark {
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.monaco-workbench .part.titlebar .alaska-brand-mark svg {
+	width: 28px;
+	height: 28px;
+	filter: drop-shadow(0 0 8px rgba(125, 211, 252, 0.45));
+}
+.monaco-workbench .part.titlebar .alaska-brand-text {
+	display: inline-flex !important;
+	flex-direction: row !important;
+	align-items: baseline !important;
+	color: #ece5d3 !important;
+	white-space: nowrap !important;
+	gap: 0 !important;
+	line-height: 1 !important;
+}
+.monaco-workbench .part.titlebar .alaska-brand-text b {
+	display: inline !important;
+	font-weight: 600 !important;
+	color: #ece5d3 !important;
+	font-size: 16px !important;
+	line-height: 1 !important;
+}
+.monaco-workbench .part.titlebar .alaska-brand-dot {
+	display: inline !important;
+	color: #7dd3fc !important;
+	font-weight: 600 !important;
+	font-size: 16px !important;
+	margin-left: 0 !important;
+	line-height: 1 !important;
+}
+
+/* Hide platform appicon — brand replaces it */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left > .window-appicon {
+	display: none !important;
+}
+
+/* User pill host — make sure it's visible and above drag region */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .alaska-user-pill-host {
+	display: inline-flex !important;
+	align-items: center;
+	position: relative;
+	z-index: 2500;
+	margin: 0 8px;
+	-webkit-app-region: no-drag;
+}
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .alaska-user-pill-host * {
+	-webkit-app-region: no-drag;
+}
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left > .alaska-brand,
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left > .alaska-brand * {
+	-webkit-app-region: no-drag;
+}
+.monaco-workbench .part.titlebar .alaska-user-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	height: 30px;
+	padding: 3px 4px 3px 10px;
+	border-radius: 999px;
+	background: transparent;
+	border: 1px solid transparent;
+	color: #a8a193;
+	font-family: "Onest", system-ui, sans-serif;
+	font-size: 12px;
+	cursor: pointer;
+	transition: background .15s ease, border-color .15s ease;
+}
+.monaco-workbench .part.titlebar .alaska-user-pill:hover,
+.monaco-workbench .part.titlebar .alaska-user-pill.open {
+	background: #0a0d13;
+	border-color: #1b2330;
+}
+.monaco-workbench .part.titlebar .alaska-user-pill.signed-out {
+	padding: 6px 18px !important;
+	background: linear-gradient(180deg, rgba(125, 211, 252, 0.15), rgba(125, 211, 252, 0.08)) !important;
+	border: 1px solid rgba(125, 211, 252, 0.45) !important;
+	color: #7dd3fc !important;
+	font-weight: 600 !important;
+	font-family: "Onest", system-ui, sans-serif !important;
+	font-size: 12px !important;
+	letter-spacing: 0.01em !important;
+	border-radius: 999px !important;
+	box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.06) inset, 0 1px 12px rgba(125, 211, 252, 0.10);
+}
+.monaco-workbench .part.titlebar .alaska-user-pill.signed-out:hover {
+	background: linear-gradient(180deg, rgba(125, 211, 252, 0.25), rgba(125, 211, 252, 0.14)) !important;
+	border-color: rgba(125, 211, 252, 0.7) !important;
+	box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.10) inset, 0 0 16px rgba(125, 211, 252, 0.25);
+}
+.monaco-workbench .part.titlebar .alaska-user-pill.signed-out .alaska-user-pill-signin {
+	font-weight: 600 !important;
+	color: #7dd3fc !important;
+}
+
+/* Hide window-title in the center (we put the menubar there) */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title {
+	display: none !important;
+}
+
+/* Menubar buttons — mockup .top-tab style, clickable (no-drag) */
+.monaco-workbench .part.titlebar .menubar {
+	display: flex !important;
+	flex-direction: row !important;
+	align-items: center !important;
+	height: 100% !important;
+	gap: 2px;
+	-webkit-app-region: no-drag;
+	flex-wrap: nowrap !important;
+	position: relative;
+	z-index: 100;
+}
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center {
+	align-items: center !important;
+	height: 100% !important;
+	position: relative;
+	z-index: 100;
+}
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left {
+	position: relative;
+	z-index: 100;
+}
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right {
+	position: relative;
+	z-index: 100;
+}
+.monaco-workbench .part.titlebar .menubar .menubar-menu-button {
+	position: relative;
+	z-index: 110;
+}
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-drag-region {
+	z-index: 1;
+}
+.monaco-workbench .part.titlebar .menubar .menubar-menu-button {
+	padding: 6px 16px !important;
+	border-radius: 6px;
+	font-family: "Onest", system-ui, sans-serif;
+	font-size: 13.5px;
+	font-weight: 500;
+	color: #a8a193;
+	height: auto;
+	min-height: 30px;
+	display: inline-flex;
+	align-items: center;
+	-webkit-app-region: no-drag;
+	transition: background .12s ease, color .12s ease;
+	letter-spacing: -0.005em;
+}
+.monaco-workbench .part.titlebar .menubar .menubar-menu-button:hover,
+.monaco-workbench .part.titlebar .menubar .menubar-menu-button.focused {
+	background: #0a0d13;
+	color: #ece5d3;
+}
+.monaco-workbench .part.titlebar .menubar .menubar-menu-button.open {
+	background: #131a24;
+	color: #ece5d3;
+	box-shadow: inset 0 0 0 1px #28323f;
+}
+
+/* Hamburger button (left zone, narrow mode only). Hidden by default and revealed
+   when BrowserTitlebarPart toggles `.is-narrow` on the part element below
+   the 800px width threshold. Click handler opens MenuId.MenubarMainMenu as a
+   context menu since the row-style menubar is uninstalled at narrow widths. */
+.monaco-workbench .part.titlebar .alaska-titlebar-hamburger {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	height: 30px;
+	min-width: 32px;
+	padding: 0 8px;
+	margin: 0 4px;
+	background: transparent;
+	border: 1px solid transparent;
+	color: inherit;
+	font-family: inherit;
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+	-webkit-app-region: no-drag;
+	border-radius: 6px;
+}
+.monaco-workbench .part.titlebar .alaska-titlebar-hamburger:hover,
+.monaco-workbench .part.titlebar .alaska-titlebar-hamburger:focus-visible {
+	background: var(--vscode-toolbar-hoverBackground, rgba(255, 255, 255, 0.08));
+	outline: none;
+}
+.monaco-workbench .part.titlebar.is-narrow .alaska-titlebar-hamburger {
+	display: inline-flex;
+}
+.monaco-workbench .part.titlebar.is-narrow .menubar {
+	display: none !important;
+}
+
+/* Alaska titlebar uses CSS Grid (brand auto / menubar 1fr / pill+controls auto).
+   Scoped via :has(.alaska-brand) so the auxiliary titlebar (no brand) keeps the
+   upstream flex layout. The minmax(0, 1fr) on the center column lets the menubar
+   shrink past its intrinsic size, so it clips inside its own zone instead of
+   pushing the right zone (pill + window-controls-container) off-screen. */
+.monaco-workbench .part.titlebar > .titlebar-container.has-center:has(> .titlebar-left > .alaska-brand) {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	grid-template-areas: "left center right";
+}
+.monaco-workbench .part.titlebar > .titlebar-container.has-center:has(> .titlebar-left > .alaska-brand) > .titlebar-left {
+	grid-area: left;
+	justify-content: flex-start;
+	gap: 12px;
+}
+.monaco-workbench .part.titlebar > .titlebar-container.has-center:has(> .titlebar-left > .alaska-brand) > .titlebar-center {
+	grid-area: center;
+	min-width: 0;
+	justify-content: center;
+	overflow: hidden;
+}
+.monaco-workbench .part.titlebar > .titlebar-container.has-center:has(> .titlebar-left > .alaska-brand) > .titlebar-right {
+	grid-area: right;
+	gap: 10px;
+}
+.monaco-workbench .part.titlebar > .titlebar-container.has-center:has(> .titlebar-left > .alaska-brand) > .titlebar-center > .menubar {
+	min-width: 0;
+}
+
+.monaco-workbench.mac .part.titlebar {
+	flex-direction: row-reverse;
+}
+
+/* Root Container */
+.monaco-workbench .part.titlebar > .titlebar-container {
+	box-sizing: border-box;
+	overflow: hidden;
+	flex-shrink: 1;
+	flex-grow: 1;
+	align-items: center;
+	justify-content: space-between;
+	user-select: none;
+	-webkit-user-select: none;
+	display: flex;
+	height: 100%;
+	width: 100%;
+}
+
+/* Account for zooming */
+.monaco-workbench .part.titlebar > .titlebar-container.counter-zoom {
+	zoom: calc(1.0 / var(--zoom-factor));
+}
+
+/* Platform specific root element */
+.monaco-workbench.mac .part.titlebar > .titlebar-container {
+	line-height: 22px;
+}
+
+.monaco-workbench.web .part.titlebar > .titlebar-container,
+.monaco-workbench.windows .part.titlebar > .titlebar-container,
+.monaco-workbench.linux .part.titlebar > .titlebar-container {
+	line-height: 22px;
+	justify-content: left;
+}
+
+.monaco-workbench.web.safari .part.titlebar,
+.monaco-workbench.web.safari .part.titlebar > .titlebar-container {
+	/* Must be scoped to safari due to #148851 */
+	/* Is required in safari due to #149476 */
+	overflow: visible;
+}
+
+/* Draggable region */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-drag-region {
+	top: 0;
+	left: 0;
+	display: block;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	-webkit-app-region: drag;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left,
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center,
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right {
+	display: flex;
+	height: 100%;
+	align-items: center;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container.has-center > .titlebar-left {
+	order: 0;
+	width: 20%;
+	flex-grow: 2;
+	justify-content: flex-start;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container.has-center > .titlebar-center {
+	order: 1;
+	width: 60%;
+	max-width: fit-content;
+	min-width: 0px;
+	margin: 0 10px;
+	/* flex-shrink: 10; */
+	justify-content: center;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container.has-center > .titlebar-right {
+	order: 2;
+	width: 20%;
+	min-width: min-content;
+	flex-grow: 2;
+	justify-content: flex-end;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container:not(.has-center) > .titlebar-left {
+	flex: 1 1 0%;
+	min-width: 0;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container:not(.has-center) > .titlebar-center {
+	display: none;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container:not(.has-center) > .titlebar-right {
+	flex: 0 0 auto;
+	padding-left: 16px; /* ensure there is some space between title and controls */
+}
+
+/* Window title text */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title {
+	flex: 0 1 auto;
+	font-size: 12px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.monaco-workbench.web .part.titlebar > .titlebar-container > .titlebar-center > .window-title,
+.monaco-workbench.windows .part.titlebar > .titlebar-container > .titlebar-center > .window-title,
+.monaco-workbench.linux .part.titlebar > .titlebar-container > .titlebar-center > .window-title {
+	cursor: default;
+}
+
+.monaco-workbench.linux .part.titlebar > .titlebar-container > .titlebar-center > .window-title {
+	font-size: inherit;
+	/* see #55435 */
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container .monaco-toolbar .actions-container {
+	gap: 4px;
+}
+
+/* Window Title Menu */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center {
+	z-index: 2500;
+	-webkit-app-region: no-drag;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center.hide {
+	visibility: hidden;
+}
+
+.monaco-workbench .part.titlebar.inactive > * {
+	opacity: 0.6;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center > .monaco-toolbar > .monaco-action-bar > .actions-container > .action-item > .action-label,
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center > .monaco-toolbar > .monaco-action-bar > .actions-container > .action-item.monaco-dropdown-with-primary .action-label {
+	color: var(--vscode-titleBar-activeForeground);
+}
+
+.monaco-workbench .part.titlebar.inactive > .titlebar-container > .titlebar-center > .window-title > .command-center > .monaco-toolbar > .monaco-action-bar > .actions-container > .action-item > .action-label,
+.monaco-workbench .part.titlebar.inactive > .titlebar-container > .titlebar-center > .window-title > .command-center > .monaco-toolbar > .monaco-action-bar > .actions-container > .action-item.monaco-dropdown-with-primary .action-label {
+	color: var(--vscode-titleBar-inactiveForeground);
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center > .monaco-toolbar > .monaco-action-bar > .actions-container > .action-item > .action-label {
+	color: inherit;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center {
+	display: flex;
+	align-items: stretch;
+	color: var(--vscode-commandCenter-foreground);
+	background-color: var(--vscode-commandCenter-background);
+	border: 1px solid var(--vscode-commandCenter-border);
+	overflow: hidden;
+	margin: 0 6px;
+	border-radius: var(--vscode-cornerRadius-medium);
+	height: 22px;
+	width: 38vw;
+	max-width: 600px;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center .action-item.command-center-quick-pick {
+	display: flex;
+	justify-content: start;
+	overflow: hidden;
+	margin: auto;
+	max-width: 600px;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center .action-item.command-center-quick-pick .search-icon {
+	font-size: 14px;
+	opacity: .8;
+	margin: auto 3px;
+	color: var(--vscode-commandCenter-foreground);
+}
+
+.monaco-workbench .part.titlebar.inactive > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center .action-item.command-center-quick-pick .search-icon {
+	color: var(--vscode-titleBar-inactiveForeground);
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center .action-item.command-center-quick-pick .search-label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Compact mode: left-aligned label, no icon, full width */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center .action-item.command-center-quick-pick.compact-mode {
+	margin: auto auto auto 0;
+	padding-left: 8px;
+	flex: 1;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center:has(.compact-mode) > .monaco-toolbar > .monaco-action-bar > .actions-container {
+	margin: 0;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center:has(.compact-mode) > .monaco-toolbar {
+	flex: 1;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center:has(.compact-mode) > .monaco-toolbar > .monaco-action-bar {
+	width: 100%;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center.multiple {
+	justify-content: flex-start;
+	padding: 0 12px;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center.multiple.active .action-label {
+	background-color: inherit;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center:only-child {
+	margin-left: 0; /* no margin if there is only the command center, without nav buttons */
+}
+
+.monaco-workbench .part.titlebar.inactive > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center {
+	color: var(--vscode-titleBar-inactiveForeground);
+	border-color: var(--vscode-commandCenter-inactiveBorder) !important;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center:HOVER {
+	color: var(--vscode-commandCenter-activeForeground);
+	background-color: var(--vscode-commandCenter-activeBackground);
+	border-color: var(--vscode-commandCenter-activeBorder);
+}
+
+/* Menubar */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left > .menubar {
+	/* move menubar above drag region as negative z-index on drag region cause greyscale AA */
+	z-index: 2500;
+	min-width: 36px;
+	flex-wrap: nowrap;
+	order: 2;
+}
+
+.monaco-workbench.web .part.titlebar > .titlebar-container > .titlebar-left > .menubar {
+	margin-left: 4px;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container.counter-zoom .menubar .menubar-menu-button > .menubar-menu-items-holder.monaco-menu-container,
+.monaco-workbench .part.titlebar > .titlebar-container.counter-zoom .monaco-toolbar .dropdown-action-container {
+	zoom: var(--zoom-factor); /* helps to position the menu properly when counter zooming */
+}
+
+/* Resizer */
+.monaco-workbench.windows .part.titlebar > .titlebar-container > .resizer,
+.monaco-workbench.linux .part.titlebar > .titlebar-container > .resizer {
+	-webkit-app-region: no-drag;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 4px;
+}
+
+.monaco-workbench.windows.fullscreen .part.titlebar > .titlebar-container > .resizer,
+.monaco-workbench.linux.fullscreen .part.titlebar > .titlebar-container > .resizer {
+	display: none;
+}
+
+/* App Icon */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left > .window-appicon {
+	width: 35px;
+	height: 100%;
+	position: relative;
+	z-index: 2500;
+	flex-shrink: 0;
+	order: 1;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left > .window-appicon:not(.codicon) {
+	background-image: url('../../../media/code-icon.svg');
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: 16px;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-left > .window-appicon.codicon {
+	line-height: 30px;
+}
+
+.monaco-workbench.fullscreen .part.titlebar > .titlebar-container > .titlebar-left > .window-appicon {
+	display: none;
+}
+
+/* Window Controls Container */
+.monaco-workbench .part.titlebar .window-controls-container {
+	display: flex;
+	flex-grow: 0;
+	flex-shrink: 0;
+	text-align: center;
+	z-index: 3000;
+	-webkit-app-region: no-drag;
+	width: 0px;
+	height: 100%;
+}
+
+.monaco-workbench.fullscreen .part.titlebar .window-controls-container {
+	display: none;
+	background-color: transparent;
+}
+
+/* Window Controls Container Web: Apply WCO environment variables (https://developer.mozilla.org/en-US/docs/Web/CSS/env#titlebar-area-x) */
+.monaco-workbench.web .part.titlebar .titlebar-right .window-controls-container {
+	width: calc(100vw - env(titlebar-area-width, 100vw) - env(titlebar-area-x, 0px));
+	height: env(titlebar-area-height, 35px);
+}
+
+.monaco-workbench.web .part.titlebar .titlebar-left .window-controls-container {
+	width: env(titlebar-area-x, 0px);
+	height: env(titlebar-area-height, 35px);
+}
+
+.monaco-workbench.web.mac .part.titlebar .titlebar-left .window-controls-container {
+	order: 0;
+}
+
+.monaco-workbench.web.mac .part.titlebar .titlebar-right .window-controls-container {
+	order: 1;
+}
+
+/* Window Controls Container Desktop: apply zoom friendly size */
+.monaco-workbench:not(.web):not(.mac) .part.titlebar .window-controls-container {
+	width: calc(138px / var(--zoom-factor, 1));
+}
+
+.monaco-workbench:not(.web):not(.mac) .part.titlebar .titlebar-container.counter-zoom .window-controls-container {
+	width: 138px;
+}
+
+.monaco-workbench.linux:not(.web) .part.titlebar .window-controls-container.wco-enabled {
+	width: calc(100vw - env(titlebar-area-width, 100vw) - env(titlebar-area-x, 0px));
+}
+
+.monaco-workbench:not(.web):not(.mac) .part.titlebar .titlebar-container:not(.counter-zoom) .window-controls-container * {
+	zoom: calc(1 / var(--zoom-factor, 1));
+}
+
+.monaco-workbench:not(.web).mac .part.titlebar .window-controls-container {
+	width: 70px;
+}
+
+/* Window Control Icons — Xipher: warm ink instead of flat gray, ice-tinted hover. */
+.monaco-workbench .part.titlebar .window-controls-container > .window-icon {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	width: 46px;
+	font-size: 16px;
+	color: #cfc8b7;
+	transition: color 120ms ease, background-color 120ms ease;
+}
+
+.monaco-workbench .part.titlebar.inactive .window-controls-container > .window-icon {
+	color: #8a8474;
+}
+
+.monaco-workbench .part.titlebar .window-controls-container > .window-icon::before {
+	height: 16px;
+	line-height: 16px;
+}
+
+.monaco-workbench .part.titlebar .window-controls-container > .window-icon:hover {
+	color: #ece5d3;
+	background-color: rgba(125, 211, 252, 0.16);
+}
+
+.monaco-workbench .part.titlebar.light .window-controls-container > .window-icon:hover {
+	background-color: rgba(0, 0, 0, 0.1);
+}
+
+.monaco-workbench .part.titlebar .window-controls-container > .window-icon.window-close:hover {
+	background-color: rgba(232, 17, 35, 0.9);
+}
+
+.monaco-workbench .part.titlebar .window-controls-container .window-icon.window-close:hover {
+	color: white;
+}
+
+/* Center-Adjacent Toolbar (e.g., update indicator) */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .center-adjacent-toolbar-container {
+	z-index: 2500;
+	-webkit-app-region: no-drag;
+	margin-right: auto;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .center-adjacent-toolbar-container.has-no-actions {
+	display: none;
+}
+
+/* Action Tool Bar Controls */
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container {
+	display: none;
+	padding-right: 4px;
+	flex-grow: 0;
+	flex-shrink: 0;
+	text-align: center;
+	position: relative;
+	z-index: 2500;
+	-webkit-app-region: no-drag;
+	height: 100%;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container {
+	margin-left: auto;
+}
+
+.monaco-workbench.mac:not(.web) .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container {
+	right: 8px;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container:not(.has-no-actions) {
+	display: flex;
+	justify-content: center;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container .codicon {
+	color: inherit;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container .monaco-action-bar .action-item {
+	display: flex;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container .monaco-action-bar .badge {
+	margin-left: 8px;
+	display: flex;
+	align-items: center;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container .monaco-action-bar .action-item.icon .badge {
+	margin-left: 0px;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container .monaco-action-bar .badge .badge-content {
+	padding: 3px 5px;
+	border-radius: 11px;
+	font-size: 9px;
+	min-width: 11px;
+	height: 16px;
+	line-height: 11px;
+	font-weight: normal;
+	text-align: center;
+	display: inline-block;
+	box-sizing: border-box;
+	position: relative;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container .monaco-action-bar .action-item.icon .badge.compact {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	margin: auto;
+	left: 0;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	z-index: 2;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container .monaco-action-bar .action-item.icon .badge.compact .badge-content::before {
+	mask-size: 12px;
+	-webkit-mask-size: 12px;
+	top: 2px;
+}
+
+.monaco-workbench .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container .monaco-action-bar .action-item.icon .badge.compact .badge-content {
+	position: absolute;
+	top: 10px;
+	right: 0px;
+	font-size: 9px;
+	font-weight: 600;
+	min-width: 12px;
+	height: 12px;
+	line-height: 12px;
+	padding: 0 2px;
+	border-radius: 16px;
+	text-align: center;
+}

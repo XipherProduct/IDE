@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Цены — ALaska.ai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+
+<canvas class="snow-canvas" id="snow"></canvas>
+
+<div class="aurora-bg" aria-hidden="true">
+  <svg viewBox="0 0 1600 900" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="aur1" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.78 0.16 155)" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="oklch(0.78 0.16 155)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="aur2" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.72 0.14 195)" stop-opacity=".65"/>
+        <stop offset="100%" stop-color="oklch(0.72 0.14 195)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="aur3" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.72 0.18 330)" stop-opacity=".4"/>
+        <stop offset="100%" stop-color="oklch(0.72 0.18 330)" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="aur-blur"><feGaussianBlur stdDeviation="40"/></filter>
+    </defs>
+    <g filter="url(#aur-blur)">
+      <path fill="url(#aur1)">
+        <animate attributeName="d" dur="14s" repeatCount="indefinite" values="M0,260 C320,160 560,320 880,200 C1200,80 1380,200 1600,140 L1600,0 L0,0 Z;M0,200 C300,300 600,140 920,240 C1240,340 1400,180 1600,260 L1600,0 L0,0 Z;M0,260 C320,160 560,320 880,200 C1200,80 1380,200 1600,140 L1600,0 L0,0 Z"/>
+      </path>
+      <path fill="url(#aur2)" opacity="0.85">
+        <animate attributeName="d" dur="18s" repeatCount="indefinite" values="M0,340 C260,260 540,420 880,300 C1200,180 1400,300 1600,260 L1600,0 L0,0 Z;M0,300 C280,400 560,240 900,360 C1240,480 1400,300 1600,380 L1600,0 L0,0 Z;M0,340 C260,260 540,420 880,300 C1200,180 1400,300 1600,260 L1600,0 L0,0 Z"/>
+      </path>
+      <path fill="url(#aur3)" opacity="0.5">
+        <animate attributeName="d" dur="22s" repeatCount="indefinite" values="M0,440 C300,360 600,500 940,400 C1280,300 1440,420 1600,360 L1600,0 L0,0 Z;M0,400 C320,500 600,320 920,440 C1240,560 1400,400 1600,460 L1600,0 L0,0 Z;M0,440 C300,360 600,500 940,400 C1280,300 1440,420 1600,360 L1600,0 L0,0 Z"/>
+      </path>
+    </g>
+  </svg>
+</div>
+<div class="grain"></div>
+
+<div class="wrap" data-screen-label="06 Pricing">
+
+  <nav class="top">
+    <a class="logo" href="Landing.html">
+      <span class="mark">
+        <svg viewBox="0 0 26 26" fill="none">
+          <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="currentColor" stroke-width="1.2" stroke-opacity=".35"></path>
+          <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".15"></path>
+          <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+        </svg>
+      </span>
+      <span><b>ALaska</b><span class="dot">.ai</span></span>
+    </a>
+    <ul>
+      <li><a href="Landing.html">Главная</a></li>
+      <li><a href="about.html">О нас</a></li>
+      <li><a href="pricing.html" style="color:var(--ink)">Цены</a></li>
+      <li><a href="download.html">Скачать</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="btn ghost" href="login.html">Войти</a>
+      <a class="btn primary" href="register.html">Создать аккаунт</a>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="kicker">Цены</div>
+    <h1>Платите за <em>токены</em>, а&nbsp;не за «безлимит».</h1>
+    <p class="lede">
+      Четыре плана. Кредиты — это просто доллары: пользуетесь моделями — расходуете, не пользуетесь — переносятся (на Max и Ultra). Без скрытых лимитов «активных сидов».
+    </p>
+  </header>
+
+  <!-- ============== PRICING CARDS ============== -->
+  <section>
+    <div class="price-grid">
+
+      <div class="price-card">
+        <div class="tier">Free</div>
+        <h3>Free</h3>
+        <p class="pitch">Начните с Alaska AI прямо в редакторе.</p>
+        <div class="amount">
+          <span class="num">$0</span>
+          <span class="per">навсегда</span>
+        </div>
+        <ul>
+          <li>$1 месячных кредитов</li>
+          <li>Только GPT 5.4 mini (1¢ за вызов)</li>
+          <li>Десктоп-чат Alaska AI</li>
+          <li>Контекст из активного файла</li>
+        </ul>
+        <div class="cta">
+          <a href="register.html">Начать бесплатно</a>
+        </div>
+      </div>
+
+      <div class="price-card featured">
+        <span class="badge">популярный</span>
+        <div class="tier">Pro</div>
+        <h3>Pro</h3>
+        <p class="pitch">Для повседневной работы.</p>
+        <div class="amount">
+          <span class="num">$12</span>
+          <span class="per">в месяц</span>
+        </div>
+        <ul>
+          <li>$12 месячных кредитов</li>
+          <li>Все модели открыты — 5.4 mini, 5.4, 5.5</li>
+          <li>GPT 5.5 — 3¢ за вызов</li>
+          <li>Перенос за +$3/мес</li>
+          <li>Приоритетная поддержка</li>
+        </ul>
+        <div class="cta">
+          <a href="register.html">Выбрать Pro →</a>
+        </div>
+      </div>
+
+      <div class="price-card">
+        <div class="tier">Max</div>
+        <h3>Max</h3>
+        <p class="pitch">Для интенсивной работы каждый день.</p>
+        <div class="amount">
+          <span class="num">$30</span>
+          <span class="per">в месяц</span>
+        </div>
+        <div class="rollover">перенос включён</div>
+        <ul>
+          <li>$30 месячных кредитов</li>
+          <li>Перенос включён — неиспользованное переходит на след. месяц</li>
+          <li>Больше выходных токенов (до 8k)</li>
+          <li>Всё из Pro</li>
+        </ul>
+        <div class="cta">
+          <a href="register.html">Выбрать Max</a>
+        </div>
+      </div>
+
+      <div class="price-card">
+        <div class="tier">Ultra</div>
+        <h3>Ultra</h3>
+        <p class="pitch">Максимальная месячная ёмкость.</p>
+        <div class="amount">
+          <span class="num">$60</span>
+          <span class="per">в месяц</span>
+        </div>
+        <div class="rollover">перенос включён</div>
+        <ul>
+          <li>$60 месячных кредитов</li>
+          <li>Перенос включён — лимит 2× месячного бюджета</li>
+          <li>Самый большой включённый лимит — для тяжёлых нагрузок</li>
+          <li>Всё из Max</li>
+        </ul>
+        <div class="cta">
+          <a href="register.html">Выбрать Ultra</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============== WEEKLY PLANNER ============== -->
+  <section style="padding-bottom: 80px">
+    <div class="planner" id="planner">
+      <div class="planner-head">
+        <div>
+          <div class="kicker">план на рабочую неделю</div>
+          <h2>Спланируйте <em>свою рабочую неделю</em>.</h2>
+          <p>Выберите дни, когда вы кодите, распределите недельный бюджет между ними и пропустите недели, когда вас нет. Дневная полоска — мягкая подсказка, единственный жёсткий потолок — недельная корзина.</p>
+        </div>
+        <div class="summary">
+          <span class="v" data-weekly-sum>$10.50</span>
+          <span class="k">бюджет на неделю</span>
+          <div style="margin-top:14px">
+            <span class="v" style="font-size:24px" data-active-sum>7 дней</span>
+            <span class="k">активных</span>
+          </div>
+          <div style="margin-top:10px">
+            <span class="v" style="font-size:20px; color:var(--aurora)" data-per-day-sum>≈ $1.50</span>
+            <span class="k">в день</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="planner-sub">активные дни</div>
+      <div class="day-pills" id="day-pills">
+        <div class="day-pill on" data-day="0"><span class="d">Mon</span><span class="v">$1.50</span></div>
+        <div class="day-pill on" data-day="1"><span class="d">Tue</span><span class="v">$1.50</span></div>
+        <div class="day-pill on" data-day="2"><span class="d">Wed</span><span class="v">$1.50</span></div>
+        <div class="day-pill on" data-day="3"><span class="d">Thu</span><span class="v">$1.50</span></div>
+        <div class="day-pill on" data-day="4"><span class="d">Fri</span><span class="v">$1.50</span></div>
+        <div class="day-pill on" data-day="5"><span class="d">Sat</span><span class="v">$1.50</span></div>
+        <div class="day-pill on" data-day="6"><span class="d">Sun</span><span class="v">$1.50</span></div>
+      </div>
+      <p class="planner-hint">Кликом включайте дни. Запросы вне набора не блокируются — мы их просто учитываем и предложим расширить набор.</p>
+
+      <div class="planner-sub">дневное распределение</div>
+      <div class="day-bars" id="day-bars">
+        <div class="day-bar on"><div class="amount">$1.50</div><div class="fill" style="height:50%"></div><div class="lbl">Mon</div></div>
+        <div class="day-bar on"><div class="amount">$1.50</div><div class="fill" style="height:50%"></div><div class="lbl">Tue</div></div>
+        <div class="day-bar on"><div class="amount">$1.50</div><div class="fill" style="height:50%"></div><div class="lbl">Wed</div></div>
+        <div class="day-bar on"><div class="amount">$1.50</div><div class="fill" style="height:50%"></div><div class="lbl">Thu</div></div>
+        <div class="day-bar on"><div class="amount">$1.50</div><div class="fill" style="height:50%"></div><div class="lbl">Fri</div></div>
+        <div class="day-bar on"><div class="amount">$1.50</div><div class="fill" style="height:50%"></div><div class="lbl">Sat</div></div>
+        <div class="day-bar on"><div class="amount">$1.50</div><div class="fill" style="height:50%"></div><div class="lbl">Sun</div></div>
+      </div>
+
+      <div class="planner-foot">
+        <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center">
+          <span class="legend"><i></i>активный день</span>
+          <span class="legend off"><i></i>пропущенный</span>
+        </div>
+        <span>Примерно <span data-per-day-sum>$1.50</span> в плане на активный день. Перерасход в&nbsp;понедельник? Вторник одолжит.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== FAQ ============== -->
+  <section style="padding-bottom: 40px">
+    <div class="section-head" style="margin-bottom: 32px">
+      <div>
+        <div class="section-tag">часто спрашивают</div>
+        <h2>Короткие ответы.</h2>
+      </div>
+      <p>Если что-то не нашли — напишите на <a href="mailto:hello@alaska.ai" style="color:var(--ice)">hello@alaska.ai</a>. Отвечают два человека, не бот.</p>
+    </div>
+
+    <div class="faq">
+      <div>
+        <h4>Что считается «токеном»?</h4>
+        <p>Примерно одно слово или знак препинания. 1¢ покрывает в среднем 4–5 ответов GPT&nbsp;5.4&nbsp;mini, 3¢ — один ответ GPT&nbsp;5.5 со средним контекстом.</p>
+      </div>
+      <div>
+        <h4>Что произойдёт, если кредиты кончились?</h4>
+        <p>Чат предложит купить ещё или подождать до следующего месяца. Сам редактор не блокируется — IDE остаётся IDE, без ИИ-фич.</p>
+      </div>
+      <div>
+        <h4>Можно ли использовать свой ключ OpenAI?</h4>
+        <p>Да, на всех планах кроме Free. В этом случае мы не берём процент за обработку — только за подписку самого плана.</p>
+      </div>
+      <div>
+        <h4>Принимаете рубли?</h4>
+        <p>Да, СБП и карты МИР через эквайринг. Цена в долларах — это просто референс, чтобы было ясно по миру.</p>
+      </div>
+      <div>
+        <h4>Можно ли отменить в любой момент?</h4>
+        <p>Да. Перенесённые кредиты остаются вам ещё на месяц — пользуйтесь, пока не закончатся, дальше уйдёте на Free.</p>
+      </div>
+      <div>
+        <h4>Командные тарифы есть?</h4>
+        <p>Скоро. Сейчас можно купить любому количеству людей Pro/Max/Ultra — мы дадим один счёт. SSO для команд готовим к лету.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="cols">
+      <div>
+        <a class="logo" href="Landing.html" style="margin-bottom:14px">
+          <span class="mark">
+            <svg viewBox="0 0 26 26" fill="none">
+              <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="currentColor" stroke-width="1.2" stroke-opacity=".35"></path>
+              <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".15"></path>
+              <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+            </svg>
+          </span>
+          <span><b>ALaska</b><span style="color: var(--ice)">.ai</span></span>
+        </a>
+        <p style="color: var(--mute); font-size:13.5px; max-width: 32ch; margin:12px 0 0">IDE с встроенным ИИ.</p>
+      </div>
+      <div>
+        <h6>Продукт</h6>
+        <ul>
+          <li><a href="Landing.html">Лендинг</a></li>
+          <li><a href="about.html">О нас</a></li>
+          <li><a href="download.html">Скачать</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Аккаунт</h6>
+        <ul>
+          <li><a href="login.html">Войти</a></li>
+          <li><a href="register.html">Регистрация</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Контакты</h6>
+        <ul>
+          <li><a href="mailto:hello@alaska.ai">hello@alaska.ai</a></li>
+          <li><a href="#">Telegram</a></li>
+          <li><a href="#">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 ALaska Labs · все права защищены</span>
+      <span class="now">
+        <span class="dot-aur"></span>
+        Анкоридж · <span data-anch-time>—</span> · <span data-temp>−14°C</span>
+      </span>
+    </div>
+  </footer>
+
+</div>
+
+<script src="app.js"></script>
+<script>
+  // -------- weekly planner --------
+  (() => {
+    const WEEKLY = 10.50;
+    let active = [true, true, true, true, true, true, true];
+
+    const pills = document.querySelectorAll('#day-pills .day-pill');
+    const bars = document.querySelectorAll('#day-bars .day-bar');
+    const weeklySum = document.querySelectorAll('[data-weekly-sum]');
+    const activeSum = document.querySelector('[data-active-sum]');
+    const perDaySums = document.querySelectorAll('[data-per-day-sum]');
+
+    function render() {
+      const activeCount = active.filter(Boolean).length;
+      const perDay = activeCount ? WEEKLY / activeCount : 0;
+
+      pills.forEach((p, i) => {
+        p.classList.toggle('on', active[i]);
+        const v = p.querySelector('.v');
+        v.textContent = active[i] ? '$' + perDay.toFixed(2) : 'off';
+      });
+
+      // bar height scale: full = $3, so $1.50 → 50%
+      const FULL = 3.0;
+      bars.forEach((b, i) => {
+        const fill = b.querySelector('.fill');
+        const amt = b.querySelector('.amount');
+        if (active[i]) {
+          b.classList.add('on');
+          b.classList.remove('off');
+          const pct = Math.min(100, (perDay / FULL) * 100);
+          fill.style.height = pct + '%';
+          amt.textContent = '$' + perDay.toFixed(2);
+        } else {
+          b.classList.add('off');
+          b.classList.remove('on');
+          fill.style.height = '';
+          amt.textContent = '—';
+        }
+      });
+
+      weeklySum.forEach(s => s.textContent = '$' + WEEKLY.toFixed(2));
+      activeSum.textContent = activeCount + (activeCount === 1 ? ' день' : (activeCount > 1 && activeCount < 5 ? ' дня' : ' дней'));
+      perDaySums.forEach(s => {
+        s.textContent = activeCount ? '$' + perDay.toFixed(2) : '—';
+      });
+    }
+
+    pills.forEach((p, i) => {
+      p.addEventListener('click', () => {
+        active[i] = !active[i];
+        // never let it go to 0 actives (re-enable on last toggle off)
+        if (active.filter(Boolean).length === 0) active[i] = true;
+        render();
+      });
+    });
+
+    render();
+  })();
+</script>
+</body>
+</html>

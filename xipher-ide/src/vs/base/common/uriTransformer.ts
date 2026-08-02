@@ -1,0 +1,51 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { UriParts, IRawURITransformer, URITransformer, IURITransformer } from './uriIpc.js';
+
+/**
+ * ```
+ * --------------------------------
+ * |    UI SIDE    |  AGENT SIDE  |
+ * |---------------|--------------|
+ * | vscode-remote | file         |
+ * | file          | vscode-local |
+ * --------------------------------
+ * ```
+ */
+function createRawURITransformer(remoteAuthority: string): IRawURITransformer {
+	return {
+		transformIncoming: (uri: UriParts): UriParts => {
+			if (uri.scheme === 'alaskacode-remote') {
+				return { scheme: 'file', path: uri.path, query: uri.query, fragment: uri.fragment };
+			}
+			if (uri.scheme === 'file') {
+				return { scheme: 'alaskacode-local', path: uri.path, query: uri.query, fragment: uri.fragment };
+			}
+			return uri;
+		},
+		transformOutgoing: (uri: UriParts): UriParts => {
+			if (uri.scheme === 'file') {
+				return { scheme: 'alaskacode-remote', authority: remoteAuthority, path: uri.path, query: uri.query, fragment: uri.fragment };
+			}
+			if (uri.scheme === 'alaskacode-local') {
+				return { scheme: 'file', path: uri.path, query: uri.query, fragment: uri.fragment };
+			}
+			return uri;
+		},
+		transformOutgoingScheme: (scheme: string): string => {
+			if (scheme === 'file') {
+				return 'alaskacode-remote';
+			} else if (scheme === 'alaskacode-local') {
+				return 'file';
+			}
+			return scheme;
+		}
+	};
+}
+
+export function createURITransformer(remoteAuthority: string): IURITransformer {
+	return new URITransformer(createRawURITransformer(remoteAuthority));
+}

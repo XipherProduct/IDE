@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+/* === Arctic Design System === */
+
+:root {
+  /* Ink (dark backgrounds) */
+  --color-ink-950: #04080f;
+  --color-ink-900: #0a1422;
+  --color-ink-800: #0f2036;
+  --color-ink-700: #163052;
+
+  /* Ice (light/foreground) */
+  --color-ice-50: #f2f8ff;
+  --color-ice-100: #dceeff;
+  --color-ice-200: #b8dcff;
+  --color-ice-400: #7cc0ff;
+
+  /* Glacier (accent/CTA) */
+  --color-glacier-400: #5ea7e8;
+  --color-glacier-500: #3b8fd6;
+  --color-glacier-600: #2a74b3;
+
+  /* Aurora */
+  --color-aurora-400: #6af2d4;
+  --color-aurora-violet: #9b7cff;
+
+  /* Frost */
+  --color-frost-edge: rgba(138, 195, 255, 0.15);
+
+  /* Semantic (dark default) */
+  --color-bg: var(--color-ink-950);
+  --color-surface: var(--color-ink-900);
+  --color-card: var(--color-ink-800);
+  --color-border: var(--color-ink-700);
+  --color-fg: var(--color-ice-50);
+  --color-fg-muted: var(--color-ice-200);
+  --color-accent: var(--color-glacier-400);
+  --color-accent-hover: var(--color-glacier-500);
+}
+
+.light {
+  --color-bg: #f8fbff;
+  --color-surface: #ffffff;
+  --color-card: #f0f5fc;
+  --color-border: #d4e3f5;
+  --color-fg: #0a1422;
+  --color-fg-muted: #4b6a8f;
+  --color-accent: #3b8fd6;
+  --color-accent-hover: #2a74b3;
+}
+
+@theme inline {
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-fg);
+  --color-muted: var(--color-fg-muted);
+  --color-surface: var(--color-surface);
+  --color-card: var(--color-card);
+  --color-border: var(--color-border);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-aurora: var(--color-aurora-400);
+  --color-aurora-violet: var(--color-aurora-violet);
+  --color-frost-edge: var(--color-frost-edge);
+  --color-ink-700: var(--color-ink-700);
+  --color-ink-800: var(--color-ink-800);
+  --color-ink-900: var(--color-ink-900);
+  --color-ink-950: var(--color-ink-950);
+  --color-ice-50: var(--color-ice-50);
+  --color-ice-200: var(--color-ice-200);
+  --color-glacier-400: var(--color-glacier-400);
+  --color-glacier-500: var(--color-glacier-500);
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+/* === Base === */
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans, "Inter", system-ui, sans-serif);
+}
+
+/* === Aurora backdrop === */
+.aurora-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.aurora-backdrop::before,
+.aurora-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.4;
+  animation: aurora-drift 40s ease-in-out infinite alternate;
+}
+
+.aurora-backdrop::before {
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    var(--color-aurora-400) 0%,
+    transparent 60%
+  );
+}
+
+.aurora-backdrop::after {
+  background: radial-gradient(
+    ellipse at 70% 60%,
+    var(--color-aurora-violet) 0%,
+    transparent 60%
+  );
+  animation-delay: -20s;
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(5%, -5%) scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-backdrop::before,
+  .aurora-backdrop::after {
+    animation: none;
+  }
+}
+
+/* === Glacial CTA glow === */
+.glacial-glow {
+  box-shadow:
+    0 0 0 1px rgba(138, 195, 255, 0.3),
+    0 8px 32px -8px rgba(94, 167, 232, 0.55);
+}
+
+/* === Frost glass === */
+.frost-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-frost-edge);
+}
+
+/* === Code blocks (rehype-pretty-code) === */
+[data-rehype-pretty-code-figure] pre {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+[data-rehype-pretty-code-figure] code {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+[data-rehype-pretty-code-figure] [data-line] {
+  padding: 0 1rem;
+}
+
+/* === Selection === */
+::selection {
+  background: rgba(94, 167, 232, 0.3);
+  color: var(--color-ice-50);
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-700);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-glacier-400);
+}
+

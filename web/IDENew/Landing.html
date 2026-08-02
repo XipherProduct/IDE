@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ALaska-ai — IDE, в которой думает чат</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ============== GLOBAL BACKDROPS ============== -->
+<canvas class="snow-canvas" id="snow"></canvas>
+
+<div class="aurora-bg" aria-hidden="true">
+  <svg viewBox="0 0 1600 900" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="aur1" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.78 0.16 155)" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="oklch(0.78 0.16 155)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="aur2" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.72 0.14 195)" stop-opacity=".65"/>
+        <stop offset="100%" stop-color="oklch(0.72 0.14 195)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="aur3" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.72 0.18 330)" stop-opacity=".4"/>
+        <stop offset="100%" stop-color="oklch(0.72 0.18 330)" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="aur-blur"><feGaussianBlur stdDeviation="40"/></filter>
+    </defs>
+
+    <g filter="url(#aur-blur)">
+      <path fill="url(#aur1)">
+        <animate attributeName="d" dur="14s" repeatCount="indefinite"
+          values="
+            M0,260 C320,160 560,320 880,200 C1200,80 1380,200 1600,140 L1600,0 L0,0 Z;
+            M0,200 C300,300 600,140 920,240 C1240,340 1400,180 1600,260 L1600,0 L0,0 Z;
+            M0,260 C320,160 560,320 880,200 C1200,80 1380,200 1600,140 L1600,0 L0,0 Z
+          "/>
+      </path>
+      <path fill="url(#aur2)" opacity="0.85">
+        <animate attributeName="d" dur="18s" repeatCount="indefinite"
+          values="
+            M0,340 C260,260 540,420 880,300 C1200,180 1400,300 1600,260 L1600,0 L0,0 Z;
+            M0,300 C280,400 560,240 900,360 C1240,480 1400,300 1600,380 L1600,0 L0,0 Z;
+            M0,340 C260,260 540,420 880,300 C1200,180 1400,300 1600,260 L1600,0 L0,0 Z
+          "/>
+      </path>
+      <path fill="url(#aur3)" opacity="0.5">
+        <animate attributeName="d" dur="22s" repeatCount="indefinite"
+          values="
+            M0,440 C300,360 600,500 940,400 C1280,300 1440,420 1600,360 L1600,0 L0,0 Z;
+            M0,400 C320,500 600,320 920,440 C1240,560 1400,400 1600,460 L1600,0 L0,0 Z;
+            M0,440 C300,360 600,500 940,400 C1280,300 1440,420 1600,360 L1600,0 L0,0 Z
+          "/>
+      </path>
+    </g>
+  </svg>
+</div>
+
+<div class="grain"></div>
+
+<div class="wrap" data-screen-label="01 Landing">
+
+  <!-- ============== NAV ============== -->
+  <nav class="top">
+    <a class="logo" href="#">
+      <span class="mark">
+        <svg viewBox="0 0 26 26" fill="none">
+          <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="currentColor" stroke-width="1.2" stroke-opacity=".35"></path>
+          <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".15"></path>
+          <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+        </svg>
+      </span>
+      <span><b>ALaska</b><span class="dot">.ai</span></span>
+    </a>
+    <ul>
+      <li><a href="#ide">IDE</a></li>
+      <li><a href="#features">Возможности</a></li>
+      <li><a href="pricing.html">Цены</a></li>
+      <li><a href="about.html">О нас</a></li>
+      <li><a href="download.html">Скачать</a></li>
+    </ul>
+    <div class="nav-cta">
+      <div class="coord-pill">
+        <div class="compass"><div class="needle"></div></div>
+        <span>61°13′N · 149°54′W</span>
+      </div>
+      <a class="btn ghost" href="login.html">Войти</a>
+      <a class="btn primary" href="download.html">Скачать <span class="kbd">⇣</span></a>
+    </div>
+  </nav>
+
+  <!-- ============== HERO ============== -->
+  <header class="hero">
+    <h1 class="title">
+      <span class="word"><span>IDE,</span></span> <span class="word"><span>в&nbsp;которой</span></span>
+      <span class="word"><span><em>думает</em></span></span>
+      <span class="word"><span>чат.</span></span>
+    </h1>
+
+    <div class="title-after-row">
+      <span class="weather-chip">
+        <span class="dot-aur"></span>
+        прямо сейчас в Анкоридже&nbsp;<span data-temp>−14°C</span>&nbsp;·&nbsp;<span data-anch-time>—</span>
+      </span>
+      <span class="title-line"></span>
+    </div>
+
+    <p class="lede">
+      ALaska — это <b>форк VS Code</b> с по-настоящему встроенным чатом: он живёт рядом с редактором,
+      видит ваш проект целиком, читает соседние файлы и правит код напрямую. Без расширений,
+      без переключений вкладок, без браузера.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn primary" href="#download">Скачать для Windows&nbsp;· 160&nbsp;МБ</a>
+      <a class="btn" href="#download">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6m0 0 3-3m-3 3-3-3M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
+        Linux · .deb / .AppImage
+      </a>
+      <a class="btn ghost" href="#ide">Посмотреть, как это выглядит →</a>
+    </div>
+
+    <div class="iso-strip">
+      <div>
+        <div class="k">бинарник</div>
+        <div class="v"><span class="countup" data-countup="160">0</span>&nbsp;МБ <small>один файл</small></div>
+      </div>
+      <div>
+        <div class="k">платформ</div>
+        <div class="v">Windows · Linux <small>x64/ARM64</small></div>
+      </div>
+      <div>
+        <div class="k">моделей</div>
+        <div class="v">GPT 5.5 / 5.4 / mini</div>
+      </div>
+      <div>
+        <div class="k">контекст</div>
+        <div class="v"><span class="countup" data-countup="200">0</span>k <small>токенов</small></div>
+      </div>
+      <div>
+        <div class="k">база</div>
+        <div class="v">VS&nbsp;Code <small>OSS</small></div>
+      </div>
+    </div>
+  </header>
+
+</div>
+
+<div class="wrap">
+
+  <!-- ============== IDE SHOWCASE ============== -->
+  <section class="show" id="ide">
+    <div class="show-tag-row">
+      <div class="left">
+        <div class="section-tag">живой мокап · не картинка</div>
+        <h2>Чат, который <em>живёт в редакторе</em>.</h2>
+      </div>
+      <div class="right">
+        <span class="live-pip"><i></i>симуляция в реальном времени</span>
+        <span>смотрите как файлы загораются, когда AI их читает</span>
+      </div>
+    </div>
+
+    <div class="ide">
+      <div class="titlebar">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="breadcrumb">
+          <span>alaska-monorepo</span><span class="slash">/</span>
+          <span>packages/glacier</span><span class="slash">/</span>
+          <b>warehouse.ts</b>
+        </div>
+        <div style="flex:1"></div>
+        <div style="display:flex; gap:14px;">
+          <span>⌘P · файлы</span><span>⌘L · чат</span><span>⌘I · правка</span>
+        </div>
+      </div>
+
+      <div class="ide-body">
+
+        <aside class="sidebar">
+          <h4>Проект</h4>
+          <ul class="tree">
+            <li><span class="ic">▾</span> alaska-monorepo</li>
+            <li class="nested"><span class="ic">▾</span> apps</li>
+            <li class="nested deep">desktop</li>
+            <li class="nested deep">cli</li>
+            <li class="nested"><span class="ic">▾</span> packages</li>
+            <li class="nested deep">core</li>
+            <li class="nested deep"><span class="ic">▾</span> glacier</li>
+            <li class="active nested deep deeper" data-readable="warehouse.ts"><span class="ic">●</span> warehouse.ts</li>
+            <li class="nested deep deeper" data-readable="index.ts">index.ts</li>
+            <li class="nested deep deeper" data-readable="types.ts">types.ts</li>
+            <li class="nested" data-readable="tools"><span class="ic">▸</span> tools</li>
+            <li class="nested" data-readable="README.md">README.md</li>
+            <li class="nested">package.json</li>
+          </ul>
+        </aside>
+
+        <main class="editor">
+          <div class="tabs">
+            <div class="tab active">warehouse.ts <span class="x">×</span></div>
+            <div class="tab">index.ts <span class="x">×</span></div>
+            <div class="tab">README.md <span class="x">×</span></div>
+          </div>
+          <div class="code">
+            <div class="ln"><span class="n">12</span><span><span class="kw">import</span> { <span class="var">Pallet</span>, <span class="var">Bin</span> } <span class="kw">from</span> <span class="str">"./types"</span></span></div>
+            <div class="ln"><span class="n">13</span><span>&nbsp;</span></div>
+            <div class="ln"><span class="n">14</span><span><span class="com">// FIXME: поиск свободной ячейки тормозит на &gt;10k паллет</span></span></div>
+            <div class="ln"><span class="n">15</span><span><span class="kw">export function</span> <span class="fn">findEmptyBin</span>(<span class="var">pallets</span>: <span class="fn">Pallet</span>[]): <span class="fn">Bin</span> | <span class="kw">null</span> {</span></div>
+            <div class="ln hl"><span class="n">16</span><span>&nbsp;&nbsp;<span class="kw">for</span> (<span class="kw">const</span> <span class="var">p</span> <span class="kw">of</span> <span class="var">pallets</span>) {</span></div>
+            <div class="ln hl"><span class="n">17</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (!<span class="var">p</span>.<span class="var">bin</span>) <span class="kw">return</span> { <span class="var">id</span>: <span class="str">"BIN-001"</span>, <span class="var">free</span>: <span class="kw">true</span> }</span></div>
+            <div class="ln hl"><span class="n">18</span><span>&nbsp;&nbsp;}</span></div>
+            <div class="ln hl"><span class="n">19</span><span>&nbsp;&nbsp;<span class="kw">return</span> <span class="kw">null</span></span></div>
+            <div class="ln"><span class="n">20</span><span>}</span></div>
+            <div class="ln"><span class="n">21</span><span>&nbsp;</span></div>
+            <div class="ln ghost"><span class="n">22</span><span>&nbsp;&nbsp;<span class="com">// предложено · alaska · ⇥ применить</span></span></div>
+            <div class="ln ghost"><span class="n">23</span><span><span class="kw">export function</span> <span class="fn">findEmptyBinFast</span>(</span></div>
+            <div class="ln ghost"><span class="n">24</span><span>&nbsp;&nbsp;<span class="var">pallets</span>: <span class="fn">Pallet</span>[],</span></div>
+            <div class="ln ghost"><span class="n">25</span><span>&nbsp;&nbsp;<span class="var">index</span>: <span class="fn">Map</span>&lt;<span class="kw">string</span>, <span class="fn">Bin</span>&gt; = <span class="fn">buildBinIndex</span>(<span class="var">pallets</span>)</span></div>
+            <div class="ln ghost"><span class="n">26</span><span>): <span class="fn">Bin</span> | <span class="kw">null</span> {</span></div>
+            <div class="ln ghost"><span class="n">27</span><span>&nbsp;&nbsp;<span class="kw">for</span> (<span class="kw">const</span> [<span class="var">id</span>, <span class="var">bin</span>] <span class="kw">of</span> <span class="var">index</span>) {</span></div>
+            <div class="ln ghost"><span class="n">28</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (<span class="var">bin</span>.<span class="var">free</span>) <span class="kw">return</span> <span class="var">bin</span></span></div>
+            <div class="ln ghost"><span class="n">29</span><span>&nbsp;&nbsp;}</span></div>
+            <div class="ln ghost"><span class="n">30</span><span>&nbsp;&nbsp;<span class="kw">return</span> <span class="kw">null</span></span></div>
+            <div class="ln ghost"><span class="n">31</span><span>}</span></div>
+          </div>
+          <div class="code-toolbar">
+            <span>11 строк предложено · alaska</span>
+            <span class="apply-btn">применить <span class="kbd-inline">⇥</span></span>
+          </div>
+        </main>
+
+        <aside class="chat">
+          <div class="chat-head">
+            <div class="left">
+              <span class="dot-aur"></span>
+              <h5>Чат проекта</h5>
+            </div>
+            <div class="model-pill">GPT&nbsp;5.5 <span class="caret">⌄</span></div>
+          </div>
+
+          <div class="chat-body">
+            <!-- runtime-filled -->
+          </div>
+
+          <div class="chat-input">
+            <div class="box">спроси про warehouse, перетащи файл, или начни с «/»<span class="cursor-blink"></span></div>
+            <div class="row">
+              <div class="acts"><span>@файл</span><span>/команды</span><span>⌘↵</span></div>
+              <div class="send">отправить ↵</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="statusbar">
+        <div class="l">
+          <span class="ice">● alaska подключён</span>
+          <span>main</span><span>UTF-8</span><span>TypeScript 5.6</span>
+        </div>
+        <div class="r">
+          <span class="aur">телеметрия: локально</span>
+          <span class="tok">токены: <span data-tok-val>0</span> / 200k <span class="tok-bar"><i></i></span></span>
+          <span>ln 16, col 24</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== STEPS / HOW IT WORKS ============== -->
+  <section class="block" id="steps">
+    <div class="section-head">
+      <div>
+        <div class="section-tag">три движения</div>
+        <h2>От вопроса до коммита — <em>три действия</em>.</h2>
+      </div>
+      <p>Никаких «открой панель, выбери модель, скопируй файл, вставь, опиши контекст». Чат уже внутри редактора, индекс уже построен, история уже сохранена.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <span class="num">01 · ИНДЕКС</span>
+        <h3>Открыли проект — индекс готов.</h3>
+        <p>ALaska читает структуру за секунды и обновляется по мере правок. Никаких ручных «добавь файл в контекст».</p>
+        <div class="art art-index">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+      </div>
+      <div class="step">
+        <span class="num">02 · ЧАТ</span>
+        <h3>Спросили — получили ответ со ссылками.</h3>
+        <p>Чат отвечает с цитатами файлов и строк. Можно перетащить любой файл прямо в окно и продолжить разговор.</p>
+        <div class="art art-talk">
+          <div class="bub you">почему этот цикл тормозит?</div>
+          <div class="bub ai">O(n) внутри тика. предлагаю Map-индекс →</div>
+        </div>
+      </div>
+      <div class="step">
+        <span class="num">03 · ПРАВКА</span>
+        <h3>Нажали Tab — изменения применились.</h3>
+        <p>Diff показывается прямо в редакторе как «призрачные строки». Применить — ⇥, отменить — Esc.</p>
+        <div class="art art-apply">
+          <div class="ln minus">findEmptyBin(pallets)</div>
+          <div class="ln plus">findEmptyBinFast(pallets, idx)</div>
+          <div class="ln plus">  if (bin.free) return bin</div>
+          <div class="ln plus">  return null</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== FEATURE WALL ============== -->
+  <section class="block" id="features">
+    <div class="section-head">
+      <div>
+        <div class="section-tag">возможности</div>
+        <h2>Не «ещё одна IDE с ИИ». <em>Шесть конкретных решений.</em></h2>
+      </div>
+      <p>Каждая ячейка ниже — отдельная фича, которую мы целенаправленно делали для разработчика в России: с моделями OpenAI без VPN-боли и с честной локальной телеметрией.</p>
+    </div>
+
+    <div class="feature-wall">
+
+      <!-- size comparison -->
+      <div class="cell span-7 tall">
+        <div>
+          <div class="label"><span class="num">01</span>размер бинарника</div>
+          <h3>160 МБ — и это весь редактор.</h3>
+          <p>Один файл, без menulibs и подграфов зависимостей. Скачивается за пару минут даже с северной мобильной сетью.</p>
+        </div>
+        <div class="size-bars">
+          <div class="row">
+            <span class="name">Редактор Э.</span>
+            <span class="bar"><i data-fill="92%"></i></span>
+            <span class="val">~720 МБ</span>
+          </div>
+          <div class="row">
+            <span class="name">IDE «J».</span>
+            <span class="bar"><i data-fill="76%"></i></span>
+            <span class="val">~580 МБ</span>
+          </div>
+          <div class="row">
+            <span class="name">Vim-форк X.</span>
+            <span class="bar"><i data-fill="48%"></i></span>
+            <span class="val">~365 МБ</span>
+          </div>
+          <div class="row us">
+            <span class="name us">ALaska</span>
+            <span class="bar"><i data-fill="22%"></i></span>
+            <span class="val">160 МБ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- keyboard chord -->
+      <div class="cell span-5 tall">
+        <div>
+          <div class="label"><span class="num">02</span>горячие клавиши</div>
+          <h3>Каждая фича — один аккорд.</h3>
+          <p>Чат, inline-правка, файл-пикер и палитра команд — на расстоянии двух клавиш. Привычные шорткаты VS Code не сломаны.</p>
+        </div>
+        <div class="chord">
+          <span class="key" data-key="cmd">⌘</span>
+          <span class="key plus">+</span>
+          <span class="key" data-key="l">L</span>
+          <span class="key plus">+</span>
+          <span class="key" data-key="i">I</span>
+          <span class="key plus">+</span>
+          <span class="key" data-key="p">P</span>
+          <span class="key plus">+</span>
+          <span class="key" data-key="k">K</span>
+        </div>
+        <span class="label" data-chord-label="">открыть чат</span>
+      </div>
+
+      <!-- installer -->
+      <div class="cell span-4">
+        <div>
+          <div class="label"><span class="num">03</span>установка</div>
+          <h3>Без установщиков.</h3>
+        </div>
+        <div class="installer">
+          <div><span class="prompt">~&nbsp;</span>curl -L alaska.ai/get | sh</div>
+          <div class="out">→ загрузка ALaska-0.42.1...</div>
+          <div class="progress">
+            <span>0</span>
+            <span class="bar"><i></i></span>
+            <span>160 МБ</span>
+          </div>
+          <div class="out">→ распаковано в ~/.alaska</div>
+          <div class="out">→ <span class="aur" style="color:var(--aurora)">готов к работе</span></div>
+        </div>
+      </div>
+
+      <!-- aurora readout -->
+      <div class="cell span-4">
+        <div>
+          <div class="label"><span class="num">04</span>точность модели</div>
+          <h3>Понимает вашу кодовую базу.</h3>
+          <p>Индекс + контекст 200k токенов даёт меньше галлюцинаций на проектах от 50k строк.</p>
+        </div>
+        <div class="readout-graph"></div>
+      </div>
+
+      <!-- OpenAI without VPN -->
+      <div class="cell span-4">
+        <div>
+          <div class="label"><span class="num">05</span>OpenAI</div>
+          <h3>Без VPN-плясок.</h3>
+          <p>Прямые маршруты к GPT 5.5, 5.4 и 5.4&nbsp;mini через нашу инфраструктуру. Один счёт, без танцев с прокси и валютой.</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <span class="mono" style="font-size:11px; color:var(--ice); border:1px solid var(--line-2); padding:4px 10px; border-radius:6px">api.alaska.ai</span>
+          <span class="mono" style="font-size:11px; color:var(--mute); border:1px solid var(--line-2); padding:4px 10px; border-radius:6px">→</span>
+          <span class="mono" style="font-size:11px; color:var(--aurora); border:1px solid var(--line-2); padding:4px 10px; border-radius:6px">api.openai.com</span>
+        </div>
+      </div>
+
+      <!-- compatibility -->
+      <div class="cell span-6">
+        <div>
+          <div class="label"><span class="num">06</span>совместимость</div>
+          <h3>Все расширения VS&nbsp;Code на месте.</h3>
+          <p>Settings Sync, темы, devcontainers, удалённая разработка по SSH. Открываете свой <code style="font-family:'JetBrains Mono',monospace; background:var(--panel); border:1px solid var(--line); padding:1px 6px; border-radius:4px; color:var(--ice); font-size:13px">.vscode/</code> — всё работает.</p>
+        </div>
+      </div>
+
+      <!-- privacy -->
+      <div class="cell span-6">
+        <div>
+          <div class="label"><span class="num">07</span>приватность</div>
+          <h3>Код не уезжает в облако без вашего ведома.</h3>
+          <p>В модель улетают только те куски, что вы явно прикрепили. Локальный индекс остаётся на машине — это аудируемо: открыли вкладку «телеметрия» и увидели каждый отправленный байт.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============== MODELS — interactive switcher ============== -->
+  <section class="block" id="models">
+    <div class="section-head">
+      <div>
+        <div class="section-tag">три модели</div>
+        <h2>OpenAI. Без подписок-абонементов, <em>по токенам</em>.</h2>
+      </div>
+      <p>Переключайтесь прямо в чате — модель крепится к вкладке, а не к проекту. Хотите ответ быстро и дёшево — mini. Сложный рефакторинг — 5.5. Платите за то, что использовали.</p>
+    </div>
+
+    <div class="models-wrap">
+      <div class="model-tabs">
+        <div class="model-tab" data-model="mini">
+          <div class="ver">openai · быстрая</div>
+          <h4>GPT 5.4 mini</h4>
+        </div>
+        <div class="model-tab active" data-model="std">
+          <div class="ver">openai · сбалансированная</div>
+          <h4>GPT 5.4</h4>
+        </div>
+        <div class="model-tab" data-model="flag">
+          <div class="ver">openai · флагман</div>
+          <h4>GPT 5.5</h4>
+          <span class="badge">reasoning</span>
+        </div>
+      </div>
+
+      <div class="model-body">
+        <div class="model-meta" id="model-meta" style="transition: opacity .25s ease">
+          <p class="quote">—</p>
+          <ul></ul>
+          <div class="price">
+            <span>от</span>
+            <span><b>—</b> / 1k токенов</span>
+          </div>
+        </div>
+
+        <div class="model-bench">
+          <div class="title">бенчмарки · по нашим тестам</div>
+          <div class="bench">
+            <div class="row" data-bench="speed">
+              <span class="l">скорость</span>
+              <span class="b"><i></i></span>
+              <span class="v">—</span>
+            </div>
+            <div class="row" data-bench="ctx">
+              <span class="l">контекст</span>
+              <span class="b"><i></i></span>
+              <span class="v">—</span>
+            </div>
+            <div class="row" data-bench="accuracy">
+              <span class="l">точность</span>
+              <span class="b"><i></i></span>
+              <span class="v">—</span>
+            </div>
+            <div class="row" data-bench="cost">
+              <span class="l">стоимость</span>
+              <span class="b"><i></i></span>
+              <span class="v">—</span>
+            </div>
+          </div>
+          <p class="mono mute" style="font-size:11px; margin:0; line-height:1.5">
+            * замеры на трёх внутренних бенчмарках:<br>
+            рефакторинг 1.2k строк, дебаг flaky-теста, генерация миграции.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== TELEMETRY ============== -->
+  <section class="block" id="telemetry">
+    <div class="section-head">
+      <div>
+        <div class="section-tag">телеметрия</div>
+        <h2>Видно, <em>что и куда</em> уходит. До&nbsp;последнего байта.</h2>
+      </div>
+      <p>Никакого «мы собираем анонимные данные для улучшения продукта». Внутри ALaska — настоящая панель телеметрии, где видно каждый запрос: что ушло, кому, сколько токенов, сколько денег.</p>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="tele-body">
+        <h3>Прозрачность как фича, а не маркетинг.</h3>
+        <p>Каждое обращение к модели логируется локально. Видно, какие файлы прикрепились к запросу, какие команды выполнил агент, сколько стоил ответ. Кнопка «отключить телеметрию» делает ровно то, что написано — никаких звёздочек.</p>
+        <ul>
+          <li>Полный журнал запросов и ответов — экспорт в JSON.</li>
+          <li>Лимиты по проекту, по дню, по модели.</li>
+          <li>Сторонним аналитическим сервисам — ничего. Даже нам.</li>
+          <li>GPG-подписанные сборки, чтобы вы могли проверить, что бинарник наш.</li>
+        </ul>
+      </div>
+
+      <div class="tele-panel">
+        <div class="head">
+          <span>telemetry · last 24h</span>
+          <span style="color:var(--aurora)">● live</span>
+        </div>
+        <div class="tele-row"><span class="l">запросов</span><span class="v tab">1 248</span></div>
+        <div class="tele-row"><span class="l">всего токенов</span><span class="v tab">2.41M <span class="mute">in</span> · 0.38M <span class="mute">out</span></span></div>
+        <div class="tele-row"><span class="l">средн. латентность</span><span class="v ok tab">412 мс</span></div>
+        <div class="tele-row"><span class="l">отправлено наружу</span><span class="v tab">2.79M ткн → api.openai.com</span></div>
+        <div class="tele-row"><span class="l">третьим сторонам</span><span class="v ok tab">0 байт</span></div>
+        <div class="tele-row"><span class="l">расход</span><span class="v tab">218,40 ₽</span></div>
+
+        <svg class="spark" id="spark" viewBox="0 0 400 90" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== DOWNLOAD ============== -->
+  <section class="block" id="download" style="border-top:none; padding-bottom: 40px">
+    <div class="download">
+      <div class="section-tag" style="position:relative; justify-content:center">скачать</div>
+      <h2>Полярный старт за&nbsp;90 секунд.</h2>
+      <p>Один файл, без админских прав на Windows, без menulib-зависимостей на Linux. Скачали — запустили — открыли проект — заработали.</p>
+
+      <div class="dl-actions">
+        <a class="dl-btn" href="#">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.4v7.1H3zM10.5 12.5v7.1L3 18.5v-6zm1 0H21v8L11.5 19zM21 3.5v8H11.5V4.6z"></path></svg>
+          <span><span class="os">для Windows 10 / 11</span><span class="name">ALaska-0.42.1-x64.exe</span></span>
+        </a>
+        <a class="dl-btn alt" href="#">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c-2 0-3 2-3 4 0 1 0 2 1 3-2 1-4 4-4 8 0 2 1 4 2 5 1 0 2-1 3-1 1 0 1 1 1 2-1 0-2 0-2 1 1 0 6 0 6-1 0-1-1-1-1-1 0-1 1-2 1-2 1 0 2 1 3 1 1-1 2-3 2-5 0-4-2-7-4-8 1-1 1-2 1-3 0-2-1-4-3-4z"></path></svg>
+          <span><span class="os">для Linux · .deb · .AppImage</span><span class="name">ALaska-0.42.1-linux-x64</span></span>
+        </a>
+      </div>
+
+      <div class="dl-foot"><b>160&nbsp;МБ</b> · sha256 <span style="color:var(--ink-2)">a1f9…84d2</span> · GPG-подпись · macOS — <span class="ice">в работе, лето&nbsp;2026</span></div>
+    </div>
+  </section>
+
+  <!-- ============== FOOTER ============== -->
+  <footer>
+    <div class="cols">
+      <div>
+        <a class="logo" href="#" style="margin-bottom:14px">
+          <span class="mark">
+            <svg viewBox="0 0 26 26" fill="none">
+              <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="currentColor" stroke-width="1.2" stroke-opacity=".35"></path>
+              <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".15"></path>
+              <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+            </svg>
+          </span>
+          <span><b>ALaska</b><span style="color: var(--ice)">.ai</span></span>
+        </a>
+        <p style="color: var(--mute); font-size:13.5px; max-width: 32ch; margin:12px 0 0">IDE с встроенным ИИ. Холодный север, тёплый код.</p>
+      </div>
+      <div>
+        <h6>Продукт</h6>
+        <ul>
+          <li><a href="#ide">IDE</a></li>
+          <li><a href="#models">Модели</a></li>
+          <li><a href="#telemetry">Телеметрия</a></li>
+          <li><a href="#changelog">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Разработчикам</h6>
+        <ul>
+          <li><a href="#">Документация</a></li>
+          <li><a href="#">CLI</a></li>
+          <li><a href="#">API ключи</a></li>
+          <li><a href="#">Расширения</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Контакты</h6>
+        <ul>
+          <li><a href="#">hello@alaska.ai</a></li>
+          <li><a href="#">Telegram</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">Статус сервиса</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 ALaska Labs · все права защищены</span>
+      <span class="now">
+        <span class="dot-aur"></span>
+        Анкоридж · <span data-anch-time>—</span> · <span data-temp>−14°C</span>
+      </span>
+    </div>
+  </footer>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>

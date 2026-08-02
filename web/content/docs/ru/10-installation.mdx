@@ -1,0 +1,64 @@
+---
+title: Установка
+description: Как установить Xipher IDE на macOS, Linux и Windows.
+order: 10
+---
+
+## Скрипт установки (рекомендуется)
+
+### macOS / Linux
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xipher-pro/xipher-ide/main/install.sh | sh
+```
+
+### Windows (PowerShell)
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/xipher-pro/xipher-ide/main/install.ps1 | iex
+```
+
+## Go Install
+
+Если установлен Go:
+
+```bash
+go install github.com/xipher-pro/xipher-ide/cmd/xipher@latest
+```
+
+## Ручная загрузка
+
+Скачайте нужный бинарник со [страницы релизов](https://github.com/xipher-pro/xipher-ide/releases/tag/v0.4.0).
+
+| Платформа | Архитектура | Файл |
+|-----------|-----------|------|
+| macOS | Apple Silicon | `xipher_0.4.0_macos_arm64.tar.gz` |
+| macOS | Intel | `xipher_0.4.0_macos_x86_64.tar.gz` |
+| Linux | x86_64 | `xipher_0.4.0_linux_x86_64.tar.gz` |
+| Linux | ARM64 | `xipher_0.4.0_linux_arm64.tar.gz` |
+| Windows | x86_64 | `xipher_0.4.0_windows_x86_64.zip` |
+
+## Предварительные требования
+
+### Linux
+
+Linux требует `libsecret` для безопасного хранения ключей:
+
+```bash
+# Ubuntu/Debian
+sudo apt install libsecret-1-0
+
+# Fedora
+sudo dnf install libsecret
+
+# Arch Linux
+sudo pacman -S libsecret
+```
+
+## Проверка установки
+
+```bash
+xipher --version
+```
+
+Ожидаемый вывод: `xipher version 0.4.0`.

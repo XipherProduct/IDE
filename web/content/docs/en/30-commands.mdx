@@ -1,0 +1,81 @@
+---
+title: Commands
+description: Complete reference for Xipher IDE commands and slash commands.
+order: 30
+---
+
+## Starting a Chat
+
+```bash
+xipher
+```
+
+This launches an interactive chat session. You'll be prompted to select a model, then you can start typing.
+
+## Slash Commands
+
+During a chat session, you can use slash commands:
+
+### /model
+
+Switch to a different model mid-conversation:
+
+```
+/model gpt-4o
+```
+
+### /system
+
+Set or change the system prompt:
+
+```
+/system You are a helpful coding assistant
+```
+
+### /history
+
+View conversation history:
+
+```
+/history
+```
+
+### /clear
+
+Clear the current conversation:
+
+```
+/clear
+```
+
+### /help
+
+Show available commands:
+
+```
+/help
+```
+
+### /exit
+
+Exit the chat:
+
+```
+/exit
+```
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+C` | Cancel current response |
+| `Ctrl+D` | Exit chat |
+| `Up/Down` | Navigate input history |
+
+## CLI Flags
+
+```bash
+xipher --version     # Show version
+xipher --help        # Show help
+xipher configure     # Configure API keys
+```

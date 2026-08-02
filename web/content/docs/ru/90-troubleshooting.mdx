@@ -1,0 +1,65 @@
+---
+title: Решение проблем
+description: Частые проблемы и их решения для Xipher IDE.
+order: 90
+---
+
+## "keyring not found" на Linux
+
+Xipher IDE использует системный keyring для безопасного хранения API-ключей. На Linux необходим `libsecret`:
+
+```bash
+# Ubuntu/Debian
+sudo apt install libsecret-1-0
+
+# Fedora
+sudo dnf install libsecret
+
+# Arch Linux
+sudo pacman -S libsecret
+```
+
+Убедитесь, что демон keyring (например, `gnome-keyring`) запущен.
+
+## API-ключ не работает
+
+1. Перепроверьте правильность ключа
+2. Убедитесь, что ключ имеет нужные права (у некоторых провайдеров есть read-only ключи)
+3. Проверьте, что ключ не истёк и не отозван
+4. Попробуйте ввести ключ заново: `xipher configure`
+
+## Таймаут соединения
+
+Если вы за прокси:
+
+```bash
+export HTTP_PROXY="http://proxy:port"
+export HTTPS_PROXY="http://proxy:port"
+```
+
+## Модель не найдена
+
+Запустите `xipher` и проверьте список моделей. Названия моделей чувствительны к регистру.
+
+## Стриминг ответа зависает
+
+Нажмите `Ctrl+C` для отмены текущего запроса. Контекст диалога сохранится — можно продолжить общение.
+
+## Бинарник не найден после установки
+
+Убедитесь, что директория установки есть в PATH:
+
+```bash
+# Проверить, где установлен xipher
+which xipher
+
+# Если не найден, добавить в PATH
+export PATH="$HOME/.local/bin:$PATH"  # Linux
+export PATH="$HOME/go/bin:$PATH"       # Go install
+```
+
+## Получение помощи
+
+- Создайте issue: [GitHub Issues](https://github.com/xipher-pro/xipher-ide/issues)
+- Проверьте существующие issues на известные проблемы
+- Укажите вашу ОС, версию Xipher IDE (`xipher --version`) и шаги для воспроизведения

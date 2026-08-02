@@ -1,0 +1,64 @@
+---
+title: Installation
+description: How to install Xipher IDE on macOS, Linux, and Windows.
+order: 10
+---
+
+## Install Script (Recommended)
+
+### macOS / Linux
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xipher-pro/xipher-ide/main/install.sh | sh
+```
+
+### Windows (PowerShell)
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/xipher-pro/xipher-ide/main/install.ps1 | iex
+```
+
+## Go Install
+
+If you have Go installed:
+
+```bash
+go install github.com/xipher-pro/xipher-ide/cmd/xipher@latest
+```
+
+## Manual Download
+
+Download the appropriate binary from the [releases page](https://github.com/xipher-pro/xipher-ide/releases/tag/v0.4.0).
+
+| Platform | Architecture | File |
+|----------|-----------|------|
+| macOS | Apple Silicon | `xipher_0.4.0_macos_arm64.tar.gz` |
+| macOS | Intel | `xipher_0.4.0_macos_x86_64.tar.gz` |
+| Linux | x86_64 | `xipher_0.4.0_linux_x86_64.tar.gz` |
+| Linux | ARM64 | `xipher_0.4.0_linux_arm64.tar.gz` |
+| Windows | x86_64 | `xipher_0.4.0_windows_x86_64.zip` |
+
+## Prerequisites
+
+### Linux
+
+Linux requires `libsecret` for secure key storage in the system keyring:
+
+```bash
+# Ubuntu/Debian
+sudo apt install libsecret-1-0
+
+# Fedora
+sudo dnf install libsecret
+
+# Arch Linux
+sudo pacman -S libsecret
+```
+
+## Verify Installation
+
+```bash
+xipher --version
+```
+
+You should see `xipher version 0.4.0`.

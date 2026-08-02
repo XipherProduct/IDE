@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ALaska Studio — сайт в форме IDE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+<!-- ============================================================
+     SPLASH / BOOT SCREEN — visible for ~1.3s while studio mounts
+============================================================ -->
+<div class="splash">
+  <div class="splash-card">
+    <div class="top">
+      <span class="mark">
+        <svg viewBox="0 0 26 26" fill="none">
+          <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="currentColor" stroke-width="1.2" stroke-opacity=".35"></path>
+          <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".15"></path>
+          <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+        </svg>
+      </span>
+      <span>ALaska Studio</span>
+      <span class="ver">v0.42.1</span>
+    </div>
+    <div class="lines">
+      <div><span class="info">▸</span> alaska boot · полярная ночь</div>
+      <div><span class="mute">✓</span> environment ........... <span class="ok">OK</span></div>
+      <div><span class="mute">✓</span> chat agent ............ <span class="ok">OK</span></div>
+      <div><span class="mute">✓</span> project files ......... <span class="ok">OK</span> <span class="mute">(20 files)</span></div>
+      <div><span class="mute">✓</span> editor ................ <span class="ok">OK</span></div>
+      <div><span class="info">▸</span> mounting studio<span class="blink"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     STUDIO SHELL
+============================================================ -->
+<div class="studio" data-screen-label="07 Studio">
+
+  <!-- titlebar -->
+  <div class="titlebar">
+    <button class="mobile-toggle" data-mobile-toggle="tree" title="Файлы">☰</button>
+    <div class="dots">
+      <button class="dot red"   title="Закрыть"     data-win="close"></button>
+      <button class="dot amber" title="Свернуть"    data-win="minimize"></button>
+      <button class="dot green" title="Оконный режим"     data-win="zoom"></button>
+    </div>
+    <div class="crumb" id="crumb"></div>
+    <div class="spacer"></div>
+    <div class="pathbar">
+      <span class="pathbar-icon">›</span>
+      <input id="pathbar-input" type="text" data-i18n-placeholder="pathbar.placeholder" placeholder="впишите путь… (напр. /login)" spellcheck="false" autocomplete="off" />
+      <span class="pathbar-kbd">⌘P</span>
+      <div class="pathbar-suggest" id="pathbar-suggest"></div>
+    </div>
+    <button class="lang-toggle" data-lang-toggle data-i18n-title="langToggle.title" title="Переключить язык">EN</button>
+    <button class="chat-toggle" data-mobile-toggle="chat" title="Чат">💬</button>
+  </div>
+
+  <!-- main 3 panes -->
+  <div class="panes">
+    <div class="drawer-backdrop" data-drawer-backdrop></div>
+
+    <!-- LEFT: file tree -->
+    <aside class="tree-pane">
+      <div class="head">
+        <span data-i18n="tree.title">Обозреватель</span>
+        <div class="actions">
+          <span data-i18n-title="tree.collapseAll" title="Свернуть всё">⤽</span>
+          <span data-i18n-title="tree.refresh" title="Обновить">↻</span>
+        </div>
+      </div>
+      <div class="scroller">
+        <ul class="tree" id="tree"></ul>
+      </div>
+      <div class="tree-foot">
+        <div class="row"><span data-i18n="tree.files">файлов</span><b>20</b></div>
+        <div class="row"><span data-i18n="tree.version">версия</span><b>v0.42.1</b></div>
+        <div class="row"><span data-i18n="tree.anchorage">анкоридж</span><b data-anch-time>—</b></div>
+      </div>
+    </aside>
+
+    <!-- CENTER: editor with tab bar + content -->
+    <main class="editor-pane">
+      <div class="tab-bar" id="tabbar"></div>
+      <div class="editor-meta">
+        <div class="left">
+          <span class="ice">●</span>
+          <span id="file-desc">—</span>
+        </div>
+        <div class="right">
+          <span>UTF-8</span>
+          <span>LF</span>
+        </div>
+      </div>
+      <div class="editor-scroll">
+        <div class="editor-stage" id="stage"></div>
+      </div>
+    </main>
+
+    <!-- RIGHT: chat panel -->
+    <aside class="chat-pane">
+      <div class="chead">
+        <div class="left">
+          <span class="dot"></span>
+          <h5 data-i18n="chat.title">Чат сайта</h5>
+        </div>
+        <div class="model-pill">GPT&nbsp;5.5</div>
+      </div>
+
+      <div class="cnotice" data-i18n="chat.notice">
+        Это демо-чат сайта. Прикреплять файлы нельзя — в реальной IDE чат видит весь проект.
+      </div>
+
+      <div class="cbody" id="cbody"></div>
+
+      <div class="cinput">
+        <div class="box">
+          <textarea id="cinput-ta" data-i18n-placeholder="chat.placeholder" placeholder="спросите про ALaska, модели, цены, установку…"></textarea>
+          <button id="cinput-send" class="send">↵</button>
+        </div>
+        <div class="row">
+          <div class="acts">
+            <span data-i18n="chat.kbd.send">Enter — отправить</span>
+            <span data-i18n="chat.kbd.newline">Shift+Enter — новая строка</span>
+          </div>
+          <span style="color: var(--aurora)" data-i18n="chat.connected">● подключён</span>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- statusbar -->
+  <div class="studio-status">
+    <div class="l">
+      <span class="ice" data-i18n="status.connected">● alaska подключён</span>
+      <span>main</span>
+      <span data-i18n="status.errors">0 ошибок</span>
+      <span data-i18n="status.warnings">0 предупреждений</span>
+    </div>
+    <div class="r">
+      <span class="aur" data-i18n="status.telemetry">телеметрия: локально</span>
+      <span>UTF-8</span>
+      <span>TypeScript 5.6</span>
+      <span data-anch-time>—</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     ARCH LINUX DESKTOP — visible when studio is closed/minimized
+============================================================ -->
+<div class="desktop" id="desktop">
+  <div class="desktop-bg"></div>
+
+  <div class="desktop-top">
+    <span class="desktop-act" data-i18n="desktop.activities">Activities</span>
+    <span class="desktop-distro">arch linux · alaska-ai workstation</span>
+    <span class="desktop-clock" data-desktop-clock>—</span>
+  </div>
+
+  <div class="desktop-hint">
+    <span data-i18n="desktop.hint">двойной клик · открыть приложение</span>
+  </div>
+
+  <div class="desktop-icons">
+    <button class="dapp" data-app="alaska">
+      <span class="dapp-ico">
+        <svg viewBox="0 0 26 26" fill="none">
+          <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="oklch(0.83 0.10 220)" stroke-width="1.2" stroke-opacity=".5"></path>
+          <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".25"></path>
+          <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+        </svg>
+      </span>
+      <span class="dapp-name">Alaska-AI</span>
+    </button>
+
+    <button class="dapp" data-app="telegram">
+      <span class="dapp-ico">
+        <svg viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" fill="#26A5E4"/>
+          <path d="M10 23 L36 13 L32 35 L22 28 L17 33 L18 24 Z" fill="#fff"/>
+          <path d="M22 28 L32 35 L36 13" stroke="#1e8bc3" stroke-width="1" fill="none" opacity=".5"/>
+        </svg>
+      </span>
+      <span class="dapp-name">Telegram</span>
+    </button>
+
+    <button class="dapp" data-app="panicvpn">
+      <span class="dapp-ico">
+        <svg viewBox="0 0 48 48" fill="none">
+          <path d="M24 4 L42 10 V22 C42 32 34 40 24 44 C14 40 6 32 6 22 V10 Z"
+                fill="oklch(0.78 0.16 155)" fill-opacity=".18"
+                stroke="oklch(0.78 0.16 155)" stroke-width="1.5"/>
+          <path d="M16 24 L22 30 L32 18"
+                stroke="oklch(0.78 0.16 155)" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </span>
+      <span class="dapp-name">PanicVPN</span>
+    </button>
+  </div>
+
+  <div class="desktop-dock" id="dock"></div>
+
+  <!-- PanicVPN modal -->
+  <div class="vpn-modal" id="vpn-modal" hidden>
+    <div class="vpn-card">
+      <div class="vpn-head">
+        <span class="vpn-ico">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M24 4 L42 10 V22 C42 32 34 40 24 44 C14 40 6 32 6 22 V10 Z" fill="oklch(0.78 0.16 155)" fill-opacity=".25" stroke="oklch(0.78 0.16 155)" stroke-width="1.5"/>
+          </svg>
+        </span>
+        <div>
+          <h3>PanicVPN</h3>
+          <p data-i18n="vpn.tagline">один клик до спокойствия</p>
+        </div>
+        <button class="vpn-x" data-close-vpn>×</button>
+      </div>
+      <div class="vpn-body">
+        <div class="vpn-status" id="vpn-status">
+          <span class="vpn-dot"></span>
+          <span class="vpn-label" data-i18n="vpn.disconnected">не подключено</span>
+        </div>
+        <div class="vpn-loc">
+          <span class="lbl" data-i18n="vpn.location">локация</span>
+          <select id="vpn-loc">
+            <option>Reykjavík · IS</option>
+            <option>Helsinki · FI</option>
+            <option>Stockholm · SE</option>
+            <option>Tallinn · EE</option>
+          </select>
+        </div>
+        <button class="vpn-btn" id="vpn-toggle" data-i18n="vpn.connect">Подключить →</button>
+        <div class="vpn-log" id="vpn-log"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="content.js"></script>
+<script src="content-dashboard.js"></script>
+<script src="content-legal.js"></script>
+<script src="content-blog.js"></script>
+<script src="content-i18n.js"></script>
+<script src="studio.js"></script>
+</body>
+</html>

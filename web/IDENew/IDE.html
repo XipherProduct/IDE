@@ -1,0 +1,3406 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ALaska · IDE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:        #06080c;
+    --bg-2:      #0a0d13;
+    --panel:     #0e131b;
+    --panel-2:   #131a24;
+    --line:      #1b2330;
+    --line-2:    #28323f;
+    --ink:       #ece5d3;
+    --ink-2:     #a8a193;
+    --mute:      #6f6a5e;
+    --ice:       oklch(0.83 0.10 220);
+    --ice-2:     oklch(0.62 0.13 235);
+    --aurora:    oklch(0.78 0.16 155);
+    --aurora-2:  oklch(0.72 0.14 195);
+    --magenta:   oklch(0.72 0.18 330);
+    --warn:      oklch(0.78 0.13 80);
+    --red:       oklch(0.70 0.18 25);
+  }
+  *{ box-sizing: border-box }
+  html, body{
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Onest", system-ui, sans-serif;
+    overflow: hidden;
+  }
+  ::selection{ background: oklch(0.83 0.10 220 / .25); color: #fff }
+  button{ background: transparent; border: none; cursor: pointer; color: inherit; font-family: inherit }
+
+  /* === BACKGROUND ============================================ */
+  .bg-topo{
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+  .bg-topo svg{ width: 200%; height: 200%; opacity: .12;
+    animation: topo-drift 240s linear infinite }
+  @keyframes topo-drift{
+    0%   { transform: translate(0,0) }
+    100% { transform: translate(-50%, -25%) }
+  }
+  .bg-aurora{
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    overflow: hidden;
+    opacity: .28;
+  }
+  .bg-aurora svg{ width: 110%; height: 75% }
+  .bg-noise{
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,.022) 1px, transparent 1px);
+    background-size: 3px 3px;
+    opacity: .35;
+    mix-blend-mode: overlay;
+  }
+
+  /* === SHELL ================================================= */
+  .ide{
+    position: fixed; inset: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-rows: 42px 30px 1fr 24px;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    margin: 14px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,.65);
+  }
+
+  /* === TOPBAR ================================================ */
+  .topbar{
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 0 14px;
+    background: linear-gradient(180deg, var(--bg-2) 0%, var(--panel) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .logo{
+    display: flex; align-items: center; gap: 9px;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .logo .mark{ width: 22px; height: 22px; flex-shrink: 0 }
+  .logo .mark svg{ width: 100%; height: 100% }
+  .logo b{ font-weight: 600 }
+  .logo .dot{ color: var(--ice) }
+
+  .topbar-center{
+    display: flex; justify-content: center;
+    gap: 2px;
+  }
+  .top-tab{
+    position: relative;
+    padding: 4px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    color: var(--ink-2);
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .12s ease, color .12s ease;
+  }
+  .top-tab:hover{ background: var(--bg-2); color: var(--ink) }
+  .top-tab.open{ background: var(--panel-2); color: var(--ink); box-shadow: 0 0 0 1px var(--line-2) inset }
+
+  .menu-dd{
+    position: absolute;
+    top: calc(100% + 6px); left: 0;
+    min-width: 240px;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    border-radius: 9px;
+    box-shadow: 0 24px 60px -14px rgba(0,0,0,.7);
+    padding: 4px;
+    z-index: 60;
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity .15s ease, transform .15s ease;
+    text-align: left;
+  }
+  .top-tab.open .menu-dd{ opacity: 1; transform: translateY(0); pointer-events: auto }
+  .mdd-item{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    padding: 7px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    color: var(--ink-2);
+    cursor: pointer;
+    align-items: center;
+    transition: background .12s ease, color .12s ease;
+  }
+  .mdd-item:hover{ background: var(--panel-2); color: var(--ink) }
+  .mdd-item .kbd{
+    color: var(--mute);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+  }
+  .mdd-item .mdd-arrow{ color: var(--mute); font-size: 11px }
+  .mdd-sep{ height: 1px; background: var(--line); margin: 4px 6px }
+  .mdd-item.danger{ color: var(--red) }
+  .mdd-item.danger:hover{ background: oklch(0.70 0.18 25 / .10); color: var(--red) }
+
+  /* activity panels */
+  .explorer{ position: relative }
+  .panel{ display: none; flex-direction: column; height: 100%; min-height: 0; flex: 1 }
+  .panel.active{ display: flex }
+
+  .search-input{
+    display: flex; gap: 6px; align-items: center;
+    background: var(--panel-2);
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin: 10px 14px 6px;
+  }
+  .search-input:focus-within{ border-color: var(--ice) }
+  .search-input svg{ width: 13px; height: 13px; color: var(--mute) }
+  .search-input input{
+    flex: 1; min-width: 0;
+    background: transparent; border: none; outline: none;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .search-input input::placeholder{ color: var(--mute) }
+  .search-input .x{ color: var(--mute); cursor: pointer; padding: 0 4px }
+  .search-input .x:hover{ color: var(--ink) }
+  .search-filters{
+    display: flex; gap: 4px; padding: 0 14px 8px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+  }
+  .search-filter{
+    padding: 3px 7px;
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--mute);
+    background: transparent;
+    cursor: pointer;
+  }
+  .search-filter.on{
+    background: oklch(0.83 0.10 220 / .12);
+    border-color: oklch(0.83 0.10 220 / .35);
+    color: var(--ice);
+  }
+  .search-results{ flex: 1; overflow-y: auto; padding: 4px 0; font-family: "JetBrains Mono", monospace }
+  .search-results::-webkit-scrollbar{ width: 4px }
+  .search-results::-webkit-scrollbar-thumb{ background: var(--line-2) }
+  .search-rf{
+    padding: 6px 14px 4px;
+    font-size: 11px;
+    color: var(--ink-2);
+    display: flex; justify-content: space-between;
+    cursor: default;
+  }
+  .search-rf:hover{ background: var(--panel-2) }
+  .search-rf .count{
+    color: var(--ice);
+    font-size: 10px;
+    background: var(--bg-2);
+    padding: 1px 6px;
+    border-radius: 8px;
+  }
+  .search-rl{
+    padding: 3px 14px 3px 32px;
+    font-size: 11px;
+    color: var(--mute);
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 8px;
+    cursor: default;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .search-rl:hover{ background: var(--panel-2); color: var(--ink-2) }
+  .search-rl mark{
+    background: oklch(0.78 0.16 155 / .25);
+    color: var(--aurora);
+    font-weight: 500;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  .scm-head{
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+  }
+  .scm-head .ico{ display: inline-flex; gap: 6px }
+  .scm-head .ico svg{ width: 13px; height: 13px; color: var(--mute); cursor: pointer }
+  .scm-head .ico svg:hover{ color: var(--ice) }
+  .scm-commit{
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .scm-commit textarea{
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink);
+    outline: none;
+    resize: none;
+    min-height: 50px;
+    line-height: 1.45;
+  }
+  .scm-commit textarea:focus{ border-color: var(--ice) }
+  .scm-commit .row{ display: flex; gap: 6px; margin-top: 8px; align-items: center }
+  .scm-btn{
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px;
+    background: var(--ice);
+    color: #06121d;
+    border: none;
+    border-radius: 5px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .12s, transform .1s;
+  }
+  .scm-btn:hover{ background: #fff }
+  .scm-btn:active{ transform: scale(.97) }
+  .scm-btn.ghost{
+    background: transparent;
+    color: var(--ink-2);
+    border: 1px solid var(--line-2);
+  }
+  .scm-btn.ghost:hover{ background: var(--panel-2); color: var(--ink); border-color: var(--ice) }
+  .scm-meta{
+    margin-left: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--mute);
+  }
+  .scm-list{ flex: 1; overflow-y: auto; padding: 4px 0 }
+  .scm-list::-webkit-scrollbar{ width: 4px }
+  .scm-list::-webkit-scrollbar-thumb{ background: var(--line-2) }
+  .scm-group{
+    padding: 10px 14px 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    display: flex; justify-content: space-between;
+  }
+  .scm-group .count{ color: var(--ink-2); letter-spacing: 0; text-transform: none }
+  .scm-row{
+    display: grid;
+    grid-template-columns: 14px 1fr auto;
+    gap: 8px;
+    padding: 4px 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-2);
+    cursor: default;
+    align-items: center;
+  }
+  .scm-row:hover{ background: var(--panel-2); color: var(--ink) }
+  .scm-row .badge{ font-size: 10px; font-weight: 600; text-align: center; width: 14px }
+  .scm-row .badge.M{ color: var(--warn) }
+  .scm-row .badge.A{ color: var(--aurora) }
+  .scm-row .badge.D{ color: var(--red) }
+  .scm-row .badge.U{ color: var(--magenta) }
+  .scm-row .path{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+  .scm-row .actions{ display: flex; gap: 2px; opacity: 0; transition: opacity .12s }
+  .scm-row:hover .actions{ opacity: 1 }
+  .scm-row .actions span{
+    color: var(--mute);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 3px;
+  }
+  .scm-row .actions span:hover{ background: var(--bg-2); color: var(--ink) }
+
+  .panel-empty{
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 30px 22px;
+    text-align: center;
+    color: var(--ink-2);
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .panel-empty .ico{ color: var(--mute); margin-bottom: 14px; opacity: .6 }
+  .panel-empty .ico svg{ width: 28px; height: 28px }
+  .panel-empty .meta{
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--mute);
+    margin-top: 8px;
+    letter-spacing: .04em;
+  }
+  .panel-empty .meta b{ color: var(--ice); font-weight: 500 }
+
+  .act{ position: relative }
+  .act .badge{
+    position: absolute;
+    top: 3px; right: 3px;
+    min-width: 14px; height: 14px;
+    background: var(--aurora);
+    border-radius: 7px;
+    color: #04241a;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px; font-weight: 700;
+    display: grid; place-items: center;
+    padding: 0 4px;
+    pointer-events: none;
+  }
+
+  .user{ display: flex; gap: 10px; align-items: center; min-width: 0; position: relative }
+  .user .email{
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-2);
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .user .avatar{
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: oklch(0.83 0.10 220 / .15);
+    border: 1px solid var(--line-2);
+    color: var(--ice);
+    display: grid; place-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .user .quota{
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg-2);
+    flex-shrink: 0;
+  }
+  .user .quota b{ color: var(--ice); font-weight: 600; letter-spacing: 0 }
+  .user .quota .dot-aur{
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--aurora);
+    box-shadow: 0 0 6px var(--aurora);
+  }
+
+  /* === USER TRIGGER + DROPDOWN ============================== */
+  .user-trigger{
+    display: flex; align-items: center;
+    gap: 10px;
+    padding: 3px 4px 3px 10px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid transparent;
+    transition: background .15s ease, border-color .15s ease;
+    min-width: 0;
+  }
+  .user-trigger:hover, .user-trigger.open{
+    background: var(--bg-2);
+    border-color: var(--line);
+  }
+  .user-trigger .caret{
+    color: var(--mute);
+    font-size: 10px;
+    margin-left: 2px;
+    transition: transform .15s ease;
+  }
+  .user-trigger.open .caret{ transform: rotate(180deg) }
+
+  .user-menu{
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 296px;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    box-shadow: 0 30px 70px -15px rgba(0,0,0,.75), 0 0 0 1px rgba(125,211,252,.05);
+    z-index: 60;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .user-menu.show{ opacity: 1; transform: translateY(0); pointer-events: auto }
+  .um-header{
+    display: flex; gap: 12px; align-items: center;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .um-avatar{
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, oklch(0.83 0.10 220 / .25), oklch(0.78 0.16 155 / .15));
+    border: 1px solid var(--line-2);
+    color: var(--ice);
+    display: grid; place-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .um-id{ min-width: 0 }
+  .um-name{ font-size: 13.5px; color: var(--ink); font-weight: 500; letter-spacing: -0.005em }
+  .um-email{
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; color: var(--mute);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .um-plan{
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .um-row{
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--mute);
+    padding: 3px 0;
+  }
+  .um-row b{ color: var(--ink); font-weight: 500 }
+  .um-row .ice{ color: var(--ice); font-weight: 600 }
+  .um-row.sub{ color: var(--mute); opacity: .75 }
+  .um-bar{
+    height: 4px;
+    background: rgba(255,255,255,.04);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 6px 0 4px;
+  }
+  .um-bar i{
+    display: block; height: 100%; width: 0;
+    background: linear-gradient(90deg, var(--ice), var(--aurora));
+    border-radius: 2px;
+    transition: width .8s cubic-bezier(.2,.7,.2,1);
+  }
+  .um-section{ padding: 4px 0; border-bottom: 1px solid var(--line) }
+  .um-section:last-of-type{ border-bottom: none }
+  .um-item{
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 16px;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .12s ease, color .12s ease;
+  }
+  .um-item:hover{ background: var(--panel-2); color: var(--ink) }
+  .um-item .glyph{
+    color: var(--mute);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    text-align: center;
+  }
+  .um-item .meta{
+    color: var(--mute);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+  }
+  .um-item .ext{
+    color: var(--ice);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+  }
+  .um-item.danger{ color: var(--red) }
+  .um-item.danger:hover{ background: oklch(0.70 0.18 25 / .10); color: var(--red) }
+  .um-item.danger .glyph{ color: var(--red) }
+  .um-foot{
+    padding: 8px 16px;
+    background: var(--bg-2);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--mute);
+    text-align: center;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  /* === SIGN-OUT TOAST ======================================= */
+  .signout-toast{
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(.96);
+    background: var(--panel);
+    border: 1px solid var(--ice);
+    border-radius: 12px;
+    padding: 22px 30px;
+    z-index: 100;
+    box-shadow: 0 40px 80px -10px rgba(0,0,0,.8), 0 0 60px -10px rgba(125,211,252,.3);
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12.5px;
+    color: var(--ink);
+    opacity: 0;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .signout-toast.show{ opacity: 1; transform: translate(-50%, -50%) scale(1) }
+  .signout-toast .title{ color: var(--aurora); margin-bottom: 6px; font-size: 13px }
+  .signout-toast .sub{ color: var(--mute); font-size: 11px; letter-spacing: .04em }
+
+  /* === CRUMB ROW ============================================= */
+  .crumb-row{
+    display: flex; align-items: center;
+    padding: 0 14px;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+    gap: 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--mute);
+  }
+  .crumb-row .crumb{ display: flex; align-items: center; gap: 6px }
+  .crumb-row .crumb b{ color: var(--ink); font-weight: 500 }
+  .crumb-row .crumb .sep{ opacity: .35 }
+  .crumb-row .branch{
+    margin-left: auto;
+    padding: 3px 9px;
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    color: var(--ink-2);
+  }
+
+  /* === MAIN FRAME — 5 columns =============================== */
+  .frame{
+    display: grid;
+    grid-template-columns: 44px 240px 1fr 400px 200px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* === ACTIVITY BAR ========================================== */
+  .activity{
+    background: var(--bg-2);
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    gap: 4px;
+  }
+  .act{
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    color: var(--mute);
+    border-radius: 6px;
+    position: relative;
+    transition: color .15s ease, background .15s ease;
+  }
+  .act:hover{ color: var(--ink-2); background: var(--panel-2) }
+  .act.active{ color: var(--ink); background: var(--panel-2) }
+  .act.active::before{
+    content: ""; position: absolute;
+    left: -8px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--ice);
+    border-radius: 2px;
+  }
+  .act svg{ width: 18px; height: 18px }
+  .act.compass svg{ width: 24px; height: 24px }
+  .act-spacer{ flex: 1 }
+
+  /* === EXPLORER (file tree) ================================= */
+  .explorer{
+    background: var(--bg-2);
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    min-height: 0;
+  }
+  .explorer .head{
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    border-bottom: 1px solid var(--line);
+  }
+  .explorer .head .ico{
+    display: inline-flex; gap: 4px;
+    color: var(--mute);
+  }
+  .explorer .head .ico svg{ width: 14px; height: 14px }
+  .explorer .head .ico svg:hover{ color: var(--ink) }
+
+  .tree-scroll{ flex: 1; overflow-y: auto; padding: 6px 0 10px;
+    font-family: "JetBrains Mono", monospace; font-size: 12.5px }
+  .tree-scroll::-webkit-scrollbar{ width: 4px }
+  .tree-scroll::-webkit-scrollbar-thumb{ background: var(--line-2); border-radius: 2px }
+  .tree ul{ list-style: none; padding: 0; margin: 0 }
+  .tree li{
+    padding: 0;
+    color: var(--ink-2);
+    line-height: 1.5;
+    position: relative;
+  }
+  .tree li > .name{
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 14px;
+    cursor: default;
+    border-radius: 0;
+    transition: background .15s ease, color .15s ease;
+  }
+  .tree li > .name:hover{ background: var(--panel-2) }
+  .tree li.folder > .name::before{
+    content: "▸";
+    color: var(--mute);
+    font-size: 9px;
+    width: 8px;
+  }
+  .tree li.folder.open > .name::before{ content: "▾" }
+  .tree li.folder > .name .glyph{
+    width: 14px; color: var(--warn); opacity: .65;
+  }
+  .tree li.file > .name::before{ content: ""; width: 8px }
+  .tree li.file > .name .glyph{
+    width: 14px; color: var(--ice); opacity: .8;
+  }
+  .tree li.file.modified > .name .glyph{ color: var(--warn) }
+  .tree li.file.modified > .name::after{
+    content: "M";
+    margin-left: auto;
+    font-size: 9.5px;
+    color: var(--warn);
+    font-weight: 600;
+  }
+  .tree li.file.added > .name::after{
+    content: "A";
+    margin-left: auto;
+    font-size: 9.5px;
+    color: var(--aurora);
+    font-weight: 600;
+  }
+  .tree li.file.added > .name .glyph{ color: var(--aurora) }
+  .tree li ul{ padding-left: 14px }
+  .tree li.active > .name{
+    background: oklch(0.83 0.10 220 / .12);
+    color: var(--ink);
+  }
+  .tree li.reading > .name{
+    background: oklch(0.78 0.16 155 / .15);
+    color: var(--ink);
+    animation: tree-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes tree-pulse{
+    0%,100% { background: oklch(0.78 0.16 155 / .10) }
+    50%     { background: oklch(0.78 0.16 155 / .22) }
+  }
+
+  /* === EDITOR ================================================ */
+  .editor{
+    display: flex; flex-direction: column;
+    background: var(--panel);
+    min-width: 0; min-height: 0;
+    border-right: 1px solid var(--line);
+  }
+  .tabs{
+    display: flex;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .tabs::-webkit-scrollbar{ height: 0 }
+  .tab{
+    padding: 9px 16px 9px 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--mute);
+    border-right: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px;
+    cursor: default;
+    position: relative;
+    white-space: nowrap;
+  }
+  .tab .glyph{ color: var(--ice); opacity: .75 }
+  .tab.active{ background: var(--panel); color: var(--ink) }
+  .tab.active::before{
+    content: ""; position: absolute;
+    left: 0; right: 0; top: 0; height: 2px;
+    background: var(--ice);
+  }
+  .tab.modified .x::before{ content: "●"; color: var(--warn); font-size: 9px }
+  .tab .x{ width: 16px; height: 16px; display: grid; place-items: center; color: var(--mute) }
+  .tab .x:hover{ color: var(--ink) }
+  .tab.active .x::before{ content: "×" }
+  .tab.modified.active .x::before{ content: "●"; color: var(--warn); font-size: 9px }
+
+  .code-frame{
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 48px;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--panel);
+    position: relative;
+  }
+  .code{
+    overflow-y: auto;
+    padding: 14px 0 14px 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--ink);
+  }
+  .code::-webkit-scrollbar{ width: 6px }
+  .code::-webkit-scrollbar-thumb{ background: var(--line-2); border-radius: 3px }
+  .code .line{
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 10px;
+    padding: 0 16px 0 0;
+    white-space: pre;
+    position: relative;
+  }
+  .code .gut{
+    color: var(--mute);
+    text-align: right;
+    user-select: none;
+    font-size: 11px;
+    opacity: .55;
+    padding-top: 2px;
+  }
+  .code .line.cur .gut{ color: var(--ice); opacity: 1 }
+  .code .line.cur{ background: oklch(0.83 0.10 220 / .04) }
+  .code .line.hl-old{ background: oklch(0.70 0.18 25 / .14); position: relative }
+  .code .line.hl-old::before{
+    content: "−"; position: absolute; left: 4px; color: var(--red); font-weight: 600;
+  }
+  .code .line.removing{ animation: line-shatter .6s ease forwards }
+  @keyframes line-shatter{
+    0%   { opacity: 1; transform: translateX(0); filter: blur(0) }
+    60%  { opacity: .35; transform: translateX(-4px); filter: blur(.4px) }
+    100% { opacity: 0; transform: translateX(-14px); height: 0; padding: 0; line-height: 0; margin: 0 }
+  }
+  .code .line.ghost{
+    background: oklch(0.78 0.16 155 / .07);
+    color: oklch(0.85 0.05 155);
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  .code .line.ghost.show{
+    opacity: 1; transform: translateY(0);
+    transition: opacity .35s ease, transform .35s ease, background .5s ease;
+  }
+  .code .line.ghost::before{
+    content: "+"; position: absolute; left: 4px;
+    color: var(--aurora); font-weight: 600;
+  }
+  .code .line.ghost.committing{ background: oklch(0.78 0.16 155 / .26); animation: line-freeze .7s ease forwards }
+  @keyframes line-freeze{
+    0%   { background: oklch(0.78 0.16 155 / .25) }
+    60%  { background: oklch(0.85 0.05 155 / .35) }
+    100% { background: transparent; color: var(--ink) }
+  }
+  .code .line.ghost.committed{ background: transparent; color: var(--ink); opacity: 1 }
+  .code .line.ghost.committed::before{ display: none }
+  .code .caret{
+    display: inline-block; width: 7px; height: 14px;
+    background: var(--ice); vertical-align: -2px;
+    margin: 0 1px;
+    animation: caret-blink 1s steps(1) infinite;
+  }
+  @keyframes caret-blink{ 50%{ opacity: 0 } }
+
+  .kw{ color: var(--magenta) }
+  .ty{ color: var(--aurora-2) }
+  .fn{ color: var(--ice) }
+  .var{ color: var(--ink) }
+  .str{ color: var(--aurora) }
+  .com{ color: var(--mute); font-style: italic }
+  .num{ color: var(--warn) }
+
+  .profile{
+    background: linear-gradient(180deg, var(--bg-2) 0%, oklch(0.10 0.04 235) 100%);
+    border-left: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .profile::before{
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(180deg, transparent 0%, transparent 24%, rgba(125,211,252,.04) 25%, transparent 26%, transparent 49%, rgba(125,211,252,.04) 50%, transparent 51%, transparent 74%, rgba(125,211,252,.04) 75%, transparent 76%);
+    pointer-events: none;
+  }
+  .profile svg{ width: 100%; height: 100%; display: block; position: relative; z-index: 1 }
+  .profile .peak{
+    fill: oklch(0.83 0.10 220);
+    filter: drop-shadow(0 0 3px oklch(0.83 0.10 220));
+  }
+  .profile .peak-fn{
+    fill: oklch(0.78 0.16 155);
+    filter: drop-shadow(0 0 3px oklch(0.78 0.16 155));
+  }
+  .profile .shimmer{
+    animation: profile-shimmer 6s ease-in-out infinite;
+  }
+  @keyframes profile-shimmer{
+    0%, 100% { opacity: .15 }
+    50%      { opacity: .45 }
+  }
+  .profile .ax{ stroke: var(--line-2); stroke-width: .3 }
+  .profile .indicator{
+    position: absolute;
+    right: 0; left: 0;
+    height: 18px;
+    pointer-events: none;
+    top: 18%;
+    transition: top .8s cubic-bezier(.2,.7,.2,1);
+    z-index: 2;
+  }
+  .profile .indicator::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at right center, oklch(0.83 0.10 220 / .45) 0%, transparent 70%);
+  }
+  .profile .indicator::after{
+    content: "";
+    position: absolute;
+    right: 0; top: 50%;
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent 30%, oklch(0.78 0.16 155) 100%);
+    transform: translateY(-.5px);
+    box-shadow: 0 0 4px oklch(0.78 0.16 155);
+  }
+  .profile .indicator .label{
+    position: absolute;
+    right: 4px; top: 50%;
+    transform: translateY(-50%);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    color: var(--aurora);
+    letter-spacing: .05em;
+    background: var(--bg-2);
+    padding: 1px 4px;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+  }
+
+  .kernel-log{
+    flex-shrink: 0;
+    border-top: 1px solid var(--line);
+    padding: 6px 14px;
+    background: var(--bg-2);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--mute);
+    line-height: 1.7;
+    max-height: 78px;
+    overflow-y: auto;
+  }
+  .kernel-log::-webkit-scrollbar{ width: 3px }
+  .kernel-log::-webkit-scrollbar-thumb{ background: var(--line-2) }
+  .kernel-log div{ opacity: 0; animation: log-in .25s ease forwards }
+  @keyframes log-in{
+    from{ opacity: 0; transform: translateX(-4px) }
+    to  { opacity: 1; transform: translateX(0) }
+  }
+  .kernel-log .ts{ color: var(--ice); opacity: .6 }
+  .kernel-log .ok{ color: var(--aurora) }
+
+  /* === CHAT ================================================== */
+  .chat{
+    display: flex; flex-direction: column;
+    background: var(--panel);
+    min-width: 0; min-height: 0;
+    border-right: 1px solid var(--line);
+    position: relative;
+  }
+  .chat-head{
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .chat-head .title{
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .chat-head .aurora-mark{ width: 18px; height: 18px }
+  .chat-head .aurora-mark svg{ width: 100%; height: 100%; overflow: visible }
+  .chat-head .aurora-mark .w{ fill: none; stroke-width: 1.4; stroke-linecap: round }
+  .chat-head .aurora-mark .w1{ stroke: var(--aurora) }
+  .chat-head .aurora-mark .w2{ stroke: var(--ice); opacity: .8 }
+  .chat-head .chat-actions{ display: flex; gap: 4px }
+  .chat-head .chat-actions button{
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    border-radius: 5px;
+    color: var(--mute);
+    transition: color .15s, background .15s;
+  }
+  .chat-head .chat-actions button:hover{ color: var(--ink); background: var(--panel-2) }
+  .chat-head .chat-actions svg{ width: 14px; height: 14px }
+
+  .convo{
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 14px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .convo::-webkit-scrollbar{ width: 4px }
+  .convo::-webkit-scrollbar-thumb{ background: var(--line-2) }
+
+  .msg{
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 10px;
+    animation: msg-in .35s cubic-bezier(.2,.7,.2,1);
+  }
+  @keyframes msg-in{
+    from{ opacity: 0; transform: translateY(6px) }
+    to  { opacity: 1; transform: translateY(0) }
+  }
+  .msg .avatar{
+    width: 24px; height: 24px; border-radius: 5px;
+    display: grid; place-items: center;
+    font-family: "JetBrains Mono", monospace; font-size: 10.5px; font-weight: 600;
+  }
+  .msg.user .avatar{ background: var(--panel-2); color: var(--ink-2); border: 1px solid var(--line-2) }
+  .msg.ai .avatar{ background: var(--bg-2); border: 1px solid var(--line); padding: 4px }
+  .msg .avatar .aurora-mark{ width: 100%; height: 100%; display: block }
+  .msg .avatar .aurora-mark svg{ width: 100%; height: 100% }
+  .msg .avatar .aurora-mark .w{ fill: none; stroke-width: 1.4; stroke-linecap: round }
+  .msg .avatar .aurora-mark .w1{ stroke: var(--aurora) }
+  .msg .avatar .aurora-mark .w2{ stroke: var(--ice); opacity: .8 }
+  .msg .meta{
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 4px;
+  }
+  .msg .meta b{ color: var(--ink-2); font-weight: 500 }
+  .msg .body{ font-size: 14px; line-height: 1.55; color: var(--ink) }
+  .msg .body code{
+    font-family: "JetBrains Mono", monospace; font-size: 12px;
+    background: var(--panel-2); border: 1px solid var(--line);
+    padding: 1px 6px; border-radius: 3px; color: var(--ice);
+  }
+  .tools{
+    margin-top: 6px;
+    border-left: 1px solid var(--line);
+    padding: 4px 0 4px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .tools .step{
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    color: var(--mute);
+    line-height: 1.6;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tools .step .glyph{ width: 10px; text-align: center }
+  .tools .step.run .glyph{ color: var(--ice); animation: glyph-spin 1s linear infinite }
+  .tools .step.done{ color: var(--ink-2) }
+  .tools .step.done .glyph{ color: var(--aurora) }
+  .tools .step.done .glyph::after{ content: "✓" }
+  .tools .step.run .glyph::after{ content: "↻" }
+  .tools .step.queue .glyph::after{ content: "·" }
+  @keyframes glyph-spin{ to{ transform: rotate(360deg) } }
+
+  /* === COMPOSER ============================================= */
+  .composer{
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+    flex-shrink: 0;
+    padding: 7px 10px 8px;
+    position: relative;
+  }
+  .attach-chips{
+    display: flex; gap: 5px; flex-wrap: wrap;
+    margin-bottom: 6px;
+    min-height: 0;
+  }
+  .attach-chips:empty{ display: none }
+  .chip{
+    display: inline-flex; align-items: center;
+    gap: 5px;
+    padding: 2px 7px;
+    background: var(--panel-2);
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--ink-2);
+  }
+  .chip .ice{ color: var(--ice) }
+  .chip .aur{ color: var(--aurora) }
+  .chip .x{ color: var(--mute); cursor: pointer; padding: 0 2px }
+  .chip .x:hover{ color: var(--ink) }
+
+  .composer-input{
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--ink);
+    min-height: 38px;
+    max-height: 160px;
+    overflow-y: auto;
+    display: block;
+    width: 100%;
+    outline: none;
+    resize: none;
+    line-height: 1.5;
+    transition: border-color .15s;
+  }
+  .composer-input::-webkit-scrollbar{ width: 4px }
+  .composer-input::-webkit-scrollbar-thumb{ background: var(--line-2) }
+  .composer-input:focus{ border-color: var(--ice) }
+  .composer-input.empty::before{
+    content: attr(data-placeholder);
+    color: var(--mute);
+    pointer-events: none;
+  }
+  .composer-input .caret{
+    display: inline-block; width: 7px; height: 14px;
+    background: var(--ice); vertical-align: -2px;
+    margin-left: 2px;
+    animation: caret-blink 1s steps(1) infinite;
+  }
+
+  .composer-bar{
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 6px;
+    gap: 5px;
+  }
+  .composer-bar .left, .composer-bar .right{
+    display: flex; align-items: center; gap: 3px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .composer-bar .left{ justify-content: flex-start }
+  .composer-bar .right{ justify-content: flex-start }
+  .composer-bar .right .send{ margin-left: auto }
+  .cbtn{
+    display: inline-flex; align-items: center; gap: 5px;
+    height: 23px;
+    padding: 0 7px;
+    border-radius: 5px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--ink-2);
+    border: 1px solid transparent;
+    transition: background .12s, color .12s, border-color .12s;
+    position: relative;
+  }
+  .cbtn:hover{
+    background: var(--panel-2);
+    color: var(--ink);
+    border-color: var(--line-2);
+  }
+  .cbtn svg{ width: 12px; height: 12px; opacity: .85 }
+  .cbtn small{ color: var(--mute); margin-left: 1px; font-size: 9.5px }
+  .cbtn .ctx-meta{
+    color: var(--mute);
+    font-size: 9.5px;
+    font-weight: 400;
+    margin-left: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+    white-space: nowrap;
+  }
+  .cbtn.toggle.on{
+    background: oklch(0.83 0.10 220 / .10);
+    color: var(--ice);
+    border-color: oklch(0.83 0.10 220 / .35);
+  }
+  .cbtn.toggle.on svg{ opacity: 1 }
+  .cbtn.icon-only{ width: 23px; justify-content: center; padding: 0 }
+  .cbtn.send{
+    background: var(--ice);
+    color: #06121d;
+    font-weight: 600;
+    border-color: transparent;
+  }
+  .cbtn.send:hover{ background: #fff; color: #06121d }
+  .cbtn.send kbd{
+    margin-right: 2px;
+    color: rgba(6,18,29,.6);
+    font-family: inherit;
+  }
+  /* divider between control groups in the bar */
+  .composer-bar .vsep{
+    width: 1px; height: 16px;
+    background: var(--line-2);
+    margin: 0 2px;
+    flex-shrink: 0;
+  }
+
+  /* dropdowns */
+  .menu{
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    min-width: 200px;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    padding: 4px;
+    box-shadow: 0 18px 40px -10px rgba(0,0,0,.7);
+    z-index: 30;
+    display: none;
+  }
+  .cbtn.open .menu{ display: block }
+  .menu .mi{
+    display: grid;
+    grid-template-columns: 14px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 5px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+  .menu .mi:hover{ background: var(--panel-2); color: var(--ink) }
+  .menu .mi.on{ color: var(--ink) }
+  .menu .mi.on::after{
+    content: "✓";
+    color: var(--ice);
+    font-size: 11px;
+  }
+  .menu .mi .glyph{ color: var(--ice); opacity: .85 }
+  .menu .mi small{ color: var(--mute); font-size: 10px; display: block; margin-top: 2px; letter-spacing: 0 }
+  .menu .mi .meta{ font-size: 10px; color: var(--mute) }
+  .menu .group-title{
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    padding: 6px 10px 4px;
+    border-top: 1px solid var(--line);
+    margin-top: 4px;
+  }
+  .menu .group-title:first-child{ border-top: none; margin-top: 0 }
+  .menu.right-anchor{ left: auto; right: 0 }
+
+  /* === HISTORY DROPDOWN (composer, opens upward) ============ */
+  .menu.history-menu{
+    min-width: 290px;
+    max-width: 330px;
+    max-height: min(58vh, 460px);
+    overflow-y: auto;
+    padding: 4px;
+  }
+  .menu.history-menu::-webkit-scrollbar{ width: 4px }
+  .menu.history-menu::-webkit-scrollbar-thumb{ background: var(--line-2); border-radius: 2px }
+  .menu .h-search{
+    display: flex; align-items: center; gap: 6px;
+    margin: 2px 2px 4px;
+    padding: 5px 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+  }
+  .menu .h-search svg{ width: 12px; height: 12px; color: var(--mute) }
+  .menu .h-search input{
+    flex: 1; min-width: 0;
+    background: transparent; border: none; outline: none;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; color: var(--ink);
+  }
+  .menu .h-search input::placeholder{ color: var(--mute) }
+  .h-mi{
+    display: block;
+    padding: 7px 10px;
+    border-radius: 5px;
+    border-left: 2px solid transparent;
+    cursor: pointer;
+    transition: background .12s;
+  }
+  .h-mi:hover{ background: var(--panel-2) }
+  .h-mi.active{ background: var(--panel-2); border-left-color: var(--ice) }
+  .h-mi .date{
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px; color: var(--mute);
+    text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: 3px;
+  }
+  .h-mi .title{ font-size: 12px; color: var(--ink); line-height: 1.35; margin-bottom: 2px }
+  .h-mi .preview{
+    font-size: 10.5px; color: var(--mute); line-height: 1.35;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .h-mi .badge{
+    display: inline-block; margin-top: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8.5px; color: var(--aurora);
+    padding: 1px 6px; background: oklch(0.78 0.16 155 / .08);
+    border-radius: 3px; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .h-empty{ padding: 14px 12px; text-align: center; color: var(--mute);
+    font-family: "JetBrains Mono", monospace; font-size: 10.5px }
+
+  /* === SCROLL-TO-BOTTOM (chat) ============================== */
+  .scroll-bottom{
+    position: absolute;
+    top: -36px; right: 14px;
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    border-radius: 50%;
+    color: var(--ink-2);
+    box-shadow: 0 8px 22px -6px rgba(0,0,0,.65);
+    opacity: 0; transform: translateY(6px) scale(.92);
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease, color .15s, border-color .15s;
+    z-index: 9;
+  }
+  .scroll-bottom.show{ opacity: 1; transform: translateY(0) scale(1); pointer-events: auto }
+  .scroll-bottom:hover{ color: var(--ice); border-color: var(--ice) }
+  .scroll-bottom svg{ width: 15px; height: 15px }
+  .scroll-bottom .ndot{
+    position: absolute; top: -3px; right: -3px;
+    min-width: 14px; height: 14px; padding: 0 3px;
+    background: var(--ice); color: #06121d;
+    border-radius: 7px;
+    font-family: "JetBrains Mono", monospace; font-size: 8.5px; font-weight: 700;
+    display: none; place-items: center;
+  }
+  .scroll-bottom.has-new .ndot{ display: grid }
+
+  /* === IN-EDITOR BROWSER / PREVIEW ========================== */
+  .browser{
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    background: var(--panel);
+    z-index: 6;
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+  .browser.show{ display: flex; opacity: 1 }
+  .browser-chrome{
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 12px;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .browser-dots{ display: flex; gap: 6px; flex-shrink: 0 }
+  .browser-dots i{ width: 10px; height: 10px; border-radius: 50%; display: block; opacity: .85 }
+  .browser-dots .r{ background: oklch(0.70 0.18 25) }
+  .browser-dots .y{ background: oklch(0.78 0.13 80) }
+  .browser-dots .g{ background: oklch(0.78 0.16 155) }
+  .browser-nav{ display: flex; gap: 1px; color: var(--mute); flex-shrink: 0 }
+  .browser-nav span{ width: 20px; height: 20px; display: grid; place-items: center; border-radius: 4px; font-size: 13px }
+  .browser-nav span:hover{ background: var(--panel-2); color: var(--ink) }
+  .browser-url{
+    flex: 1;
+    display: flex; align-items: center; gap: 7px;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    min-width: 0;
+  }
+  .browser-url .lock{ color: var(--aurora); font-size: 10px; flex-shrink: 0 }
+  .browser-url .u{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+  .browser-url .spin{
+    margin-left: auto; width: 11px; height: 11px; flex-shrink: 0;
+    border: 1.5px solid var(--line-2); border-top-color: var(--ice);
+    border-radius: 50%;
+    animation: glyph-spin .7s linear infinite;
+    display: none;
+  }
+  .browser.loading .browser-url .spin{ display: block }
+  .browser-viewport{
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+  }
+  .browser-viewport::-webkit-scrollbar{ width: 8px }
+  .browser-viewport::-webkit-scrollbar-thumb{ background: var(--line-2); border-radius: 4px }
+  .browser-progress{
+    position: absolute; top: 0; left: 0; height: 2px; width: 0;
+    background: linear-gradient(90deg, var(--ice), var(--aurora));
+    z-index: 4; opacity: 0;
+    transition: width .4s ease, opacity .3s ease;
+    pointer-events: none;
+  }
+  .browser.loading .browser-progress{ opacity: 1 }
+
+  /* agent "vision" — scan sweep while the model reads a rendered page */
+  .browser-scan{
+    position: absolute; left: 0; right: 0; top: 34px; bottom: 0;
+    overflow: hidden; pointer-events: none; z-index: 3;
+    opacity: 0; transition: opacity .2s ease;
+  }
+  .browser.scanning .browser-scan{ opacity: 1 }
+  .browser-scan i{
+    position: absolute; left: 0; right: 0; top: 0; height: 2px;
+    transform: translateY(-90px);
+    background: linear-gradient(90deg, transparent, oklch(0.83 0.10 220 / .9) 50%, transparent);
+    box-shadow: 0 0 18px 3px oklch(0.83 0.10 220 / .45);
+  }
+  .browser-scan i::after{
+    content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 88px;
+    background: linear-gradient(180deg, transparent, oklch(0.83 0.10 220 / .12));
+  }
+  .browser.scanning .browser-scan i{ animation: vscan 1.6s ease-in-out 2 }
+  @keyframes vscan{
+    0%   { transform: translateY(-90px); opacity: .25 }
+    12%  { opacity: 1 }
+    88%  { opacity: 1 }
+    100% { transform: translateY(var(--scanH, 480px)); opacity: .25 }
+  }
+
+  /* collapsible folders — real-IDE behaviour */
+  .tree li.folder:not(.open) > ul{ display: none }
+
+  /* respect reduced-motion: kill the continuous decorative animations */
+  @media (prefers-reduced-motion: reduce){
+    .bg-topo svg{ animation: none }
+    .bg-aurora{ opacity: .12 }
+    .browser.scanning .browser-scan i{ animation: none }
+    .composer-input .caret, .code .caret{ animation: none }
+    .tools .step.run .glyph{ animation: none }
+  }
+
+  /* --- docs page --- */
+  .bp{ font-family: "Onest", system-ui, sans-serif; color: var(--ink); }
+  .bp-docs{ display: grid; grid-template-columns: 168px 1fr; min-height: 100%; }
+  .bp-docs .side{
+    border-right: 1px solid var(--line);
+    background: var(--bg-2);
+    padding: 18px 0;
+    font-size: 12px;
+  }
+  .bp-docs .side .grp{ padding: 6px 18px; color: var(--mute); font-size: 9.5px; text-transform: uppercase; letter-spacing: .12em; font-family: "JetBrains Mono", monospace }
+  .bp-docs .side a{ display: block; padding: 5px 18px; color: var(--ink-2); text-decoration: none }
+  .bp-docs .side a.on{ color: var(--ice); border-left: 2px solid var(--ice); background: oklch(0.83 0.10 220 / .08) }
+  .bp-docs .doc{ padding: 26px 34px 60px; max-width: 640px }
+  .bp-docs .crumbs{ font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--mute); margin-bottom: 14px }
+  .bp-docs h1{ font-size: 26px; font-weight: 600; margin: 0 0 10px; letter-spacing: -.01em }
+  .bp-docs h2{ font-size: 17px; font-weight: 600; margin: 26px 0 8px; color: var(--ink) }
+  .bp-docs p{ font-size: 13.5px; line-height: 1.7; color: var(--ink-2); margin: 0 0 12px }
+  .bp-docs code{ font-family: "JetBrains Mono", monospace; font-size: 12px; background: var(--panel-2); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; color: var(--ice) }
+  .bp-docs pre{
+    background: var(--bg-2); border: 1px solid var(--line-2);
+    border-radius: 8px; padding: 14px 16px; overflow-x: auto;
+    font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.7;
+    margin: 0 0 16px;
+  }
+  .bp-docs .note{
+    border-left: 3px solid var(--aurora);
+    background: oklch(0.78 0.16 155 / .06);
+    padding: 10px 14px; border-radius: 0 8px 8px 0;
+    font-size: 12.5px; color: var(--ink-2); margin: 0 0 16px;
+  }
+
+  /* --- live site preview page --- */
+  .bp-site{ min-height: 100%; background:
+      radial-gradient(900px 420px at 80% -8%, oklch(0.62 0.13 235 / .22), transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%); }
+  .bp-site .nav{
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 30px;
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0;
+    background: oklch(0.07 0.012 250 / .96);
+  }
+  .bp-site .nav .brand{ display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px }
+  .bp-site .nav .brand .dot{ color: var(--ice) }
+  .bp-site .nav .lk{ color: var(--ink-2); font-size: 12.5px }
+  .bp-site .nav .lk:nth-child(2){ margin-left: auto }
+  .bp-site .nav .cta{ background: var(--ice); color: #06121d; font-weight: 600; padding: 6px 14px; border-radius: 6px; font-size: 12px }
+  .bp-site .hero{ padding: 64px 30px 40px; text-align: center }
+  .bp-site .hero .tag{
+    display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 11px;
+    color: var(--aurora); border: 1px solid oklch(0.78 0.16 155 / .35);
+    background: oklch(0.78 0.16 155 / .07);
+    padding: 4px 12px; border-radius: 999px; margin-bottom: 20px;
+  }
+  .bp-site .hero h1{ font-size: 44px; line-height: 1.05; font-weight: 600; margin: 0 auto 16px; max-width: 620px; letter-spacing: -.02em }
+  .bp-site .hero h1 .grad{ background: linear-gradient(90deg, var(--ice), var(--aurora)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent }
+  .bp-site .hero p{ font-size: 15px; color: var(--ink-2); max-width: 480px; margin: 0 auto 26px; line-height: 1.6 }
+  .bp-site .hero .row{ display: flex; gap: 10px; justify-content: center }
+  .bp-site .hero .b1{ background: var(--ice); color: #06121d; font-weight: 600; padding: 10px 20px; border-radius: 8px; font-size: 13.5px }
+  .bp-site .hero .b2{ border: 1px solid var(--line-2); color: var(--ink); padding: 10px 20px; border-radius: 8px; font-size: 13.5px }
+  .bp-site .cards{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 20px 30px 50px; max-width: 880px; margin: 0 auto }
+  .bp-site .card{
+    background: var(--panel); border: 1px solid var(--line-2);
+    border-radius: 12px; padding: 18px;
+  }
+  .bp-site .card .ico{ width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: oklch(0.83 0.10 220 / .12); color: var(--ice); margin-bottom: 12px; font-size: 15px }
+  .bp-site .card h3{ font-size: 14.5px; font-weight: 600; margin: 0 0 6px }
+  .bp-site .card p{ font-size: 12.5px; color: var(--ink-2); line-height: 1.55; margin: 0 }
+  .bp-site .strip{ text-align: center; padding: 30px; border-top: 1px solid var(--line); color: var(--mute); font-family: "JetBrains Mono", monospace; font-size: 11px }
+
+  /* === HISTORY =============================================== */
+  .history{
+    background: var(--bg-2);
+    display: flex; flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .history .head{
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    border-bottom: 1px solid var(--line);
+  }
+  .history .head .plus{ width: 20px; height: 20px; color: var(--mute) }
+  .history .head .plus:hover{ color: var(--ice) }
+  .history .head .plus svg{ width: 13px; height: 13px }
+  .history-list{
+    flex: 1; overflow-y: auto;
+    padding: 4px 0 10px;
+  }
+  .history-list::-webkit-scrollbar{ width: 4px }
+  .history-list::-webkit-scrollbar-thumb{ background: var(--line-2) }
+  .h-item{
+    display: block;
+    padding: 9px 14px;
+    border-left: 2px solid transparent;
+    cursor: default;
+    transition: background .15s;
+  }
+  .h-item:hover{ background: var(--panel-2) }
+  .h-item.active{
+    background: var(--panel-2);
+    border-left-color: var(--ice);
+  }
+  .h-item .date{
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 4px;
+  }
+  .h-item .title{
+    font-size: 12.5px;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .h-item .preview{
+    font-size: 11px;
+    color: var(--mute);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .h-item .badge{
+    display: inline-block;
+    margin-top: 5px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    color: var(--aurora);
+    padding: 1px 6px;
+    background: oklch(0.78 0.16 155 / .08);
+    border-radius: 3px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .history-section{
+    padding: 8px 14px 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    border-bottom: 1px solid var(--line);
+    margin-top: 4px;
+  }
+
+  /* === STATUSBAR ============================================= */
+  .statusbar{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 14px;
+    background: var(--bg-2);
+    border-top: 1px solid var(--line);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--mute);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .statusbar::-webkit-scrollbar{ height: 0 }
+  .statusbar .item{
+    display: inline-flex; align-items: center;
+    gap: 6px;
+    height: 100%;
+    padding: 0 6px;
+  }
+  .statusbar .item:hover{ background: var(--panel-2) }
+  .statusbar .dot{
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--aurora);
+    box-shadow: 0 0 6px var(--aurora);
+  }
+  .statusbar .num{ color: var(--ink) }
+  .statusbar .spacer{ flex: 1 }
+  .statusbar .ice{ color: var(--ice) }
+  .statusbar .warn{ color: var(--warn) }
+
+  /* === RESPONSIVE ============================================ */
+  @media (max-width: 1380px){
+    .frame{ grid-template-columns: 44px 220px 1fr 380px }
+    .history{ display: none }
+  }
+  @media (max-width: 1240px){
+    .cbtn .ctx-meta{ display: none }
+  }
+  @media (max-width: 1100px){
+    .frame{ grid-template-columns: 44px 200px 1fr 340px }
+  }
+  @media (max-width: 880px){
+    html, body{ overflow: auto }
+    .ide{ position: relative; height: auto; min-height: calc(100vh - 28px); margin: 14px;
+      grid-template-rows: 42px 30px 1fr auto }
+    .frame{ grid-template-columns: 1fr; grid-template-rows: auto auto auto }
+    .activity{ display: none }
+    .explorer{ display: none }
+    .editor{ min-height: 320px }
+    .chat{ min-height: 480px; border-right: none }
+    .topbar{ grid-template-columns: auto 1fr auto }
+    .topbar-center{ display: none }
+    .topbar .user .email{ display: none }
+    .topbar .user .quota{ display: none }
+    .crumb-row{ font-size: 10px }
+    .crumb-row .branch{ display: none }
+    .user-menu{ width: 280px }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ BACKDROPS ============ -->
+<div class="bg-topo" aria-hidden="true">
+  <svg viewBox="0 0 1200 1200" preserveAspectRatio="none">
+    <g fill="none" stroke="oklch(0.62 0.13 235)" stroke-width="0.6">
+      <path d="M0,200 C200,180 380,260 600,220 C820,180 1000,240 1200,200" />
+      <path d="M0,260 C220,230 400,330 620,280 C840,240 1010,300 1200,260" />
+      <path d="M0,320 C240,290 420,400 640,340 C860,290 1020,360 1200,320" />
+      <path d="M0,380 C260,350 440,460 660,400 C880,340 1030,420 1200,380" />
+      <path d="M0,440 C220,410 410,520 640,460 C870,400 1040,480 1200,440" />
+      <path d="M0,540 C260,510 420,620 660,560 C900,500 1050,580 1200,540" />
+      <path d="M0,620 C240,590 430,700 650,640 C870,580 1050,660 1200,620" />
+      <path d="M0,720 C260,690 420,800 660,740 C900,680 1050,760 1200,720" />
+      <path d="M0,820 C240,790 430,900 650,840 C870,780 1050,860 1200,820" />
+      <path d="M0,920 C260,890 420,1000 660,940 C900,880 1050,960 1200,920" />
+      <path d="M0,1020 C240,990 430,1100 650,1040 C870,980 1050,1060 1200,1020" />
+    </g>
+    <g fill="none" stroke="oklch(0.78 0.16 155)" stroke-width="0.4" opacity=".5">
+      <path d="M0,100 C260,70 460,180 700,120 C940,60 1080,140 1200,100" />
+      <path d="M0,170 C260,140 460,250 700,190 C940,130 1080,210 1200,170" />
+    </g>
+  </svg>
+</div>
+<div class="bg-aurora" aria-hidden="true">
+  <svg viewBox="0 0 1600 600" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="aur-a" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%"   stop-color="oklch(0.78 0.16 155)" stop-opacity=".5"/>
+        <stop offset="100%" stop-color="oklch(0.78 0.16 155)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="aur-b" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%"   stop-color="oklch(0.62 0.13 235)" stop-opacity=".4"/>
+        <stop offset="100%" stop-color="oklch(0.62 0.13 235)" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="aur-blur"><feGaussianBlur stdDeviation="48"/></filter>
+    </defs>
+    <g filter="url(#aur-blur)">
+      <path fill="url(#aur-a)">
+        <animate attributeName="d" dur="22s" repeatCount="indefinite"
+          values="
+            M0,180 C320,90 620,260 920,140 C1180,40 1400,180 1600,120 L1600,0 L0,0 Z;
+            M0,140 C300,260 620,100 940,220 C1240,320 1380,140 1600,220 L1600,0 L0,0 Z;
+            M0,180 C320,90 620,260 920,140 C1180,40 1400,180 1600,120 L1600,0 L0,0 Z"/>
+      </path>
+      <path fill="url(#aur-b)" opacity="0.85">
+        <animate attributeName="d" dur="30s" repeatCount="indefinite"
+          values="
+            M0,260 C260,180 580,360 880,240 C1180,140 1380,260 1600,200 L1600,0 L0,0 Z;
+            M0,220 C300,340 600,180 920,300 C1220,400 1380,240 1600,320 L1600,0 L0,0 Z;
+            M0,260 C260,180 580,360 880,240 C1180,140 1380,260 1600,200 L1600,0 L0,0 Z"/>
+      </path>
+    </g>
+  </svg>
+</div>
+<div class="bg-noise" aria-hidden="true"></div>
+
+<main class="ide" data-screen-label="01 IDE">
+
+  <!-- ============ TOPBAR ============ -->
+  <header class="topbar">
+    <div class="logo">
+      <span class="mark">
+        <svg viewBox="0 0 26 26" fill="none">
+          <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="oklch(0.83 0.10 220)" stroke-width="1.2" stroke-opacity=".4"/>
+          <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".18"/>
+          <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"/>
+        </svg>
+      </span>
+      <span><b>Alaska</b><span class="dot">-AI</span></span>
+    </div>
+
+    <div class="topbar-center" id="topbar-center">
+      <button class="top-tab" data-menu="file">Файл
+        <div class="menu-dd">
+          <div class="mdd-item" data-act="new-file"><span>Новый файл</span><span class="kbd">⌘N</span></div>
+          <div class="mdd-item"><span>Новое окно</span><span class="kbd">⇧⌘N</span></div>
+          <div class="mdd-item"><span>Открыть…</span><span class="kbd">⌘O</span></div>
+          <div class="mdd-item"><span>Открыть последние</span><span class="mdd-arrow">›</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>Сохранить</span><span class="kbd">⌘S</span></div>
+          <div class="mdd-item"><span>Сохранить как…</span><span class="kbd">⇧⌘S</span></div>
+          <div class="mdd-item"><span>Сохранить всё</span><span class="kbd">⌥⌘S</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>Закрыть редактор</span><span class="kbd">⌘W</span></div>
+          <div class="mdd-item"><span>Закрыть папку</span><span class="kbd">⌘K F</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item danger" data-act="signout"><span>Выйти из аккаунта</span><span class="kbd">⌘⇧Q</span></div>
+        </div>
+      </button>
+      <button class="top-tab" data-menu="edit">Правка
+        <div class="menu-dd">
+          <div class="mdd-item"><span>Отменить</span><span class="kbd">⌘Z</span></div>
+          <div class="mdd-item"><span>Повторить</span><span class="kbd">⌘⇧Z</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>Вырезать</span><span class="kbd">⌘X</span></div>
+          <div class="mdd-item"><span>Копировать</span><span class="kbd">⌘C</span></div>
+          <div class="mdd-item"><span>Вставить</span><span class="kbd">⌘V</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>Найти</span><span class="kbd">⌘F</span></div>
+          <div class="mdd-item"><span>Заменить</span><span class="kbd">⌥⌘F</span></div>
+          <div class="mdd-item" data-act="go-search"><span>Найти в файлах</span><span class="kbd">⇧⌘F</span></div>
+        </div>
+      </button>
+      <button class="top-tab" data-menu="selection">Выделение
+        <div class="menu-dd">
+          <div class="mdd-item"><span>Выделить всё</span><span class="kbd">⌘A</span></div>
+          <div class="mdd-item"><span>Выделить строку</span><span class="kbd">⌘L</span></div>
+          <div class="mdd-item"><span>Расширить</span><span class="kbd">⌃⇧→</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>Курсор сверху</span><span class="kbd">⌥⌘↑</span></div>
+          <div class="mdd-item"><span>Курсор снизу</span><span class="kbd">⌥⌘↓</span></div>
+          <div class="mdd-item"><span>Все вхождения</span><span class="kbd">⌘⇧L</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>Колоночное</span><span class="kbd">⌥ click</span></div>
+        </div>
+      </button>
+      <button class="top-tab" data-menu="view">Вид
+        <div class="menu-dd">
+          <div class="mdd-item"><span>Палитра команд</span><span class="kbd">⇧⌘P</span></div>
+          <div class="mdd-item"><span>Открыть вид…</span><span class="mdd-arrow">›</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>Боковая панель</span><span class="kbd">⌘B</span></div>
+          <div class="mdd-item"><span>Чат Alaska</span><span class="kbd">⌘I</span></div>
+          <div class="mdd-item"><span>Терминал</span><span class="kbd">⌃`</span></div>
+          <div class="mdd-item"><span>История чатов</span><span class="kbd">⌃⌘H</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>Полный экран</span><span class="kbd">⌃⌘F</span></div>
+          <div class="mdd-item"><span>Zen режим</span><span class="kbd">⌘K Z</span></div>
+        </div>
+      </button>
+      <button class="top-tab" data-menu="go">Перейти
+        <div class="menu-dd">
+          <div class="mdd-item"><span>К файлу…</span><span class="kbd">⌘P</span></div>
+          <div class="mdd-item"><span>К строке…</span><span class="kbd">⌃G</span></div>
+          <div class="mdd-item"><span>К символу</span><span class="kbd">⌘⇧O</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>К определению</span><span class="kbd">F12</span></div>
+          <div class="mdd-item"><span>К ссылке</span><span class="kbd">⇧F12</span></div>
+          <div class="mdd-item"><span>Назад</span><span class="kbd">⌃−</span></div>
+          <div class="mdd-item"><span>Вперёд</span><span class="kbd">⌃⇧−</span></div>
+        </div>
+      </button>
+      <button class="top-tab" data-menu="terminal">Терминал
+        <div class="menu-dd">
+          <div class="mdd-item"><span>Новый терминал</span><span class="kbd">⌃`</span></div>
+          <div class="mdd-item"><span>Разделить терминал</span><span class="kbd">⌃⇧`</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>Запустить задачу…</span><span class="kbd">⌘⇧B</span></div>
+          <div class="mdd-item"><span>Агент ALaska</span><span class="kbd">⌘I</span></div>
+          <div class="mdd-item"><span>Очистить терминал</span><span class="kbd">⌃K</span></div>
+        </div>
+      </button>
+      <button class="top-tab" data-menu="help">Помощь
+        <div class="menu-dd">
+          <div class="mdd-item"><span>Документация</span><span class="mdd-arrow">↗</span></div>
+          <div class="mdd-item"><span>Горячие клавиши</span><span class="kbd">⌘K ⌘S</span></div>
+          <div class="mdd-item"><span>Changelog</span></div>
+          <div class="mdd-item"><span>Сообщить об ошибке</span><span class="mdd-arrow">↗</span></div>
+          <div class="mdd-sep"></div>
+          <div class="mdd-item"><span>О Alaska AI</span></div>
+        </div>
+      </button>
+    </div>
+
+    <div class="user">
+      <span class="quota" title="План Pro · сброс 15 мая"><span class="dot-aur"></span>Pro · <b>$4.80 / $12</b></span>
+      <button class="user-trigger" id="user-trigger" aria-label="Профиль">
+        <span class="email">alex@warehouse.dev</span>
+        <span class="avatar">A</span>
+        <span class="caret">▾</span>
+      </button>
+      <div class="user-menu" id="user-menu">
+        <div class="um-header">
+          <div class="um-avatar">A</div>
+          <div class="um-id">
+            <div class="um-name">Alex Petrov</div>
+            <div class="um-email">alex@warehouse.dev</div>
+          </div>
+        </div>
+        <div class="um-plan">
+          <div class="um-row"><span>тариф</span><span class="ice">Pro</span></div>
+          <div class="um-row"><span>кредиты</span><span><b>$4.80</b> / $12</span></div>
+          <div class="um-bar"><i style="width:40%"></i></div>
+          <div class="um-row sub"><span>сброс</span><span>через 15 дней · 15 мая</span></div>
+        </div>
+        <div class="um-section">
+          <a class="um-item" data-um="dashboard">
+            <span class="glyph">▤</span>
+            <span>Открыть Dashboard</span>
+            <span class="ext">↗</span>
+          </a>
+          <a class="um-item" data-um="plan">
+            <span class="glyph">⊕</span>
+            <span>Сменить тариф</span>
+            <span class="meta">⌘,</span>
+          </a>
+          <a class="um-item" data-um="settings">
+            <span class="glyph">⦾</span>
+            <span>Настройки IDE</span>
+            <span class="meta">⌘,</span>
+          </a>
+          <a class="um-item" data-um="keys">
+            <span class="glyph">⊸</span>
+            <span>API-ключи</span>
+          </a>
+        </div>
+        <div class="um-section">
+          <a class="um-item" data-um="switch">
+            <span class="glyph">↻</span>
+            <span>Сменить аккаунт</span>
+          </a>
+          <a class="um-item danger" data-um="signout" id="um-signout">
+            <span class="glyph">⇦</span>
+            <span>Выйти из IDE</span>
+            <span class="meta">⌘⇧Q</span>
+          </a>
+        </div>
+        <div class="um-foot">Alaska-AI · v0.1.5 · macOS arm64</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ CRUMB ROW ============ -->
+  <div class="crumb-row">
+    <div class="crumb" id="crumb-path">
+      <span>alaska-monorepo</span>
+      <span class="sep">›</span>
+      <span>src</span>
+      <span class="sep">›</span>
+      <span>warehouse</span>
+      <span class="sep">›</span>
+      <b>moveItem.ts</b>
+      <span class="sep">›</span>
+      <span>function <span style="color:var(--ice)">moveItem</span></span>
+    </div>
+    <div class="branch">⌥ main · ↑2 ↓0</div>
+  </div>
+
+  <!-- ============ FRAME ============ -->
+  <div class="frame">
+
+    <!-- ===== ACTIVITY ===== -->
+    <nav class="activity">
+      <button class="act active" data-panel="files" title="Explorer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M3 5h4l2 2h12v11a2 2 0 0 1-2 2H3z" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="act" data-panel="search" title="Search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="11" cy="11" r="6"/><path d="m20 20-4-4"/>
+        </svg>
+      </button>
+      <button class="act" data-panel="scm" title="Source Control">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="14" r="2.5"/>
+          <path d="M6 9v6M8 18a4 4 0 0 0 4-4v-2a4 4 0 0 1 4-4"/>
+        </svg>
+        <span class="badge">5</span>
+      </button>
+      <button class="act" data-panel="debug" title="Debug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M8 10v8a4 4 0 0 0 8 0v-8M8 10a4 4 0 0 1 8 0M8 10H4M16 10h4M5 14h3M16 14h3M5 18h3M16 18h3"/>
+        </svg>
+      </button>
+      <button class="act" data-panel="ext" title="Extensions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v4a3 3 0 0 0 3 3h0a3 3 0 0 1-3-3v-4z"/>
+        </svg>
+      </button>
+      <button class="act" data-panel="chat" title="Alaska Chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M21 12c0 4.4-4 8-9 8-1.4 0-2.8-.3-4-.8L4 21l1.8-3.2C4.7 16.3 4 14.2 4 12c0-4.4 4-8 9-8s8 3.6 8 8z"/>
+        </svg>
+      </button>
+      <div class="act-spacer"></div>
+      <button class="act compass" title="Coordinates">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".4"/>
+          <path d="M12,4 L13.5,12 L12,20 L10.5,12 Z" fill="oklch(0.78 0.13 80)"/>
+          <path d="M12,4 L13.5,12 L10.5,12 Z" fill="oklch(0.70 0.18 25)"/>
+        </svg>
+      </button>
+      <button class="act" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+        </svg>
+      </button>
+    </nav>
+
+    <!-- ===== EXPLORER ===== -->
+    <aside class="explorer">
+      <div class="panel active" data-panel="files">
+      <div class="head">
+        <span>ALASKA-AI</span>
+        <span class="ico">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 3v10M3 8h10"/></svg>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 5l3 3-3 3M9 12h3"/></svg>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 8a5 5 0 1 1 10 0 5 5 0 0 1-10 0M8 5v3l2 2"/></svg>
+        </span>
+      </div>
+      <div class="tree-scroll">
+        <div class="tree">
+          <ul>
+            <li class="folder open">
+              <div class="name"><span class="glyph">▣</span>src</div>
+              <ul>
+                <li class="folder open">
+                  <div class="name"><span class="glyph">▣</span>warehouse</div>
+                  <ul>
+                    <li class="file"><div class="name"><span class="glyph">‹›</span>index.ts</div></li>
+                    <li class="file active modified" data-file="moveItem"><div class="name"><span class="glyph">‹›</span>moveItem.ts</div></li>
+                    <li class="file" data-file="types"><div class="name"><span class="glyph">‹›</span>types.ts</div></li>
+                    <li class="file" data-file="locks"><div class="name"><span class="glyph">‹›</span>locks.ts</div></li>
+                    <li class="file" data-file="errors"><div class="name"><span class="glyph">‹›</span>errors.ts</div></li>
+                  </ul>
+                </li>
+                <li class="folder">
+                  <div class="name"><span class="glyph">▣</span>api</div>
+                </li>
+                <li class="folder">
+                  <div class="name"><span class="glyph">▣</span>routes</div>
+                </li>
+                <li class="folder">
+                  <div class="name"><span class="glyph">▣</span>db</div>
+                </li>
+                <li class="file"><div class="name"><span class="glyph">‹›</span>app.ts</div></li>
+              </ul>
+            </li>
+            <li class="folder">
+              <div class="name"><span class="glyph">▣</span>tests</div>
+            </li>
+            <li class="folder">
+              <div class="name"><span class="glyph">▣</span>scripts</div>
+            </li>
+            <li class="file added"><div class="name"><span class="glyph">‹›</span>.alaskarules</div></li>
+            <li class="file"><div class="name"><span class="glyph">{ }</span>package.json</div></li>
+            <li class="file"><div class="name"><span class="glyph">md</span>README.md</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+      <!-- SEARCH PANEL -->
+      <div class="panel" data-panel="search">
+        <div class="head"><span>SEARCH</span></div>
+        <div class="search-input">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="m13 13-2.5-2.5"/></svg>
+          <input type="text" placeholder="что искать…" value="moveItem">
+          <span class="x">×</span>
+        </div>
+        <div class="search-filters">
+          <span class="search-filter on">Aa</span>
+          <span class="search-filter">.*</span>
+          <span class="search-filter">word</span>
+          <span class="search-filter">include</span>
+          <span class="search-filter">exclude</span>
+        </div>
+        <div class="search-results">
+          <div class="search-rf"><span>src/warehouse/moveItem.ts</span><span class="count">3</span></div>
+          <div class="search-rl"><span class="ln">19</span><span>export function <mark>moveItem</mark>(id, to) {</span></div>
+          <div class="search-rl"><span class="ln">42</span><span>  return <mark>moveItem</mark>(id, bin)</span></div>
+          <div class="search-rl"><span class="ln">88</span><span>// <mark>moveItem</mark> is idempotent</span></div>
+          <div class="search-rf"><span>src/api/routes.ts</span><span class="count">2</span></div>
+          <div class="search-rl"><span class="ln">31</span><span>POST /move → <mark>moveItem</mark></span></div>
+          <div class="search-rl"><span class="ln">52</span><span>handler.<mark>moveItem</mark>(req.body)</span></div>
+          <div class="search-rf"><span>tests/warehouse.spec.ts</span><span class="count">7</span></div>
+          <div class="search-rl"><span class="ln">14</span><span>describe('<mark>moveItem</mark>', () => {</span></div>
+          <div class="search-rl"><span class="ln">28</span><span>  it('<mark>moveItem</mark> locks', ...)</span></div>
+          <div class="search-rl"><span class="ln">39</span><span>  await <mark>moveItem</mark>(id, b)</span></div>
+        </div>
+      </div>
+
+      <!-- SOURCE CONTROL -->
+      <div class="panel" data-panel="scm">
+        <div class="scm-head">
+          <span>SOURCE CONTROL · main ↑2</span>
+          <span class="ico">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 8a6 6 0 1 1 12 0 6 6 0 0 1-12 0M8 5v3l2 2"/></svg>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 11l3-3-3-3M7 8h6"/></svg>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="4" cy="8" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="12" cy="8" r="1"/></svg>
+          </span>
+        </div>
+        <div class="scm-commit">
+          <textarea spellcheck="false">feat(warehouse): guard moveItem against locked items</textarea>
+          <div class="row">
+            <button class="scm-btn">✓ Commit</button>
+            <button class="scm-btn ghost">↑ Push</button>
+            <button class="scm-btn ghost">↓ Pull</button>
+            <span class="scm-meta">↑2 ↓0</span>
+          </div>
+        </div>
+        <div class="scm-list">
+          <div class="scm-group"><span>Staged</span><span class="count">2 · +24 −18</span></div>
+          <div class="scm-row"><span class="badge M">M</span><span class="path">src/warehouse/moveItem.ts</span><span class="actions"><span title="Unstage">−</span><span title="Diff">⇉</span></span></div>
+          <div class="scm-row"><span class="badge A">A</span><span class="path">tests/warehouse.spec.ts</span><span class="actions"><span title="Unstage">−</span></span></div>
+          <div class="scm-group"><span>Changes</span><span class="count">3 · +11 −2</span></div>
+          <div class="scm-row"><span class="badge M">M</span><span class="path">src/warehouse/types.ts</span><span class="actions"><span title="Stage">+</span><span title="Discard">↶</span></span></div>
+          <div class="scm-row"><span class="badge M">M</span><span class="path">README.md</span><span class="actions"><span title="Stage">+</span></span></div>
+          <div class="scm-row"><span class="badge U">?</span><span class="path">scripts/migrate.sh</span><span class="actions"><span title="Stage">+</span></span></div>
+        </div>
+      </div>
+
+      <!-- DEBUG -->
+      <div class="panel" data-panel="debug">
+        <div class="head"><span>RUN AND DEBUG</span></div>
+        <div class="panel-empty">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 10v8a4 4 0 0 0 8 0v-8M8 10a4 4 0 0 1 8 0M8 10H4M16 10h4"/></svg></span>
+          Нет конфигураций запуска.
+          <span class="meta">Создайте <b>.vscode/launch.json</b><br>или выберите шаблон.</span>
+        </div>
+      </div>
+
+      <!-- EXTENSIONS -->
+      <div class="panel" data-panel="ext">
+        <div class="head"><span>EXTENSIONS · 47</span></div>
+        <div class="panel-empty">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v4a3 3 0 0 0 3 3"/></svg></span>
+          Поиск расширений.
+          <span class="meta"><b>⌘⇧X</b> · открыть маркетплейс</span>
+        </div>
+      </div>
+
+      <!-- CHAT (info) -->
+      <div class="panel" data-panel="chat">
+        <div class="head"><span>ALASKA CHAT</span></div>
+        <div class="panel-empty">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M21 12c0 4.4-4 8-9 8-1.4 0-2.8-.3-4-.8L4 21l1.8-3.2C4.7 16.3 4 14.2 4 12c0-4.4 4-8 9-8s8 3.6 8 8z"/></svg></span>
+          Чат открыт в правой панели.
+          <span class="meta"><b>⌘I</b> · фокус на инпут</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== EDITOR ===== -->
+    <section class="editor">
+      <div class="tabs" id="tabs">
+        <div class="tab active modified" data-file="moveItem">
+          <span class="glyph">‹›</span>moveItem.ts
+          <span class="x"></span>
+        </div>
+        <div class="tab" data-file="types">
+          <span class="glyph">‹›</span>types.ts
+          <span class="x">×</span>
+        </div>
+        <div class="tab" data-file="readme">
+          <span class="glyph">md</span>README.md
+          <span class="x">×</span>
+        </div>
+      </div>
+
+      <div class="code-frame">
+        <div class="code" id="code"></div>
+        <div class="profile" aria-hidden="true">
+          <svg viewBox="0 0 48 600" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="profile-fill" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%"  stop-color="oklch(0.83 0.10 220)" stop-opacity="0"/>
+                <stop offset="60%" stop-color="oklch(0.83 0.10 220)" stop-opacity=".12"/>
+                <stop offset="100%" stop-color="oklch(0.78 0.16 155)" stop-opacity=".22"/>
+              </linearGradient>
+              <linearGradient id="profile-line" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%"  stop-color="oklch(0.62 0.13 235)" stop-opacity=".5"/>
+                <stop offset="100%" stop-color="oklch(0.83 0.10 220)" stop-opacity="1"/>
+              </linearGradient>
+              <linearGradient id="profile-shimmer" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%"  stop-color="oklch(0.78 0.16 155)" stop-opacity="0"/>
+                <stop offset="100%" stop-color="oklch(0.78 0.16 155)" stop-opacity=".5"/>
+              </linearGradient>
+            </defs>
+
+            <!-- baseline grid -->
+            <line class="ax" x1="24" y1="0" x2="24" y2="600"/>
+            <line class="ax" x1="36" y1="0" x2="36" y2="600" opacity=".5"/>
+            <line class="ax" x1="12" y1="0" x2="12" y2="600" opacity=".5"/>
+
+            <!-- deep filled terrain -->
+            <path d="M24,0 L26,20 L22,42 L30,62 L18,82 L24,102 L14,120 L22,138 L8,158 L20,180 L10,200 L24,220 L16,240 L22,262 L12,284 L18,304 L8,326 L16,348 L24,368 L34,388 L22,410 L30,432 L18,452 L26,474 L14,496 L20,516 L12,538 L24,560 L20,582 L24,600 L48,600 L48,0 Z"
+              fill="url(#profile-fill)"/>
+
+            <!-- main contour line -->
+            <path d="M24,0 L26,20 L22,42 L30,62 L18,82 L24,102 L14,120 L22,138 L8,158 L20,180 L10,200 L24,220 L16,240 L22,262 L12,284 L18,304 L8,326 L16,348 L24,368 L34,388 L22,410 L30,432 L18,452 L26,474 L14,496 L20,516 L12,538 L24,560 L20,582 L24,600"
+              stroke="url(#profile-line)" stroke-width=".9" fill="none" stroke-linejoin="round"/>
+
+            <!-- secondary echo line, fainter -->
+            <path d="M30,0 L31,20 L29,42 L35,62 L26,82 L29,102 L22,120 L28,138 L18,158 L26,180 L20,200 L29,220 L24,240 L28,262 L22,284 L25,304 L19,326 L24,348 L29,368 L37,388 L28,410 L34,432 L25,452 L30,474 L23,496 L27,516 L21,538 L29,560 L26,582 L29,600"
+              stroke="oklch(0.78 0.16 155)" stroke-width=".5" stroke-opacity=".35" fill="none" stroke-linejoin="round"/>
+
+            <!-- shimmer overlay (animated) -->
+            <path class="shimmer"
+              d="M24,0 L26,20 L22,42 L30,62 L18,82 L24,102 L14,120 L22,138 L8,158 L20,180 L10,200 L24,220 L16,240 L22,262 L12,284 L18,304 L8,326 L16,348 L24,368 L34,388 L22,410 L30,432 L18,452 L26,474 L14,496 L20,516 L12,538 L24,560 L20,582 L24,600 L48,600 L48,0 Z"
+              fill="url(#profile-shimmer)"/>
+
+            <!-- dotted depth markers -->
+            <g opacity=".55">
+              <circle cx="42" cy="60"  r=".8" fill="oklch(0.83 0.10 220)"/>
+              <circle cx="42" cy="150" r=".8" fill="oklch(0.83 0.10 220)"/>
+              <circle cx="42" cy="240" r=".8" fill="oklch(0.83 0.10 220)"/>
+              <circle cx="42" cy="330" r=".8" fill="oklch(0.83 0.10 220)"/>
+              <circle cx="42" cy="420" r=".8" fill="oklch(0.83 0.10 220)"/>
+              <circle cx="42" cy="510" r=".8" fill="oklch(0.83 0.10 220)"/>
+            </g>
+
+            <!-- function peaks — auroras -->
+            <circle class="peak-fn" cx="30" cy="62" r="1.6"/>
+            <circle class="peak-fn" cx="24" cy="220" r="1.6"/>
+            <circle class="peak-fn" cx="34" cy="388" r="1.6"/>
+            <circle class="peak-fn" cx="30" cy="432" r="1.6"/>
+
+            <!-- valleys — small ice points -->
+            <circle class="peak" cx="8" cy="158" r="1"/>
+            <circle class="peak" cx="10" cy="200" r="1"/>
+            <circle class="peak" cx="8" cy="326" r="1"/>
+            <circle class="peak" cx="12" cy="538" r="1"/>
+
+            <!-- top + bottom caps -->
+            <line x1="6" y1="4" x2="42" y2="4" stroke="oklch(0.83 0.10 220)" stroke-width=".4" opacity=".5"/>
+            <line x1="6" y1="596" x2="42" y2="596" stroke="oklch(0.83 0.10 220)" stroke-width=".4" opacity=".5"/>
+
+            <!-- side latitude ticks every 100u -->
+            <g stroke="oklch(0.62 0.13 235)" stroke-width=".25" opacity=".4">
+              <line x1="0" y1="100" x2="6" y2="100"/>
+              <line x1="0" y1="200" x2="6" y2="200"/>
+              <line x1="0" y1="300" x2="6" y2="300"/>
+              <line x1="0" y1="400" x2="6" y2="400"/>
+              <line x1="0" y1="500" x2="6" y2="500"/>
+            </g>
+          </svg>
+          <div class="indicator" id="profile-indicator"><span class="label">21</span></div>
+        </div>
+
+        <!-- in-editor browser / live preview (agent-driven) -->
+        <div class="browser" id="browser" aria-hidden="true">
+          <div class="browser-progress" id="browser-progress"></div>
+          <div class="browser-chrome">
+            <div class="browser-dots"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+            <div class="browser-nav"><span>‹</span><span>›</span><span>↻</span></div>
+            <div class="browser-url">
+              <svg class="lock" viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7.5" width="10" height="6" rx="1"/><path d="M5 7.5V5a3 3 0 1 1 6 0v2.5"/></svg>
+              <span class="u" id="browser-url">localhost:3000</span>
+              <span class="spin"></span>
+            </div>
+          </div>
+          <div class="browser-viewport" id="browser-viewport"></div>
+          <div class="browser-scan" aria-hidden="true"><i></i></div>
+        </div>
+      </div>
+
+      <div class="kernel-log" id="klog">
+        <div><span class="ts">14:22:58</span> indexer · обновил граф зависимостей</div>
+        <div><span class="ts">14:23:01</span> lsp · 0 ошибок · 0 предупреждений</div>
+        <div><span class="ts">14:23:04</span> watcher · 1 247 файлов</div>
+      </div>
+    </section>
+
+    <!-- ===== CHAT ===== -->
+    <aside class="chat">
+      <div class="chat-head">
+        <div class="title">
+          <span class="aurora-mark" aria-hidden="true">
+            <svg viewBox="0 0 30 18">
+              <path class="w w1" d="M0,9 Q7.5,3 15,9 T30,9">
+                <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                  values="M0,9 Q7.5,3 15,9 T30,9;M0,9 Q7.5,15 15,9 T30,9;M0,9 Q7.5,3 15,9 T30,9"/>
+              </path>
+              <path class="w w2" d="M0,9 Q7.5,5 15,9 T30,9">
+                <animate attributeName="d" dur="3.5s" repeatCount="indefinite"
+                  values="M0,9 Q7.5,13 15,9 T30,9;M0,9 Q7.5,5 15,9 T30,9;M0,9 Q7.5,13 15,9 T30,9"/>
+              </path>
+            </svg>
+          </span>
+          <span id="chat-title">null check guard</span>
+        </div>
+        <div class="chat-actions">
+          <button title="Новый чат" id="chat-new">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 3v10M3 8h10"/></svg>
+          </button>
+          <button title="История" id="chat-history-top">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 3a5 5 0 1 0 5 5M8 3v5l3 2M8 3V1"/></svg>
+          </button>
+          <button title="Меню">
+            <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12" cy="8" r="1.2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="convo" id="convo"></div>
+
+      <div class="composer">
+        <button class="scroll-bottom" id="scroll-bottom" title="Вниз к последнему сообщению" aria-label="Прокрутить вниз">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v9M4 8.5l4 4 4-4"/></svg>
+          <span class="ndot" id="sb-ndot"></span>
+        </button>
+        <div class="attach-chips" id="chips">
+          <span class="chip">
+            <span class="ice">‹›</span> moveItem.ts
+            <span class="x">×</span>
+          </span>
+          <span class="chip">
+            <span class="aur">@</span> active selection · 4 lines
+            <span class="x">×</span>
+          </span>
+        </div>
+
+        <div class="composer-input empty" contenteditable="true" data-placeholder="попроси изменить, найти, объяснить…" id="cinput"></div>
+
+        <div class="composer-bar">
+          <div class="left">
+            <!-- attach + -->
+            <div class="cbtn icon-only" id="btn-attach" title="Прикрепить контекст">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v10M3 8h10"/></svg>
+              <div class="menu" id="menu-attach">
+                <div class="group-title">Прикрепить</div>
+                <div class="mi" data-attach="file"><span class="glyph">‹›</span><span>Файл из проекта<small>open file</small></span><span class="meta">⌘O</span></div>
+                <div class="mi" data-attach="folder"><span class="glyph">▣</span><span>Папку<small>recursive</small></span></div>
+                <div class="mi" data-attach="url"><span class="glyph">@</span><span>URL<small>fetched once</small></span></div>
+                <div class="mi" data-attach="image"><span class="glyph">▤</span><span>Изображение<small>screenshot / mockup</small></span></div>
+                <div class="mi" data-attach="git"><span class="glyph">⌥</span><span>Diff с main<small>git changes</small></span></div>
+              </div>
+            </div>
+
+            <!-- active code context -->
+            <button class="cbtn toggle on" id="btn-active" title="Использовать активный код">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M5 4l-4 4 4 4M11 4l4 4-4 4M9 3l-2 10"/>
+              </svg>
+              <span>Active</span>
+              <span class="ctx-meta">moveItem.ts:18-24</span>
+            </button>
+
+            <!-- permissions -->
+            <div class="cbtn" id="btn-perm" title="Режим разрешений">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+                <rect x="3" y="7" width="10" height="7" rx="1"/>
+                <path d="M5 7V5a3 3 0 1 1 6 0v2"/>
+              </svg>
+              <span>Ask</span>
+              <small>▾</small>
+              <div class="menu" id="menu-perm">
+                <div class="group-title">Permissions / Разрешения</div>
+                <div class="mi on" data-perm="ask">
+                  <span class="glyph">?</span>
+                  <span>Ask · спрашивать<small>diff требует подтверждения</small></span>
+                </div>
+                <div class="mi" data-perm="auto">
+                  <span class="glyph">⚡</span>
+                  <span>Auto-apply · применять сразу<small>с 1.5с undo</small></span>
+                </div>
+                <div class="mi" data-perm="read">
+                  <span class="glyph">⊙</span>
+                  <span>Read-only · только чтение<small>не редактирует файлы</small></span>
+                </div>
+                <div class="mi" data-perm="plan">
+                  <span class="glyph">▤</span>
+                  <span>Plan · только план<small>пишет, не выполняет</small></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="vsep"></div>
+
+            <!-- chat history (dropdown opens upward) -->
+            <div class="cbtn icon-only" id="btn-history" title="История чатов">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 3a5 5 0 1 0 5 5M8 3v5l3 2M8 3V1"/></svg>
+              <div class="menu history-menu right-anchor" id="menu-history">
+                <div class="h-search">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="m13 13-2.5-2.5"/></svg>
+                  <input type="text" placeholder="поиск по истории…" id="h-search-input" spellcheck="false">
+                </div>
+                <div class="h-groups" id="h-groups">
+                  <div class="group-title" data-grp>Сегодня</div>
+                  <div class="h-mi active" data-h="null check guard в moveItem">
+                    <div class="date">14:23 · сейчас</div>
+                    <div class="title">null check guard в moveItem</div>
+                    <div class="preview">проверь блокировку перед перемещением…</div>
+                    <span class="badge">+1 строка</span>
+                  </div>
+                  <div class="h-mi" data-h="refactor moveItem — Result<T,E>">
+                    <div class="date">11:08</div>
+                    <div class="title">refactor moveItem — Result&lt;T,E&gt;</div>
+                    <div class="preview">избавимся от throw, вернём Result</div>
+                    <span class="badge">+24 / −18</span>
+                  </div>
+                  <div class="h-mi" data-h="добавить тесты для bin allocator">
+                    <div class="date">09:42</div>
+                    <div class="title">добавить тесты для bin allocator</div>
+                    <div class="preview">создал warehouse/bin.test.ts с 8 кейсами</div>
+                  </div>
+                  <div class="group-title" data-grp>Вчера</div>
+                  <div class="h-mi" data-h="мигрировать types на discriminated union">
+                    <div class="date">вчера · 22:15</div>
+                    <div class="title">мигрировать types на discriminated union</div>
+                    <div class="preview">переделал ItemKind с enum на DU</div>
+                  </div>
+                  <div class="h-mi" data-h="почему flaky-тест в bin.spec.ts:42">
+                    <div class="date">вчера · 18:30</div>
+                    <div class="title">почему flaky-тест в bin.spec.ts:42</div>
+                    <div class="preview">race на await — нужен Promise.all</div>
+                  </div>
+                  <div class="group-title" data-grp>На прошлой неделе</div>
+                  <div class="h-mi" data-h="explain locks.ts">
+                    <div class="date">2 мая · 16:04</div>
+                    <div class="title">explain locks.ts</div>
+                    <div class="preview">advisory locking через row-level postgres</div>
+                  </div>
+                  <div class="h-mi" data-h="setup ci · github actions">
+                    <div class="date">1 мая · 11:30</div>
+                    <div class="title">setup ci · github actions</div>
+                    <div class="preview">матрица 6 платформ + signing</div>
+                  </div>
+                  <div class="h-mi" data-h="SSRF guard на @url mentions">
+                    <div class="date">30 апреля</div>
+                    <div class="title">SSRF guard на @url mentions</div>
+                    <div class="preview">блокируем loopback / RFC1918</div>
+                  </div>
+                </div>
+                <div class="h-empty" id="h-empty" style="display:none">ничего не найдено</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right">
+            <!-- model -->
+            <div class="cbtn" id="btn-model" title="Модель">
+              <span class="ice">●</span>
+              <span>5.5</span>
+              <small>▾</small>
+              <div class="menu right-anchor" id="menu-model">
+                <div class="group-title">OpenAI · хостинг Alaska</div>
+                <div class="mi" data-model="mini">
+                  <span class="glyph">·</span>
+                  <span>GPT 5.4 mini<small>быстро · 1¢ · 32k</small></span>
+                  <span class="meta">~180мс</span>
+                </div>
+                <div class="mi" data-model="std">
+                  <span class="glyph">●</span>
+                  <span>GPT 5.4<small>дефолт · 1¢ · 128k</small></span>
+                  <span class="meta">~280мс</span>
+                </div>
+                <div class="mi on" data-model="flag">
+                  <span class="glyph">◉</span>
+                  <span>GPT 5.5<small>флагман · 3¢ · 256k · reasoning</small></span>
+                  <span class="meta">~620мс</span>
+                </div>
+                <div class="group-title">Локальные · Ollama</div>
+                <div class="mi" data-model="qwen">
+                  <span class="glyph">◌</span>
+                  <span>qwen2.5-coder:32b<small>offline · бесплатно</small></span>
+                  <span class="meta">локально</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- effort -->
+            <div class="cbtn" id="btn-effort" title="Усилие reasoning">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M2 13l3-7 3 5 3-9 3 11"/>
+              </svg>
+              <span>high</span>
+              <small>▾</small>
+              <div class="menu right-anchor" id="menu-effort">
+                <div class="group-title">Reasoning effort</div>
+                <div class="mi" data-effort="low">
+                  <span class="glyph">┄</span>
+                  <span>low<small>быстро, без размышления</small></span>
+                </div>
+                <div class="mi" data-effort="med">
+                  <span class="glyph">┅</span>
+                  <span>medium<small>~10с размышления</small></span>
+                </div>
+                <div class="mi on" data-effort="high">
+                  <span class="glyph">━</span>
+                  <span>high<small>~40с · многошаговые планы</small></span>
+                </div>
+                <div class="mi" data-effort="xhigh">
+                  <span class="glyph">▰</span>
+                  <span>x-high<small>~3 мин · сложный дебаг</small></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- send -->
+            <button class="cbtn send" id="btn-send">
+              <kbd>⌘↵</kbd> Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== HISTORY ===== -->
+    <aside class="history">
+      <div class="head">
+        <span>HISTORY · 12</span>
+        <button class="plus" title="Новый чат">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 3v10M3 8h10"/></svg>
+        </button>
+      </div>
+      <div class="history-list">
+        <div class="history-section">Сегодня</div>
+        <div class="h-item active">
+          <div class="date">14:23 · сейчас</div>
+          <div class="title">null check guard в moveItem</div>
+          <div class="preview">проверь блокировку перед перемещением…</div>
+          <div class="badge">+1 строка</div>
+        </div>
+        <div class="h-item">
+          <div class="date">11:08</div>
+          <div class="title">refactor moveItem — Result&lt;T,E&gt;</div>
+          <div class="preview">избавимся от throw, вернём Result</div>
+          <div class="badge">+24 / −18</div>
+        </div>
+        <div class="h-item">
+          <div class="date">09:42</div>
+          <div class="title">добавить тесты для bin allocator</div>
+          <div class="preview">создал warehouse/bin.test.ts с 8 кейсами</div>
+        </div>
+
+        <div class="history-section">Вчера</div>
+        <div class="h-item">
+          <div class="date">вчера · 22:15</div>
+          <div class="title">мигрировать types на discriminated union</div>
+          <div class="preview">переделал ItemKind с enum на DU</div>
+        </div>
+        <div class="h-item">
+          <div class="date">вчера · 18:30</div>
+          <div class="title">почему flaky-тест в bin.spec.ts:42</div>
+          <div class="preview">race на await — нужен Promise.all</div>
+        </div>
+
+        <div class="history-section">На прошлой неделе</div>
+        <div class="h-item">
+          <div class="date">2 мая · 16:04</div>
+          <div class="title">explain locks.ts</div>
+          <div class="preview">advisory locking через row-level postgres</div>
+        </div>
+        <div class="h-item">
+          <div class="date">1 мая · 11:30</div>
+          <div class="title">setup ci · github actions</div>
+          <div class="preview">матрица 6 платформ + signing</div>
+        </div>
+        <div class="h-item">
+          <div class="date">30 апреля</div>
+          <div class="title">SSRF guard на @url mentions</div>
+          <div class="preview">блокируем loopback / RFC1918</div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ============ STATUSBAR ============ -->
+  <footer class="statusbar">
+    <span class="item"><span class="dot"></span><span>alaska · online</span></span>
+    <span class="item">⌥ main · ↑2</span>
+    <span class="item">0 errors</span>
+    <span class="item">0 warnings</span>
+    <span class="spacer"></span>
+    <span class="item">UTF-8</span>
+    <span class="item">LF</span>
+    <span class="item">TypeScript 5.6</span>
+    <span class="item">Ln 21, Col 24</span>
+    <span class="item ice">5.5 · high</span>
+    <span class="item">токены <span class="num" id="tok">1 248</span> / 8 000</span>
+    <span class="item" id="clock">14:23:12</span>
+  </footer>
+
+</main>
+
+<script>
+/* ============================================================
+   IDE.html — composer interactions + looping AI demo
+============================================================ */
+(() => {
+  const CODE = document.getElementById('code');
+  const CONVO = document.getElementById('convo');
+  const KLOG = document.getElementById('klog');
+  const TOK = document.getElementById('tok');
+  const CLOCK = document.getElementById('clock');
+  const PROF = document.getElementById('profile-indicator');
+
+  /* === BASE CODE ============================================ */
+  const BASE = [
+    { n: 14, html: '<span class="kw">import</span> { <span class="ty">ItemId</span>, <span class="ty">BinId</span> } <span class="kw">from</span> <span class="str">"./types"</span>' },
+    { n: 15, html: '<span class="kw">import</span> { <span class="fn">findItem</span> } <span class="kw">from</span> <span class="str">"./locks"</span>' },
+    { n: 16, html: '<span class="kw">import</span> { <span class="ty">NotFound</span>, <span class="ty">Conflict</span> } <span class="kw">from</span> <span class="str">"./errors"</span>' },
+    { n: 17, html: '' },
+    { n: 18, html: '<span class="com">/** Перенести позицию в другую ячейку склада. */</span>' },
+    { n: 19, html: '<span class="kw">export function</span> <span class="fn">moveItem</span>(<span class="var">id</span>: <span class="ty">ItemId</span>, <span class="var">to</span>: <span class="ty">BinId</span>) {' },
+    { n: 20, html: '  <span class="kw">const</span> <span class="var">item</span> = <span class="fn">findItem</span>(<span class="var">id</span>)' },
+    { n: 21, html: '  <span class="kw">if</span> (!<span class="var">item</span>) <span class="kw">throw new</span> <span class="ty">NotFound</span>(<span class="str">"item missing"</span>)' },
+    { n: 22, html: '  <span class="var">item</span>.<span class="var">bin</span> = <span class="var">to</span>' },
+    { n: 23, html: '  <span class="var">item</span>.<span class="var">movedAt</span> = <span class="ty">Date</span>.<span class="fn">now</span>()' },
+    { n: 24, html: '  <span class="kw">return</span> <span class="var">item</span>' },
+    { n: 25, html: '}' },
+    { n: 26, html: '' },
+    { n: 27, html: '<span class="com">// TODO: уважать item.locked перед перемещением</span>' }
+  ];
+  const GHOST = '<span class="kw">if</span> (<span class="var">item</span>.<span class="var">locked</span>) <span class="kw">throw new</span> <span class="ty">Conflict</span>(<span class="str">"item is locked"</span>, { <span class="var">by</span>: <span class="var">item</span>.<span class="var">lockedBy</span> })';
+
+  function renderBase(){
+    CODE.innerHTML = BASE.map((l, i) => {
+      const cur = i === 6 ? ' cur' : '';
+      return `<div class="line${cur}" data-idx="${i}"><span class="gut">${l.n}</span><span>${l.html}</span></div>`;
+    }).join('');
+  }
+
+  /* === FILE CONTENTS (agent opens & scrolls real files) ===== */
+  const FILES = {
+    types: [
+      { n: 1,  html: '<span class="com">// src/warehouse/types.ts</span>' },
+      { n: 2,  html: '' },
+      { n: 3,  html: '<span class="kw">export type</span> <span class="ty">ItemId</span> = <span class="ty">string</span> &amp; { <span class="kw">readonly</span> <span class="var">brand</span>: <span class="kw">unique symbol</span> }' },
+      { n: 4,  html: '<span class="kw">export type</span> <span class="ty">BinId</span>  = <span class="ty">string</span> &amp; { <span class="kw">readonly</span> <span class="var">brand</span>: <span class="kw">unique symbol</span> }' },
+      { n: 5,  html: '' },
+      { n: 6,  html: '<span class="kw">export interface</span> <span class="ty">Item</span> {' },
+      { n: 7,  html: '  <span class="var">id</span>: <span class="ty">ItemId</span>' },
+      { n: 8,  html: '  <span class="var">bin</span>: <span class="ty">BinId</span>' },
+      { n: 9,  html: '  <span class="var">sku</span>: <span class="ty">string</span>' },
+      { n: 10, html: '  <span class="var">qty</span>: <span class="ty">number</span>' },
+      { n: 11, html: '  <span class="var">locked</span>: <span class="ty">boolean</span>' },
+      { n: 12, html: '  <span class="var">lockedBy</span>?: <span class="ty">string</span>' },
+      { n: 13, html: '  <span class="var">movedAt</span>?: <span class="ty">number</span>' },
+      { n: 14, html: '}' },
+      { n: 15, html: '' },
+      { n: 16, html: '<span class="kw">export type</span> <span class="ty">ItemKind</span> =' },
+      { n: 17, html: '  | { <span class="var">kind</span>: <span class="str">"pallet"</span>; <span class="var">slots</span>: <span class="ty">number</span> }' },
+      { n: 18, html: '  | { <span class="var">kind</span>: <span class="str">"case"</span>;   <span class="var">units</span>: <span class="ty">number</span> }' },
+      { n: 19, html: '  | { <span class="var">kind</span>: <span class="str">"each"</span> }' },
+      { n: 20, html: '' },
+      { n: 21, html: '<span class="kw">export interface</span> <span class="ty">Bin</span> {' },
+      { n: 22, html: '  <span class="var">id</span>: <span class="ty">BinId</span>' },
+      { n: 23, html: '  <span class="var">zone</span>: <span class="str">"cold"</span> | <span class="str">"ambient"</span> | <span class="str">"hazmat"</span>' },
+      { n: 24, html: '  <span class="var">capacity</span>: <span class="ty">number</span>' },
+      { n: 25, html: '  <span class="var">items</span>: <span class="ty">ItemId</span>[]' },
+      { n: 26, html: '}' },
+      { n: 27, html: '' },
+      { n: 28, html: '<span class="com">/** Результат перемещения позиции. */</span>' },
+      { n: 29, html: '<span class="kw">export type</span> <span class="ty">MoveResult</span> =' },
+      { n: 30, html: '  | { <span class="var">ok</span>: <span class="kw">true</span>;  <span class="var">item</span>: <span class="ty">Item</span> }' },
+      { n: 31, html: '  | { <span class="var">ok</span>: <span class="kw">false</span>; <span class="var">error</span>: <span class="ty">Conflict</span> | <span class="ty">NotFound</span> }' }
+    ],
+    locks: [
+      { n: 1,  html: '<span class="com">// src/warehouse/locks.ts</span>' },
+      { n: 2,  html: '<span class="kw">import</span> { <span class="ty">Item</span>, <span class="ty">ItemId</span> } <span class="kw">from</span> <span class="str">"./types"</span>' },
+      { n: 3,  html: '<span class="kw">import</span> { <span class="ty">Conflict</span> } <span class="kw">from</span> <span class="str">"./errors"</span>' },
+      { n: 4,  html: '<span class="kw">import</span> { <span class="var">db</span> } <span class="kw">from</span> <span class="str">"../db"</span>' },
+      { n: 5,  html: '' },
+      { n: 6,  html: '<span class="kw">const</span> <span class="var">TTL_MS</span> = <span class="num">30_000</span>' },
+      { n: 7,  html: '' },
+      { n: 8,  html: '<span class="com">/** Найти позицию по id. null, если её нет. */</span>' },
+      { n: 9,  html: '<span class="kw">export function</span> <span class="fn">findItem</span>(<span class="var">id</span>: <span class="ty">ItemId</span>): <span class="ty">Item</span> | <span class="kw">null</span> {' },
+      { n: 10, html: '  <span class="kw">const</span> <span class="var">row</span> = <span class="var">db</span>.<span class="var">items</span>.<span class="fn">get</span>(<span class="var">id</span>)' },
+      { n: 11, html: '  <span class="kw">if</span> (!<span class="var">row</span>) <span class="kw">return</span> <span class="kw">null</span>' },
+      { n: 12, html: '  <span class="kw">return</span> <span class="fn">hydrate</span>(<span class="var">row</span>)' },
+      { n: 13, html: '}' },
+      { n: 14, html: '' },
+      { n: 15, html: '<span class="com">/** Взять advisory-лок на позицию. */</span>' },
+      { n: 16, html: '<span class="kw">export async function</span> <span class="fn">acquire</span>(<span class="var">id</span>: <span class="ty">ItemId</span>, <span class="var">by</span>: <span class="ty">string</span>) {' },
+      { n: 17, html: '  <span class="kw">const</span> <span class="var">ok</span> = <span class="kw">await</span> <span class="var">db</span>.<span class="fn">lock</span>(<span class="str">`item:${id}`</span>, <span class="var">TTL_MS</span>)' },
+      { n: 18, html: '  <span class="kw">if</span> (!<span class="var">ok</span>) <span class="kw">throw new</span> <span class="ty">Conflict</span>(<span class="str">"item is locked"</span>, { <span class="var">by</span> })' },
+      { n: 19, html: '  <span class="kw">return</span> () =&gt; <span class="var">db</span>.<span class="fn">unlock</span>(<span class="str">`item:${id}`</span>)' },
+      { n: 20, html: '}' },
+      { n: 21, html: '' },
+      { n: 22, html: '<span class="kw">function</span> <span class="fn">hydrate</span>(<span class="var">row</span>: <span class="ty">Row</span>): <span class="ty">Item</span> {' },
+      { n: 23, html: '  <span class="kw">return</span> {' },
+      { n: 24, html: '    <span class="var">id</span>: <span class="var">row</span>.<span class="var">id</span> <span class="kw">as</span> <span class="ty">ItemId</span>,' },
+      { n: 25, html: '    <span class="var">bin</span>: <span class="var">row</span>.<span class="var">bin</span> <span class="kw">as</span> <span class="ty">BinId</span>,' },
+      { n: 26, html: '    <span class="var">sku</span>: <span class="var">row</span>.<span class="var">sku</span>,' },
+      { n: 27, html: '    <span class="var">qty</span>: <span class="var">row</span>.<span class="var">qty</span>,' },
+      { n: 28, html: '    <span class="var">locked</span>: <span class="var">row</span>.<span class="var">lock_ttl</span> &gt; <span class="ty">Date</span>.<span class="fn">now</span>(),' },
+      { n: 29, html: '    <span class="var">lockedBy</span>: <span class="var">row</span>.<span class="var">lock_by</span> ?? <span class="kw">undefined</span>,' },
+      { n: 30, html: '  }' },
+      { n: 31, html: '}' },
+      { n: 32, html: '' },
+      { n: 33, html: '<span class="com">// pg_try_advisory_lock — освобождается по TTL</span>' },
+      { n: 34, html: '<span class="kw">export const</span> <span class="fn">lockKey</span> = (<span class="var">id</span>: <span class="ty">ItemId</span>) =&gt;' },
+      { n: 35, html: '  <span class="str">`wh:item:${id}`</span>' }
+    ]
+  };
+
+  const FILE_META = {
+    moveItem: { tab: 'moveItem.ts', glyph: '‹›', path: ['src','warehouse','moveItem.ts'] },
+    types:    { tab: 'types.ts',    glyph: '‹›', path: ['src','warehouse','types.ts'] },
+    locks:    { tab: 'locks.ts',    glyph: '‹›', path: ['src','warehouse','locks.ts'] }
+  };
+
+  const TABS  = document.getElementById('tabs');
+  const TABS_HTML = TABS ? TABS.innerHTML : '';
+  const CRUMB = document.getElementById('crumb-path');
+
+  function renderFile(id){
+    if (id === 'moveItem'){ renderBase(); CODE.scrollTop = 0; return; }
+    const f = FILES[id];
+    if (!f) return;
+    CODE.innerHTML = f.map((l, i) =>
+      `<div class="line" data-idx="${i}"><span class="gut">${l.n}</span><span>${l.html}</span></div>`
+    ).join('');
+    CODE.scrollTop = 0;
+  }
+
+  function resetTabs(){ if (TABS) TABS.innerHTML = TABS_HTML; }
+
+  function setTab(id){
+    if (!TABS) return;
+    const pv = TABS.querySelector('.tab.preview-tab');
+    if (pv) pv.remove();
+    let tab = TABS.querySelector(`.tab[data-file="${id}"]`);
+    if (!tab){
+      const meta = FILE_META[id] || { tab: id + '.ts', glyph: '‹›' };
+      tab = document.createElement('div');
+      tab.className = 'tab';
+      tab.dataset.file = id;
+      tab.innerHTML = `<span class="glyph">${meta.glyph}</span>${meta.tab} <span class="x">×</span>`;
+      TABS.appendChild(tab);
+    }
+    TABS.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+  }
+
+  function setTreeActive(id){
+    document.querySelectorAll('.tree li.active').forEach(li => li.classList.remove('active'));
+    const li = document.querySelector(`.tree li[data-file="${id}"]`);
+    if (li) li.classList.add('active');
+  }
+
+  function setCrumb(id){
+    const meta = FILE_META[id];
+    if (!CRUMB || !meta) return;
+    const segs = ['alaska-monorepo'].concat(meta.path);
+    CRUMB.innerHTML = segs.map((s, i) =>
+      i === segs.length - 1 ? `<b>${s}</b>` : `<span>${s}</span>`
+    ).join('<span class="sep">›</span>');
+  }
+
+  function smoothScrollTo(el, to, dur){
+    dur = dur || 800;
+    return new Promise(res => {
+      const start = el.scrollTop;
+      const diff = to - start;
+      if (Math.abs(diff) < 2){ res(); return; }
+      const t0 = performance.now();
+      function frame(now){
+        const p = Math.min(1, (now - t0) / dur);
+        const e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        el.scrollTop = start + diff * e;
+        if (p < 1) requestAnimationFrame(frame); else res();
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+
+  async function autoScrollCode(){
+    const max = CODE.scrollHeight - CODE.clientHeight;
+    if (max <= 6){ await sleep(450); return; }
+    await smoothScrollTo(CODE, max, 1100);
+    await sleep(320);
+    await smoothScrollTo(CODE, Math.round(max * 0.2), 600);
+    await sleep(140);
+  }
+
+  function openInstant(id){
+    hideBrowser();
+    setTab(id);
+    setTreeActive(id);
+    renderFile(id);
+    setCrumb(id);
+  }
+
+  async function openFile(id){
+    openInstant(id);
+    const li = document.querySelector(`.tree li[data-file="${id}"]`);
+    if (li) li.classList.add('reading');
+    await sleep(240);
+    await autoScrollCode();
+    if (li) li.classList.remove('reading');
+  }
+
+  /* === IN-EDITOR BROWSER / LIVE PREVIEW ===================== */
+  const BROWSER = document.getElementById('browser');
+  const BVIEW   = document.getElementById('browser-viewport');
+  const BURL    = document.getElementById('browser-url');
+  const BPROG   = document.getElementById('browser-progress');
+
+  // escape dynamic text before it ever touches innerHTML
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+  }
+
+  // context chips — what the model has "in view" (Cursor/Kiro-style)
+  const CHIPS = document.getElementById('chips');
+  const CHIPS_HTML = CHIPS ? CHIPS.innerHTML : '';
+  function resetChips(){ if (CHIPS) CHIPS.innerHTML = CHIPS_HTML; }
+  function ctxChip(inner){
+    if (!CHIPS) return null;
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.innerHTML = inner + ' <span class="x">×</span>';
+    CHIPS.appendChild(c);
+    return c;
+  }
+
+  function showPreviewTab(label){
+    if (!TABS) return;
+    let tab = TABS.querySelector('.tab.preview-tab');
+    if (!tab){
+      tab = document.createElement('div');
+      tab.className = 'tab preview-tab';
+      tab.dataset.file = '__preview';
+      TABS.appendChild(tab);
+    }
+    tab.innerHTML = `<span class="glyph" style="color:var(--aurora)">◉</span>${label} <span class="x">×</span>`;
+    TABS.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+  }
+
+  function hideBrowser(){
+    if (!BROWSER) return;
+    BROWSER.classList.remove('show', 'loading', 'scanning');
+    BROWSER.setAttribute('aria-hidden', 'true');
+  }
+
+  async function openBrowser(url, html, label){
+    if (!BROWSER) return;
+    showPreviewTab(label);
+    BURL.textContent = url;
+    BROWSER.classList.add('show', 'loading');
+    BROWSER.setAttribute('aria-hidden', 'false');
+    BPROG.style.width = '0';
+    await sleep(60);  BPROG.style.width = '38%';
+    await sleep(280); BPROG.style.width = '70%';
+    BVIEW.innerHTML = html;
+    BVIEW.scrollTop = 0;
+    await sleep(260); BPROG.style.width = '100%';
+    await sleep(220);
+    BROWSER.classList.remove('loading');
+    BPROG.style.width = '0';
+  }
+
+  async function browseScroll(scan){
+    if (!BVIEW) return;
+    if (scan && BROWSER){
+      BROWSER.style.setProperty('--scanH', BVIEW.clientHeight + 'px');
+      BROWSER.classList.remove('scanning');
+      void BROWSER.offsetWidth;            // restart the CSS animation
+      BROWSER.classList.add('scanning');
+    }
+    const max = BVIEW.scrollHeight - BVIEW.clientHeight;
+    if (max <= 6){
+      await sleep(900);
+    } else {
+      await sleep(280);
+      await smoothScrollTo(BVIEW, Math.round(max * 0.5), 950);
+      await sleep(420);
+      await smoothScrollTo(BVIEW, max, 1000);
+      await sleep(480);
+      await smoothScrollTo(BVIEW, 0, 700);
+      await sleep(140);
+    }
+    if (scan && BROWSER) BROWSER.classList.remove('scanning');
+  }
+
+  function docsPage(){
+    return `<div class="bp bp-docs">
+      <div class="side">
+        <div class="grp">Гайд</div>
+        <a>Введение</a>
+        <a>Быстрый старт</a>
+        <div class="grp">Паттерны</div>
+        <a>Обработка ошибок</a>
+        <a class="on">Result&lt;T, E&gt;</a>
+        <a>Discriminated unions</a>
+        <a>Бренды типов</a>
+        <div class="grp">API</div>
+        <a>defineConfig</a>
+        <a>createStore</a>
+      </div>
+      <div class="doc">
+        <div class="crumbs">docs › паттерны › result-type</div>
+        <h1>Result&lt;T, E&gt;</h1>
+        <p>Тип <code>Result</code> описывает операцию, которая может завершиться успехом (<code>Ok</code>) или ошибкой (<code>Err</code>), не выбрасывая исключений в управляющий поток. Так ошибка становится частью сигнатуры функции.</p>
+        <pre>type Result&lt;T, E&gt; =
+  | { ok: true;  value: T }
+  | { ok: false; error: E }</pre>
+        <h2>Зачем, если есть throw</h2>
+        <p>Исключения невидимы в типах: компилятор не заставит вызывающий код их обработать. <code>Result</code> переносит ошибку в возвращаемое значение — и её больше нельзя молча проигнорировать.</p>
+        <div class="note">Совет: возвращайте <code>Result</code> на границах модулей, где ошибка — ожидаемая часть контракта (валидация, IO, блокировки). Внутри модуля <code>throw</code> всё ещё уместен.</div>
+        <h2>Сопоставление</h2>
+        <pre>const r = moveItem(id, bin)
+if (!r.ok) {
+  log.warn(r.error)   // "locked" | "not_found"
+  return
+}
+use(r.value)          // r сужен до Item</pre>
+        <p>Проверка по <code>ok</code> сужает тип: в ветке <code>true</code> доступен <code>value</code>, в ветке <code>false</code> — <code>error</code>. Никаких <code>any</code> и забытых catch.</p>
+        <h2>Совместимость</h2>
+        <p>Result можно собрать из <code>try/catch</code> на границе с внешним кодом через хелпер <code>fromThrowable</code> — внутри домена остаётся чистый тип.</p>
+      </div>
+    </div>`;
+  }
+
+  function sitePage(){
+    return `<div class="bp bp-site">
+      <div class="nav">
+        <div class="brand"><span>Alaska</span><span class="dot">·WMS</span></div>
+        <a class="lk">Возможности</a>
+        <a class="lk">Тарифы</a>
+        <a class="lk">Docs</a>
+        <span class="cta">Войти</span>
+      </div>
+      <div class="hero">
+        <span class="tag">⚡ склад нового поколения</span>
+        <h1>Перемещайте позиции <span class="grad">без блокировок и потерь</span></h1>
+        <p>Alaska WMS отслеживает каждую ячейку склада в реальном времени и гарантирует целостность при параллельных перемещениях.</p>
+        <div class="row"><span class="b1">Начать бесплатно</span><span class="b2">Смотреть демо</span></div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="ico">⊞</div><h3>Атомарные перемещения</h3><p>Advisory-локи на уровне строки не дают двум воркерам тронуть одну позицию.</p></div>
+        <div class="card"><div class="ico">◷</div><h3>Реальное время</h3><p>Состояние ячеек обновляется по WebSocket за миллисекунды.</p></div>
+        <div class="card"><div class="ico">✶</div><h3>Аудит</h3><p>Каждое движение позиции пишется в неизменяемый журнал.</p></div>
+      </div>
+      <div class="strip">localhost:3000 · Alaska Dev Server · HMR ready · собрано за 412мс</div>
+    </div>`;
+  }
+
+  /* === CHAT STICK-TO-BOTTOM ================================= */
+  let stickBottom = true;
+  let newMsgs = 0;
+  const SB    = document.getElementById('scroll-bottom');
+  const SBDOT = document.getElementById('sb-ndot');
+
+  function nearBottom(px){
+    px = (px == null) ? 64 : px;
+    return CONVO.scrollHeight - CONVO.scrollTop - CONVO.clientHeight <= px;
+  }
+  function refreshSB(){
+    if (!SB) return;
+    if (stickBottom){ SB.classList.remove('show', 'has-new'); newMsgs = 0; }
+    else SB.classList.add('show');
+  }
+  function scrollConvo(force){
+    if (force || stickBottom) CONVO.scrollTop = CONVO.scrollHeight;
+  }
+  function noteNew(){
+    if (stickBottom){ scrollConvo(true); }
+    else {
+      newMsgs++;
+      if (SBDOT) SBDOT.textContent = newMsgs;
+      if (SB) SB.classList.add('show', 'has-new');
+    }
+  }
+
+  /* === CHAT BUBBLE =========================================== */
+  function aurMark(){
+    return `<span class="aurora-mark"><svg viewBox="0 0 30 18">
+      <path class="w w1" d="M0,9 Q7.5,3 15,9 T30,9"><animate attributeName="d" dur="3s" repeatCount="indefinite" values="M0,9 Q7.5,3 15,9 T30,9;M0,9 Q7.5,15 15,9 T30,9;M0,9 Q7.5,3 15,9 T30,9"/></path>
+      <path class="w w2" d="M0,9 Q7.5,5 15,9 T30,9"><animate attributeName="d" dur="3.5s" repeatCount="indefinite" values="M0,9 Q7.5,13 15,9 T30,9;M0,9 Q7.5,5 15,9 T30,9;M0,9 Q7.5,13 15,9 T30,9"/></path>
+    </svg></span>`;
+  }
+  function bubble(role, who){
+    const wrap = document.createElement('div');
+    wrap.className = 'msg ' + role;
+    const avatar = role === 'ai' ? `<span class="avatar">${aurMark()}</span>` : `<span class="avatar">Я</span>`;
+    wrap.innerHTML = `${avatar}<div><div class="meta"><b>${who}</b> · ${hhmm()}</div><div class="body"></div></div>`;
+    CONVO.appendChild(wrap);
+    noteNew();
+    return wrap.querySelector('.body');
+  }
+  function hhmm(){
+    const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function pad(n){ return String(n).padStart(2,'0') }
+
+  function typeInto(el, html, speed = 14){
+    return new Promise(resolve => {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const nodes = Array.from(tmp.childNodes);
+      el.innerHTML = '';
+      const caret = document.createElement('span');
+      caret.className = 'caret';
+      el.appendChild(caret);
+      let i = 0;
+      function step(){
+        if (i >= nodes.length){ caret.remove(); resolve(); return; }
+        const node = nodes[i++];
+        if (node.nodeType === 3){
+          const text = node.textContent;
+          let j = 0;
+          (function tick(){
+            if (j >= text.length){ step(); return; }
+            caret.before(document.createTextNode(text[j++]));
+            scrollConvo();
+            setTimeout(tick, speed);
+          })();
+        } else {
+          caret.before(node.cloneNode(true));
+          setTimeout(step, 30);
+        }
+      }
+      step();
+    });
+  }
+
+  /* === KLOG ================================================== */
+  function klog(msg, cls = ''){
+    const t = new Date();
+    const ts = `<span class="ts">${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}</span>`;
+    const div = document.createElement('div');
+    if (cls) div.classList.add(cls);
+    div.innerHTML = `${ts} ${msg}`;
+    KLOG.appendChild(div);
+    KLOG.scrollTop = KLOG.scrollHeight;
+  }
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)) }
+  function setTokens(v){ TOK.textContent = v.toLocaleString('ru-RU').replace(/,/g, ' ') }
+
+  /* === MENU TOGGLES ========================================= */
+  function setupMenus(){
+    const buttons = document.querySelectorAll('.cbtn');
+    buttons.forEach(btn => {
+      const menu = btn.querySelector('.menu');
+      if (!menu) return;
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        document.querySelectorAll('.cbtn.open').forEach(b => { if (b !== btn) b.classList.remove('open') });
+        btn.classList.toggle('open');
+      });
+      menu.addEventListener('click', e => e.stopPropagation());
+      menu.querySelectorAll('.mi').forEach(mi => {
+        mi.addEventListener('click', () => {
+          if (mi.dataset.model || mi.dataset.perm || mi.dataset.effort){
+            menu.querySelectorAll('.mi.on').forEach(m => m.classList.remove('on'));
+            mi.classList.add('on');
+            // update button label
+            const labelSpan = btn.querySelector(':scope > span:not(.glyph):not(.ice):not(small)');
+            if (labelSpan){
+              const txt = mi.querySelector('span:not(.glyph):not(.meta)').firstChild.textContent.trim();
+              if (mi.dataset.model){
+                const map = { mini: '5.4 mini', std: '5.4', flag: '5.5', qwen: 'qwen' };
+                labelSpan.textContent = map[mi.dataset.model] || txt;
+              } else if (mi.dataset.perm){
+                const map = { ask: 'Ask', auto: 'Auto', read: 'Read', plan: 'Plan' };
+                labelSpan.textContent = map[mi.dataset.perm] || txt;
+              } else if (mi.dataset.effort){
+                const map = { low: 'low', med: 'medium', high: 'high', xhigh: 'x-high' };
+                labelSpan.textContent = map[mi.dataset.effort] || txt;
+              }
+            }
+          }
+          if (mi.dataset.attach){
+            addChip(mi.dataset.attach);
+          }
+          btn.classList.remove('open');
+        });
+      });
+    });
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.cbtn.open').forEach(b => b.classList.remove('open'));
+    });
+
+    // active toggle
+    const btnActive = document.getElementById('btn-active');
+    btnActive.addEventListener('click', e => {
+      e.stopPropagation();
+      btnActive.classList.toggle('on');
+    });
+
+    // send
+    document.getElementById('btn-send').addEventListener('click', e => {
+      e.stopPropagation();
+      // visual nudge — no real send
+      const btn = e.currentTarget;
+      btn.style.transform = 'scale(.96)';
+      setTimeout(() => btn.style.transform = '', 150);
+    });
+
+    // chip remove
+    document.getElementById('chips').addEventListener('click', e => {
+      if (e.target.classList.contains('x')) e.target.parentElement.remove();
+    });
+  }
+
+  function addChip(kind){
+    const map = {
+      file:   { icon: '‹›', cls: 'ice', label: 'config.json' },
+      folder: { icon: '▣', cls: 'ice', label: 'src/db/' },
+      url:    { icon: '@',  cls: 'aur', label: 'docs.openai.com/...' },
+      image:  { icon: '▤',  cls: 'aur', label: 'screenshot.png' },
+      git:    { icon: '⌥',  cls: 'ice', label: 'diff: main..HEAD · 12 files' }
+    };
+    const c = map[kind] || map.file;
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `<span class="${c.cls}">${c.icon}</span> ${c.label} <span class="x">×</span>`;
+    document.getElementById('chips').appendChild(chip);
+  }
+
+  /* === LOOP ================================================= */
+  async function loop(){
+    while (true){
+      // --- reset ---
+      resetTabs();
+      resetChips();
+      hideBrowser();
+      openInstant('moveItem');
+      CONVO.innerHTML = '';
+      KLOG.innerHTML = '';
+      stickBottom = true; newMsgs = 0; refreshSB();
+      klog('indexer · обновил граф зависимостей');
+      klog('lsp · 0 ошибок · 0 предупреждений');
+      klog('watcher · 1 247 файлов');
+      setTokens(1248);
+      PROF.style.top = '20%';
+      await sleep(1100);
+
+      // --- user message ---
+      const u = bubble('user', 'вы');
+      await typeInto(u, 'проверь блокировку перед перемещением. если <code>item.locked</code> — кинь <code>Conflict</code>.', 22);
+      await sleep(280);
+
+      // --- AI: autonomous browsing plan ---
+      const a = bubble('ai', 'alaska');
+      a.innerHTML = `
+        <div class="tools">
+          <div class="step queue" data-s="0"><span class="glyph"></span>открываю moveItem.ts</div>
+          <div class="step queue" data-s="1"><span class="glyph"></span>читаю types.ts</div>
+          <div class="step queue" data-s="2"><span class="glyph"></span>читаю locks.ts</div>
+          <div class="step queue" data-s="3"><span class="glyph"></span>сверяюсь с докой Result&lt;T,E&gt;</div>
+          <div class="step queue" data-s="4"><span class="glyph"></span>смотрю превью склада</div>
+          <div class="step queue" data-s="5"><span class="glyph"></span>ищу вызовы moveItem</div>
+        </div>`;
+      scrollConvo();
+      const step = (n, c) => { const el = a.querySelector('[data-s="' + n + '"]'); if (el) el.className = 'step ' + c; };
+
+      // 0 — open & read moveItem.ts
+      step(0, 'run'); await openFile('moveItem'); step(0, 'done');
+      klog('agent · открыт <b style="color:var(--ink-2)">moveItem.ts</b>', 'ok'); setTokens(1612); scrollConvo();
+
+      // 1 — read types.ts (editor switches + scrolls)
+      step(1, 'run'); await openFile('types'); step(1, 'done');
+      klog('agent · прочитан <b style="color:var(--ink-2)">types.ts</b>', 'ok'); setTokens(1860); scrollConvo();
+
+      // 2 — read locks.ts
+      step(2, 'run'); await openFile('locks'); step(2, 'done');
+      klog('agent · прочитан <b style="color:var(--ink-2)">locks.ts</b>', 'ok'); setTokens(2102); scrollConvo();
+
+      // 3 — fetch & browse a docs URL (the model reads the page itself)
+      step(3, 'run');
+      klog('agent · fetch <b style="color:var(--ink-2)">docs.alaska.dev/patterns/result-type</b>');
+      await openBrowser('https://docs.alaska.dev/patterns/result-type', docsPage(), 'docs · result-type');
+      await browseScroll(true);
+      ctxChip('<span class="aur">@</span> docs · result-type');
+      step(3, 'done'); klog('agent · доку прочитал · паттерн Result усвоен', 'ok'); setTokens(2480); scrollConvo();
+
+      // 4 — open the live site preview & "see" it (vision scan)
+      step(4, 'run');
+      klog('agent · открываю превью <b style="color:var(--ink-2)">localhost:3000</b>');
+      await openBrowser('http://localhost:3000', sitePage(), 'Preview · localhost:3000');
+      await browseScroll(true);
+      klog('vision · распознал <b style="color:var(--ink-2)">hero · 3 фичи · футер</b>', 'ok');
+      ctxChip('<span class="aur">📸</span> preview · localhost:3000');
+      step(4, 'done'); klog('agent · превью просмотрел · UI не задет', 'ok'); setTokens(2700); scrollConvo();
+
+      // 5 — back to the file, grep usages
+      step(5, 'run');
+      openInstant('moveItem');
+      await sleep(750);
+      klog('grep · 12 вхождений moveItem в 4 файлах', 'ok');
+      step(5, 'done'); scrollConvo();
+
+      // --- AI summary ---
+      const m = document.createElement('div');
+      m.style.marginTop = '8px';
+      a.appendChild(m);
+      await typeInto(m, 'Прочитал <code>moveItem.ts</code>, <code>types.ts</code>, <code>locks.ts</code>, сверился с докой <code>Result</code> и превью — UI не ломается. Добавил guard на <code>item.locked</code> сразу после <code>findItem</code>, использую <code>Conflict</code> из <code>errors.ts</code>. <b style="color:var(--aurora)">+1 строка @ moveItem.ts:22</b>', 17);
+      setTokens(2890);
+
+      // --- ghost line patch on moveItem.ts ---
+      const target = CODE.querySelector('[data-idx="7"]');
+      if (target){
+        const gline = document.createElement('div');
+        gline.className = 'line ghost';
+        gline.innerHTML = `<span class="gut">22</span><span>  ${GHOST}</span>`;
+        target.before(gline);
+        klog('agent · предложен патч @ moveItem.ts:22', 'ok');
+        PROF.style.top = '35%';
+        await sleep(120);
+        gline.classList.add('show');
+
+        // tab hint
+        const hint = document.createElement('div');
+        hint.style.cssText = `position:absolute; right:14px; bottom:170px; font-family:"JetBrains Mono",monospace; font-size:11px; background:var(--bg-2); border:1px solid var(--line-2); padding:6px 10px; border-radius:6px; color:var(--ink-2); opacity:0; transform:translateY(6px); transition:opacity .25s, transform .25s; z-index:5; pointer-events:none;`;
+        hint.innerHTML = '<span style="color:var(--ice)">⇥ Tab</span> применить · Esc отменить';
+        document.querySelector('.editor').appendChild(hint);
+        requestAnimationFrame(() => { hint.style.opacity = '1'; hint.style.transform = 'translateY(0)'; });
+        await sleep(900);
+        hint.style.opacity = '0';
+        setTimeout(() => hint.remove(), 300);
+
+        // commit
+        gline.classList.add('committing');
+        klog('agent · применил патч · <b style="color:var(--aurora)">+1 строка</b>', 'ok');
+        await sleep(700);
+        gline.classList.remove('committing');
+        gline.classList.add('committed');
+
+        // remove TODO line
+        const lines = CODE.querySelectorAll('.line');
+        const todo = lines[lines.length - 1];
+        if (todo){
+          todo.classList.add('hl-old');
+          await sleep(600);
+          todo.classList.add('removing');
+          klog('agent · TODO разрешён → удалил строку', 'ok');
+          setTokens(3104);
+        }
+      }
+
+      await sleep(3200);
+      const fr = document.querySelector('.frame');
+      fr.style.transition = 'opacity .5s ease';
+      fr.style.opacity = '.55';
+      await sleep(600);
+      fr.style.opacity = '1';
+    }
+  }
+
+  /* === CLOCK ================================================ */
+  function tick(){
+    const d = new Date();
+    if (CLOCK) CLOCK.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  /* === USER MENU + SIGN OUT ================================ */
+  function setupUserMenu(){
+    const trigger = document.getElementById('user-trigger');
+    const menu = document.getElementById('user-menu');
+    if (!trigger || !menu) return;
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = menu.classList.toggle('show');
+      trigger.classList.toggle('open', open);
+    });
+    document.addEventListener('click', e => {
+      if (!menu.contains(e.target) && !trigger.contains(e.target)){
+        menu.classList.remove('show');
+        trigger.classList.remove('open');
+      }
+    });
+    menu.querySelectorAll('.um-item').forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        if (item.id === 'um-signout'){
+          doSignOut();
+        }
+        menu.classList.remove('show');
+        trigger.classList.remove('open');
+      });
+    });
+  }
+
+  function doSignOut(){
+    const ide = document.querySelector('.ide');
+    ide.style.transition = 'opacity .4s ease, filter .4s ease';
+    ide.style.opacity = '.18';
+    ide.style.filter = 'blur(3px) saturate(.4)';
+
+    const t = document.createElement('div');
+    t.className = 'signout-toast';
+    t.innerHTML = `
+      <div class="title">✓ выход из аккаунта</div>
+      <div class="sub">refresh-токены семейства отозваны · 1 устройство</div>
+    `;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => {
+        t.remove();
+        ide.style.opacity = '1';
+        ide.style.filter = 'none';
+      }, 300);
+    }, 2400);
+  }
+
+  /* === TOP MENUS ============================================ */
+  function setupTopMenus(){
+    const tabs = document.querySelectorAll('.top-tab[data-menu]');
+    let anyOpen = false;
+    tabs.forEach(tab => {
+      tab.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = tab.classList.contains('open');
+        tabs.forEach(t => t.classList.remove('open'));
+        if (!isOpen){ tab.classList.add('open'); anyOpen = true }
+        else anyOpen = false;
+      });
+      tab.addEventListener('mouseenter', () => {
+        if (anyOpen){
+          tabs.forEach(t => t.classList.remove('open'));
+          tab.classList.add('open');
+        }
+      });
+    });
+    document.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('open'));
+      anyOpen = false;
+    });
+    document.querySelectorAll('.menu-dd .mdd-item[data-act]').forEach(item => {
+      item.addEventListener('click', e => {
+        e.stopPropagation();
+        const act = item.dataset.act;
+        tabs.forEach(t => t.classList.remove('open'));
+        anyOpen = false;
+        if (act === 'signout' && typeof doSignOut === 'function') doSignOut();
+        if (act === 'go-search'){
+          const btn = document.querySelector('.activity .act[data-panel="search"]');
+          if (btn) btn.click();
+        }
+      });
+    });
+  }
+
+  /* === ACTIVITY PANEL SWITCH ================================ */
+  function setupActivity(){
+    const buttons = document.querySelectorAll('.activity .act[data-panel]');
+    const panels = document.querySelectorAll('.explorer .panel');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.panel;
+        buttons.forEach(b => b.classList.toggle('active', b === btn));
+        panels.forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+      });
+    });
+  }
+
+  /* === HISTORY DROPDOWN (composer, opens upward) =========== */
+  function setupHistory(){
+    const menu = document.getElementById('menu-history');
+    const btn  = document.getElementById('btn-history');
+    if (!menu || !btn) return;
+    menu.querySelectorAll('.h-mi').forEach(it => {
+      it.addEventListener('click', e => {
+        e.stopPropagation();
+        menu.querySelectorAll('.h-mi.active').forEach(x => x.classList.remove('active'));
+        it.classList.add('active');
+        const titleEl = it.querySelector('.title');
+        const title = it.dataset.h || (titleEl ? titleEl.textContent : '');
+        const ct = document.getElementById('chat-title');
+        if (ct) ct.textContent = title;
+        // mirror selection into the right-side history column
+        const want = titleEl ? titleEl.textContent.trim() : '';
+        document.querySelectorAll('.history .h-item').forEach(hi => {
+          const t = hi.querySelector('.title');
+          hi.classList.toggle('active', !!t && t.textContent.trim() === want);
+        });
+        klog('chat · открыт из истории · <b style="color:var(--ink-2)">' + esc(titleEl ? titleEl.textContent : '') + '</b>');
+        btn.classList.remove('open');
+      });
+    });
+    const input = document.getElementById('h-search-input');
+    const empty = document.getElementById('h-empty');
+    if (input){
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        let any = false;
+        menu.querySelectorAll('.h-mi').forEach(it => {
+          const show = !q || (it.textContent || '').toLowerCase().includes(q);
+          it.style.display = show ? '' : 'none';
+          if (show) any = true;
+        });
+        menu.querySelectorAll('.group-title[data-grp]').forEach(g => {
+          let n = g.nextElementSibling, vis = false;
+          while (n && !n.matches('.group-title')){
+            if (n.classList.contains('h-mi') && n.style.display !== 'none'){ vis = true; break; }
+            n = n.nextElementSibling;
+          }
+          g.style.display = vis ? '' : 'none';
+        });
+        if (empty) empty.style.display = any ? 'none' : 'block';
+      });
+    }
+  }
+
+  /* === EDITOR TABS (clickable) ============================= */
+  function setupTabs(){
+    if (!TABS) return;
+    TABS.addEventListener('click', e => {
+      const tab = e.target.closest('.tab');
+      if (!tab) return;
+      const id = tab.dataset.file;
+      if (!id) return;
+      if (id === '__preview'){
+        if (BROWSER){
+          BROWSER.classList.add('show');
+          BROWSER.setAttribute('aria-hidden', 'false');
+          TABS.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+        }
+        return;
+      }
+      if (FILE_META[id]){ openInstant(id); }
+      else {
+        hideBrowser();
+        TABS.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+      }
+    });
+  }
+
+  /* === CHAT-HEAD ICONS ===================================== */
+  function setupChatHead(){
+    const top  = document.getElementById('chat-history-top');
+    const btnH = document.getElementById('btn-history');
+    if (top && btnH){
+      top.addEventListener('click', e => { e.stopPropagation(); btnH.click(); });
+    }
+  }
+
+  /* === SCROLL (stick-to-bottom + jump button) ============== */
+  function setupScroll(){
+    if (CONVO){
+      CONVO.addEventListener('scroll', () => {
+        stickBottom = nearBottom();
+        refreshSB();
+      });
+    }
+    if (SB){
+      SB.addEventListener('click', () => {
+        stickBottom = true;
+        CONVO.scrollTo({ top: CONVO.scrollHeight, behavior: 'smooth' });
+        refreshSB();
+      });
+    }
+  }
+
+  /* === FILE TREE (clickable like a real IDE) =============== */
+  function setupTree(){
+    const tree = document.querySelector('.tree');
+    if (!tree) return;
+    tree.addEventListener('click', e => {
+      const name = e.target.closest('.name');
+      if (!name) return;
+      const li = name.parentElement;
+      if (li.classList.contains('folder')){ li.classList.toggle('open'); return; }
+      const id = li.dataset.file;
+      if (id && FILE_META[id]) openInstant(id);
+    });
+  }
+
+  /* === GO =================================================== */
+  renderBase();
+  openInstant('moveItem');
+  setupMenus();
+  setupUserMenu();
+  setupTopMenus();
+  setupActivity();
+  setupHistory();
+  setupTabs();
+  setupTree();
+  setupChatHead();
+  setupScroll();
+  loop();
+})();
+</script>
+
+</body>
+</html>

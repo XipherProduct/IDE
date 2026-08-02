@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Скачать — ALaska.ai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+
+<canvas class="snow-canvas" id="snow"></canvas>
+
+<div class="aurora-bg" aria-hidden="true">
+  <svg viewBox="0 0 1600 900" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="aur1" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.78 0.16 155)" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="oklch(0.78 0.16 155)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="aur2" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="oklch(0.72 0.14 195)" stop-opacity=".65"/>
+        <stop offset="100%" stop-color="oklch(0.72 0.14 195)" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="aur-blur"><feGaussianBlur stdDeviation="40"/></filter>
+    </defs>
+    <g filter="url(#aur-blur)">
+      <path fill="url(#aur1)">
+        <animate attributeName="d" dur="14s" repeatCount="indefinite" values="M0,260 C320,160 560,320 880,200 C1200,80 1380,200 1600,140 L1600,0 L0,0 Z;M0,200 C300,300 600,140 920,240 C1240,340 1400,180 1600,260 L1600,0 L0,0 Z;M0,260 C320,160 560,320 880,200 C1200,80 1380,200 1600,140 L1600,0 L0,0 Z"/>
+      </path>
+      <path fill="url(#aur2)" opacity="0.85">
+        <animate attributeName="d" dur="18s" repeatCount="indefinite" values="M0,340 C260,260 540,420 880,300 C1200,180 1400,300 1600,260 L1600,0 L0,0 Z;M0,300 C280,400 560,240 900,360 C1240,480 1400,300 1600,380 L1600,0 L0,0 Z;M0,340 C260,260 540,420 880,300 C1200,180 1400,300 1600,260 L1600,0 L0,0 Z"/>
+      </path>
+    </g>
+  </svg>
+</div>
+<div class="grain"></div>
+
+<div class="wrap" data-screen-label="05 Download">
+
+  <nav class="top">
+    <a class="logo" href="Landing.html">
+      <span class="mark">
+        <svg viewBox="0 0 26 26" fill="none">
+          <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="currentColor" stroke-width="1.2" stroke-opacity=".35"></path>
+          <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".15"></path>
+          <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+        </svg>
+      </span>
+      <span><b>ALaska</b><span class="dot">.ai</span></span>
+    </a>
+    <ul>
+      <li><a href="Landing.html">Главная</a></li>
+      <li><a href="about.html">О нас</a></li>
+      <li><a href="pricing.html">Цены</a></li>
+      <li><a href="download.html" style="color:var(--ink)">Скачать</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="btn ghost" href="login.html">Войти</a>
+      <a class="btn primary" href="register.html">Создать аккаунт</a>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="kicker">v0.42.1 · сборка 2026.05.08</div>
+    <h1>Скачать <em>ALaska</em>.</h1>
+    <p class="lede">
+      Один бинарник в 160 МБ. Без админских прав на Windows, без menulib-зависимостей на Linux. Скачали — запустили — открыли проект.
+    </p>
+  </header>
+
+  <section style="padding-bottom: 40px">
+    <div class="dl-page-grid">
+
+      <div class="dl-options">
+
+        <a class="dl-option" href="#" data-os="windows">
+          <span class="os-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.4v7.1H3zM10.5 12.5v7.1L3 18.5v-6zm1 0H21v8L11.5 19zM21 3.5v8H11.5V4.6z"/></svg>
+          </span>
+          <span class="info">
+            <span class="name">Windows 10 / 11</span>
+            <span class="detail">ALaska-0.42.1-x64.exe · 160 МБ · подписан Authenticode</span>
+          </span>
+          <span class="download-arrow">скачать</span>
+        </a>
+
+        <a class="dl-option" href="#" data-os="linux-deb">
+          <span class="os-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c-2 0-3 2-3 4 0 1 0 2 1 3-2 1-4 4-4 8 0 2 1 4 2 5 1 0 2-1 3-1 1 0 1 1 1 2-1 0-2 0-2 1 1 0 6 0 6-1 0-1-1-1-1-1 0-1 1-2 1-2 1 0 2 1 3 1 1-1 2-3 2-5 0-4-2-7-4-8 1-1 1-2 1-3 0-2-1-4-3-4z"/></svg>
+          </span>
+          <span class="info">
+            <span class="name">Linux · .deb</span>
+            <span class="detail">ALaska_0.42.1_amd64.deb · для Debian/Ubuntu/Mint</span>
+          </span>
+          <span class="download-arrow">скачать</span>
+        </a>
+
+        <a class="dl-option" href="#" data-os="linux-appimage">
+          <span class="os-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c-2 0-3 2-3 4 0 1 0 2 1 3-2 1-4 4-4 8 0 2 1 4 2 5 1 0 2-1 3-1 1 0 1 1 1 2-1 0-2 0-2 1 1 0 6 0 6-1 0-1-1-1-1-1 0-1 1-2 1-2 1 0 2 1 3 1 1-1 2-3 2-5 0-4-2-7-4-8 1-1 1-2 1-3 0-2-1-4-3-4z"/></svg>
+          </span>
+          <span class="info">
+            <span class="name">Linux · AppImage</span>
+            <span class="detail">ALaska-0.42.1-x86_64.AppImage · работает где угодно</span>
+          </span>
+          <span class="download-arrow">скачать</span>
+        </a>
+
+        <a class="dl-option" href="#" data-os="linux-arm">
+          <span class="os-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+          </span>
+          <span class="info">
+            <span class="name">Linux · ARM64</span>
+            <span class="detail">ALaska-0.42.1-aarch64.AppImage · Raspberry Pi / Apple-via-multipass</span>
+          </span>
+          <span class="download-arrow">скачать</span>
+        </a>
+
+        <a class="dl-option disabled" href="#" data-os="macos">
+          <span class="os-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12.5a3.5 3.5 0 0 1 1.65-2.95 3.6 3.6 0 0 0-2.85-1.55c-1.2-.13-2.36.71-2.97.71-.62 0-1.57-.69-2.59-.67a3.77 3.77 0 0 0-3.18 1.94c-1.36 2.37-.35 5.86 1 7.78.65.94 1.4 1.99 2.4 1.95.97-.04 1.33-.62 2.49-.62 1.15 0 1.48.62 2.5.6 1.04-.02 1.69-.95 2.32-1.9.5-.75.83-1.55 1.07-2.39a3.42 3.42 0 0 1-2.04-2.9zm-1.91-5.13a3.45 3.45 0 0 0 .79-2.5 3.55 3.55 0 0 0-2.3 1.2 3.27 3.27 0 0 0-.81 2.41 2.94 2.94 0 0 0 2.32-1.1z"/></svg>
+          </span>
+          <span class="info">
+            <span class="name">macOS</span>
+            <span class="detail">Universal Binary · Intel + Apple Silicon</span>
+          </span>
+          <span class="download-arrow"></span>
+        </a>
+
+      </div>
+
+      <aside class="dl-side">
+        <h3>Что внутри коробки</h3>
+        <ul>
+          <li>Чат проекта на GPT 5.4 / 5.4 mini / 5.5</li>
+          <li>Inline-правки одним ⌘I — diff прямо в редакторе</li>
+          <li>Локальный индекс репозитория, обновляется на лету</li>
+          <li>Все расширения VS Code, Settings Sync, темы и devcontainers</li>
+          <li>Прямой маршрут к OpenAI — без VPN-плясок</li>
+          <li>Полная панель телеметрии: что ушло, кому, сколько токенов</li>
+        </ul>
+
+        <div class="verify">
+          <div style="color:var(--ink-2); margin-bottom: 8px">проверить целостность:</div>
+          <div>sha256: <code>a1f9c4d…84d2</code></div>
+          <div>gpg: <code>0xA1A9 B7C5 99D6 11E4</code></div>
+          <div style="margin-top:10px; color:var(--mute)">
+            ALaska подписана нашим GPG-ключом. Если ваша система ругается — это значит, что вы скачали что-то не то.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="block" style="border-top: 1px solid var(--line); padding: 70px 0">
+    <div class="section-head">
+      <div>
+        <div class="section-tag">установка одной строкой</div>
+        <h2>Для тех, кто <em>дома в терминале</em>.</h2>
+      </div>
+      <p>Скрипт берёт ваш ARCH, скачивает нужный билд, проверяет sha256 и кладёт в <code style="background:var(--panel); border:1px solid var(--line); padding:1px 6px; border-radius:4px; font-size:13px; color:var(--ice)">~/.alaska</code>. Никаких sudo.</p>
+    </div>
+
+    <div class="installer" style="font-size: 14px; padding: 22px 26px">
+      <div><span class="prompt">~ $</span> curl -L alaska.ai/get | sh</div>
+      <div class="out">→ обнаружено: linux-x86_64</div>
+      <div class="out">→ загрузка ALaska-0.42.1-x86_64.AppImage…</div>
+      <div class="progress">
+        <span>0</span>
+        <span class="bar"><i></i></span>
+        <span>160 МБ</span>
+      </div>
+      <div class="out">→ sha256: ok</div>
+      <div class="out">→ gpg: подпись валидна</div>
+      <div class="out">→ установлено в ~/.alaska</div>
+      <div class="out"><span style="color:var(--aurora)">✓ запустите:</span> <span style="color:var(--ice)">alaska .</span> &nbsp;<span class="mute">в любой папке проекта</span></div>
+    </div>
+  </section>
+
+  <section class="block" style="border-top: 1px solid var(--line); padding: 70px 0">
+    <div class="section-head">
+      <div>
+        <div class="section-tag">системные требования</div>
+        <h2>Что нужно, чтобы запустить.</h2>
+      </div>
+      <p>Низкие, как у обычного редактора. Без отдельных GPU-требований — модели крутятся не у вас.</p>
+    </div>
+
+    <div class="feature-wall">
+      <div class="cell span-3" style="grid-column: span 3">
+        <div>
+          <div class="label"><span class="num">os</span>системы</div>
+          <h3>Win 10+ / Linux glibc 2.31+</h3>
+          <p>На Windows 7/8 не запустится. Альт Линукс, Astra, Ubuntu 20.04+, Fedora 36+ — да.</p>
+        </div>
+      </div>
+      <div class="cell span-3" style="grid-column: span 3">
+        <div>
+          <div class="label"><span class="num">ram</span>память</div>
+          <h3>4 ГБ минимум, 8 ГБ норма</h3>
+          <p>Редактор плюс индекс среднего репозитория умещается в 1–2 ГБ. Остальное — для остальных вкладок.</p>
+        </div>
+      </div>
+      <div class="cell span-3" style="grid-column: span 3">
+        <div>
+          <div class="label"><span class="num">cpu</span>процессор</div>
+          <h3>x64 или ARM64</h3>
+          <p>Тестируем на i5-8xxx, Ryzen 5 первой ревизии, и Apple Silicon (через мультипасс).</p>
+        </div>
+      </div>
+      <div class="cell span-3" style="grid-column: span 3">
+        <div>
+          <div class="label"><span class="num">net</span>сеть</div>
+          <h3>Прямой доступ в интернет</h3>
+          <p>VPN не нужен — мы сами роутим запросы к OpenAI. Для off-grid режима оффлайн-индекс работает без сети.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="border-top: 1px solid var(--line); padding: 70px 0 40px; text-align: center">
+    <div class="kicker" style="justify-content:center; display:inline-flex">changelog</div>
+    <h2 style="font-size: clamp(28px, 3vw, 38px); font-weight:500; letter-spacing:-0.02em; margin:14px 0 18px">
+      Что нового в v0.42.1.
+    </h2>
+    <p style="color:var(--ink-2); margin:0 auto 30px; max-width: 56ch">
+      Сборка от 8 мая 2026: исправили дрожание курсора в режиме inline-правки, переключатель моделей переехал в шапку чата, агенты научились читать <code style="background:var(--panel); border:1px solid var(--line); padding:1px 6px; border-radius:4px; font-size:13px; color:var(--ice)">.env.local</code> без подсказки.
+    </p>
+    <a class="btn" href="#">Полный changelog →</a>
+  </section>
+
+  <footer>
+    <div class="cols">
+      <div>
+        <a class="logo" href="Landing.html" style="margin-bottom:14px">
+          <span class="mark">
+            <svg viewBox="0 0 26 26" fill="none">
+              <path d="M13 1 L25 13 L13 25 L1 13 Z" stroke="currentColor" stroke-width="1.2" stroke-opacity=".35"></path>
+              <path d="M13 4 L22 13 L13 22 L4 13 Z" fill="oklch(0.83 0.10 220)" fill-opacity=".15"></path>
+              <path d="M13 7 L19 13 L13 19 L7 13 Z" fill="oklch(0.83 0.10 220)"></path>
+            </svg>
+          </span>
+          <span><b>ALaska</b><span style="color: var(--ice)">.ai</span></span>
+        </a>
+        <p style="color: var(--mute); font-size:13.5px; max-width: 32ch; margin:12px 0 0">IDE с встроенным ИИ.</p>
+      </div>
+      <div>
+        <h6>Продукт</h6>
+        <ul>
+          <li><a href="Landing.html">Лендинг</a></li>
+          <li><a href="about.html">О нас</a></li>
+          <li><a href="pricing.html">Цены</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Аккаунт</h6>
+        <ul>
+          <li><a href="login.html">Войти</a></li>
+          <li><a href="register.html">Регистрация</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Контакты</h6>
+        <ul>
+          <li><a href="mailto:hello@alaska.ai">hello@alaska.ai</a></li>
+          <li><a href="#">Telegram</a></li>
+          <li><a href="#">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 ALaska Labs · все права защищены</span>
+      <span class="now">
+        <span class="dot-aur"></span>
+        Анкоридж · <span data-anch-time>—</span> · <span data-temp>−14°C</span>
+      </span>
+    </div>
+  </footer>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

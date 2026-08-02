@@ -1,0 +1,301 @@
+{
+  "meta": {
+    "title": "Xipher IDE — 75+ AI Models in One Terminal",
+    "description": "A unified CLI for ChatGPT, Claude, Gemini, DeepSeek, Grok, GLM, and Kimi. Free, open-source."
+  },
+  "nav": {
+    "docs": "Docs",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "download": "Download",
+    "account": "Account",
+    "github": "GitHub"
+  },
+  "hero": {
+    "eyebrow": "Alpha · v0.4.0",
+    "title": "75+ AI Models.\n7 Providers.\nOne Terminal.",
+    "subtitle": "Xipher IDE is a free open-source tool to chat with leading AI models right from your terminal. No browser, no per-service subscriptions.",
+    "ctaPrimary": "Download for {os}",
+    "ctaSecondary": "GitHub",
+    "installTab": {
+      "macos": "macOS / Linux",
+      "windows": "Windows",
+      "go": "Go Install"
+    }
+  },
+  "terminal": {
+    "title": "See It in Action",
+    "subtitle": "Xipher IDE in real time"
+  },
+  "features": {
+    "title": "Everything You Need",
+    "subtitle": "Powerful features for productive AI workflows",
+    "multiProvider": {
+      "title": "75+ Models, 7 Providers",
+      "desc": "OpenAI, Anthropic, Google, DeepSeek, xAI, Zhipu, Moonshot — all through a single interface."
+    },
+    "secureKeys": {
+      "title": "Secure Key Storage",
+      "desc": "API keys are stored in your system keyring (macOS Keychain, GNOME Keyring, Windows Credential Manager)."
+    },
+    "streaming": {
+      "title": "Streaming & Cancellation",
+      "desc": "Responses stream in real time. Ctrl+C to cancel without losing context."
+    },
+    "modelSwitcher": {
+      "title": "Switch Models on the Fly",
+      "desc": "The /model command lets you switch models mid-conversation."
+    },
+    "systemPrompt": {
+      "title": "System Prompts",
+      "desc": "Set a system prompt via /system to customize model behavior."
+    },
+    "history": {
+      "title": "Persistent History",
+      "desc": "All conversation history is saved locally and accessible via /history."
+    }
+  },
+  "providers": {
+    "title": "Providers",
+    "subtitle": "One CLI — access to all leading AI platforms",
+    "models": "Models"
+  },
+  "quickstart": {
+    "title": "Quick Start",
+    "subtitle": "Install Xipher IDE in 30 seconds",
+    "step1": "Install the CLI",
+    "step2": "Add your API key",
+    "step3": "Start chatting",
+    "addKeyCmd": "xipher configure",
+    "startCmd": "xipher"
+  },
+  "download": {
+    "title": "Download Xipher IDE",
+    "subtitle": "Choose a build for your platform",
+    "goInstall": "Or via Go",
+    "checksums": "Checksums (SHA256)",
+    "size": "Size",
+    "pageTitle": "Downloads",
+    "pageSubtitle": "All Xipher IDE v{version} builds",
+    "verification": "Verification",
+    "verificationDesc": "Verify your download integrity using SHA256 checksums.",
+    "prerequisites": "Prerequisites",
+    "linuxNote": "Linux: libsecret is required for the system keyring."
+  },
+  "why": {
+    "title": "Why Xipher IDE?",
+    "subtitle": "Comparing approaches to working with AI",
+    "webUi": {
+      "title": "Web UI",
+      "items": ["Separate browser", "Paid subscriptions", "Copy-pasting between windows"]
+    },
+    "perProvider": {
+      "title": "Per-Provider CLIs",
+      "items": ["Different CLIs", "Different APIs", "No unified history"]
+    },
+    "xipher": {
+      "title": "Xipher IDE",
+      "items": ["One terminal", "Your own keys", "Unified history", "75+ models"]
+    }
+  },
+  "roadmap": {
+    "title": "Roadmap",
+    "subtitle": "What's next",
+    "items": [
+      { "title": "Tool Calling", "desc": "Function calling from models", "status": "planned" },
+      { "title": "/attach — File Attachments", "desc": "Send files as context", "status": "planned" },
+      { "title": "Multimodality", "desc": "Images and other formats", "status": "planned" },
+      { "title": "SQLite Sessions", "desc": "Persistent sessions with full context", "status": "planned" }
+    ]
+  },
+  "cta": {
+    "title": "Ready to Try?",
+    "subtitle": "Download Xipher IDE and start working with AI from your terminal today.",
+    "primary": "Download",
+    "secondary": "GitHub"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "subtitle": "Xipher IDE is free and open-source. Hosted tiers are planned.",
+    "disclaimer": "Xipher IDE is a free open-source project. Hosted tiers coming soon.",
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "forever",
+      "desc": "Open-source CLI, your own API keys",
+      "features": ["75+ models", "All 7 providers", "Secure key storage", "Response streaming", "Conversation history", "Updates"]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "TBD",
+      "period": "",
+      "desc": "Managed team keys, priority support",
+      "features": ["Everything in Free", "Managed API keys", "Team access", "Priority support", "Analytics"]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Contact Us",
+      "period": "",
+      "desc": "SSO, audit logs, SLA",
+      "features": ["Everything in Pro", "SSO/SAML", "Audit logs", "SLA", "Dedicated manager"]
+    }
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "News and articles about Xipher IDE",
+    "readMore": "Read more",
+    "backToBlog": "Back to blog",
+    "share": "Share",
+    "readingTime": "{min} min read",
+    "tags": "Tags"
+  },
+  "docs": {
+    "title": "Documentation",
+    "subtitle": "Guide to using Xipher IDE",
+    "onThisPage": "On this page",
+    "sidebar": {
+      "gettingStarted": "Getting Started",
+      "installation": "Installation",
+      "configuration": "Configuration",
+      "commands": "Commands",
+      "providers": "Providers",
+      "troubleshooting": "Troubleshooting"
+    }
+  },
+  "account": {
+    "meta": {
+      "title": "Account",
+      "description": "Xipher IDE MVP control center with local provider settings, preferences, and mock sessions."
+    },
+    "eyebrow": "Frontend MVP",
+    "title": "Xipher IDE Account",
+    "subtitle": "A minimal control center for providers, sessions, and local preferences across CLI-first workflows.",
+    "storageNotice": "The MVP runs locally in this browser: no backend, auth, or raw API key storage.",
+    "headerCard": {
+      "plan": "Current lane",
+      "connected": "Connected providers",
+      "sessions": "Sessions",
+      "lastSeen": "Last local update"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "providers": "Providers",
+      "sessions": "Sessions",
+      "preferences": "Preferences"
+    },
+    "actions": {
+      "openProviders": "Providers and keys",
+      "openSessions": "Sessions",
+      "openPreferences": "Local preferences",
+      "createSession": "New mock session",
+      "viewDetails": "View details",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "save": "Save",
+      "reset": "Reset demo data",
+      "pin": "Pin",
+      "unpin": "Unpin"
+    },
+    "overview": {
+      "welcome": "Hi, {name}",
+      "welcomeSubtitle": "Your local Xipher IDE console for CLI-first workflows, provider control, and useful operator actions without a backend layer.",
+      "localOnly": "Browser-local only",
+      "planTitle": "Current plan",
+      "planNote": "Hosted billing and managed controls come later. For now this stays an honest BYOK flow on top of the open-source CLI.",
+      "planFields": {
+        "workspace": "Workspace",
+        "seats": "Seats",
+        "mode": "Mode"
+      },
+      "cards": {
+        "models": "Available models",
+        "requests": "Requests / 30d",
+        "tokens": "Tokens / 30d",
+        "spend": "Estimated spend"
+      },
+      "providersTitle": "Provider status",
+      "providersDescription": "Active connections are visible immediately, but the raw key never stays in storage.",
+      "activityTitle": "Recent activity",
+      "activityDescription": "Pins, statuses, and a quick trail of the latest AI sessions.",
+      "emptyProviders": "No providers connected yet. Add a safe masked key on the Providers tab.",
+      "emptySessions": "No sessions yet. Create a local draft to validate the flow."
+    },
+    "providers": {
+      "title": "Providers / Keys",
+      "subtitle": "Connect BYOK providers through the UI. localStorage only receives a safe mask and last4 value, never the raw secret.",
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "models": "Models",
+      "updated": "Updated",
+      "maskedKey": "Masked key",
+      "keyLabel": "Add or update key",
+      "keyPlaceholder": "Paste an API key. Only a safe mask will be stored.",
+      "safeStorage": "The raw key is never stored. After confirmation only a mask and safe fingerprint remain.",
+      "openWebsite": "Provider site",
+      "last4": "last4 {value}"
+    },
+    "sessions": {
+      "title": "Recent sessions",
+      "subtitle": "A local feed of recent AI conversations with pinning, statuses, and per-session details.",
+      "filters": {
+        "all": "All",
+        "pinned": "Pinned",
+        "active": "Active"
+      },
+      "provider": "Provider",
+      "updated": "Updated",
+      "messages": "Messages",
+      "tokens": "Tokens",
+      "noResults": "No sessions match the current filter yet.",
+      "dialog": {
+        "pinned": "Pinned",
+        "metrics": "Metrics"
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "subtitle": "Local control center settings, start tab selection, and a lightweight working profile.",
+      "profileTitle": "Profile and behavior",
+      "profileSubtitle": "Settings are stored only in this browser localStorage.",
+      "name": "User name",
+      "email": "Email placeholder",
+      "emailHint": "Used only as a local placeholder without any auth flow behind it.",
+      "defaultModel": "Default model",
+      "appearance": "Theme preference",
+      "density": "Interface density",
+      "homeTab": "Start tab",
+      "saveHint": "Stored in this browser localStorage and survives reloads.",
+      "saved": "Local preferences saved.",
+      "appearanceOptions": {
+        "dark": "Polar dark",
+        "light": "Ice light"
+      },
+      "densityOptions": {
+        "cozy": "Cozy",
+        "compact": "Compact"
+      }
+    },
+    "status": {
+      "live": "Live",
+      "idle": "Idle",
+      "review": "Needs review",
+      "alpha": "Alpha"
+    },
+    "common": {
+      "connectedProviders": "{count} of {total} providers connected",
+      "updated": "Updated {date}"
+    }
+  },
+  "footer": {
+    "product": "Product",
+    "resources": "Resources",
+    "legal": "Legal",
+    "copyright": "© 2026 Xipher IDE. Open Source.",
+    "builtWith": "Built with ❄️ in CLI"
+  },
+  "notFound": {
+    "title": "404",
+    "desc": "Page not found. Maybe it froze?",
+    "backHome": "Go Home"
+  }
+}
