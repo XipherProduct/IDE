@@ -6,11 +6,9 @@
 *.p12
 *.pfx
 id_rsa*
-*credentials*
-*secret*
-data/
-**/data/site.json
-**/data/executors.json
+/*/data/
+**/site-backend/data/
+**/ide-backend/data/
 
 # ---- dependencies ----
 node_modules/
@@ -59,18 +57,13 @@ vscode.db
 extensions/copilot/test/simulation/cache/
 
 # ---- packaged binaries / installers (too large for git) ----
-*.AppImage
-*.exe
-*.dll
-*.zip
-*.dmg
-*.deb
-*.rpm
-*.tar.gz
-*.pak
-*.bin
-*.dat
-*.node
+/*.AppImage
+/*.exe
+/*.zip
+/*.dmg
+/*.deb
+/*.rpm
+/*.tar.gz
 
 # ---- prebuilt desktop distributions & upstream copies ----
 VSCode-linux-x64/
